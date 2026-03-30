@@ -1,178 +1,320 @@
 # StockTrack Backend - Real-Time Trading Engine
 
-A high-performance, concurrent trading backend built with Go. Uses Pub/Sub pattern with WebSockets to stream live market data to multiple clients.
+A production-grade, concurrent trading backend built with Go following **Hexagonal Architecture (Ports & Adapters)**. Features JWT authentication, WebSocket real-time market streaming, and clean separation of concerns.
+
+## 🏗️ Architecture Overview
+
+This project follows **Hexagonal Architecture** (also called Ports & Adapters), ensuring:
+- **Core domain logic** is completely independent of external frameworks
+- **Ports (Interfaces)** define contracts without implementation details
+- **Adapters** implement those interfaces for specific technologies
+- **Easy testing** with mock implementations
+- **Framework agnostic** - swap databases, auth, or web servers without touching domain logic
+
+### Layered Structure
+
+```
+internal/
+├── domain/                    # 🎯 Core business logic (NO external dependencies)
+│   ├── models.go             # Data structures (User, MarketTick, Claims)
+│   ├── services.go           # Interfaces (ports) - what the app needs
+│   ├── market_engine.go      # Market simulation logic
+│   └── auth_service.go       # Authentication logic
+│
+├── port/                      # Interface definitions (abstraction)
+│   └── [external dependencies defined here]
+│
+└── adapter/                   # 🔌 External implementations (adapters)
+    ├── auth/
+    │   └── jwt.go           # JWT token implementation
+    ├── storage/
+    │   └── memory.go        # In-memory user repository
+    ├── http/
+    │   ├── auth.go          # REST API handlers
+    │   └── middleware.go    # JWT validation middleware
+    └── ws/
+        └── handler.go       # WebSocket broadcast manager
+
+cmd/
+├── server/
+│   ├── main.go              # Entry point, route setup
+│   └── container.go         # Dependency injection (wiring)
+└── client/
+    └── main_auth.go         # Test client with auth
+
+config/
+└── config.go                # Configuration management
+```
 
 ## Features
 
-- **Real-Time Market Data Stream** - Price updates every 500ms
-- **Concurrent WebSocket Support** - Handles thousands of simultaneous connections
-- **Pub/Sub Architecture** - Clean separation between market engine and network delivery
-- **Race Condition Protection** - Uses `sync.Mutex` for thread-safe operations
-- **Mock Trading Data** - Simulates real market behavior with random price changes
+✨ **Production-Ready**:
+- Hexagonal Architecture for clean code
+- JWT Authentication (register/login)
+- Password hashing with bcrypt
+- Thread-safe operations with sync.Mutex
+- Real-time WebSocket streaming
+- Comprehensive error handling
 
-## Project Structure
+📊 **Real-Time Market Data**:
+- 4 mock stocks with live price updates
+- Updates every 500ms
+- Percentage change calculations
+- Timestamp tracking
 
-```
-.
-├── main.go                 # WebSocket server, Hub, Market Engine, Broadcasting logic
-├── go.mod                  # Go module definition
-├── go.sum                  # Dependency checksums
-├── cmd/
-│   └── client/
-│       └── main.go         # WebSocket test client
-└── README.md               # This file
-```
-
-## Tech Stack
-
-- **Language**: Go 1.19+
-- **WebSocket**: [gorilla/websocket](https://github.com/gorilla/websocket)
-- **Concurrency**: Go Goroutines and Channels
+🔒 **Security**:
+- JWT token-based authentication
+- Protected WebSocket endpoint
+- Password hashing
+- Bearer token validation
 
 ## Quick Start
 
-### 1. **Start the Server**
-
+### 1. Install Dependencies
 ```bash
 cd C:\Users\harsh\Python\StockTrack
-go run main.go
+go mod download
 ```
 
-You should see:
-```
-=== Market Server running on :8080 ===
-WebSocket endpoint: ws://localhost:8080/ws
-Health check: http://localhost:8080/health
-
-Waiting for connections...
-```
-
-### 2. **Connect a Test Client** (in a new terminal)
-
+### 2. Start the Server
 ```bash
-cd C:\Users\harsh\Python\StockTrack\cmd\client
-go run main.go
+cd cmd/server
+go run .
 ```
 
-The client will display live market ticks for 10 seconds.
+Output:
+```
+=== StockTrack Backend Server ===
+Running on http://localhost:8080
+
+📋 API Endpoints:
+  POST   http://localhost:8080/auth/register
+  POST   http://localhost:8080/auth/login
+  GET    http://localhost:8080/health
+  WS     ws://localhost:8080/ws?token=<JWT>
+```
+
+### 3. Test with Authentication
+```bash
+cd cmd/client
+go run main_auth.go
+```
 
 ## API Endpoints
 
-### WebSocket
-- **URL**: `ws://localhost:8080/ws`
-- **Data Format**: JSON array of MarketTick objects
-- **Update Frequency**: Every 500ms
+### Register New User
+```bash
+POST /auth/register
+Content-Type: application/json
 
-### HTTP
-- **Health Check**: `http://localhost:8080/health`
-- **Response**: JSON status and server time
+{
+  "email": "trader@example.com",
+  "username": "trader123",
+  "password": "securepass123"
+}
+```
 
-## Market Data Format
-
-Each market tick contains:
+Response:
 ```json
 {
-  "symbol": "RELIANCE-CE-2900",
-  "currentPrice": 45.50,
-  "percentageChange": 2.34,
-  "timestamp": "2026-03-30T12:00:00Z"
+  "id": "user_1711778844923456789",
+  "email": "trader@example.com",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
+```
+
+### Login
+```bash
+POST /auth/login
+Content-Type: application/json
+
+{
+  "email": "trader@example.com",
+  "password": "securepass123"
+}
+```
+
+Response: Same as register
+
+### Health Check
+```bash
+GET /health
+```
+
+Response:
+```json
+{
+  "status": "OK"
+}
+```
+
+### WebSocket Subscribe (Protected)
+```
+ws://localhost:8080/ws?token=<JWT_TOKEN>
+```
+
+Message format:
+```json
+[
+  {
+    "symbol": "RELIANCE-CE-2900",
+    "currentPrice": 45.50,
+    "percentageChange": 2.34,
+    "timestamp": "2026-03-30T12:00:00Z"
+  }
+]
 ```
 
 ## How It Works
 
-### Architecture Diagram
+### Dependency Injection (Container Pattern)
 
-1. **Market Engine** (Goroutine)
-   - Runs infinite loop every 500ms
-   - Generates random price changes for mock stocks
-   - Sends updated data to broadcast channel
+The `Container` in `cmd/server/container.go` wires all dependencies:
 
-2. **Broadcasting Service** (Goroutine)
-   - Listens to broadcast channel
-   - Manages client connections/disconnections
-   - Sends data to all connected clients simultaneously
-
-3. **WebSocket Handler** (HTTP Handler)
-   - Upgrades HTTP connection to WebSocket
-   - Registers/unregisters clients with the Hub
-   - Detects client disconnections
-
-### Concurrency Model
-
-- **Market Engine**: 1 Goroutine generating prices
-- **Broadcaster**: 1 Goroutine distributing to all clients
-- **Client Listeners**: 1 Goroutine per connected client
-- **Synchronization**: `sync.Mutex` protects shared `clients` map
-
-This ensures even if a client has slow connection, the market engine keeps running at full speed.
-
-## Scalability
-
-- Tested with simultaneous connections
-- Handles thousands of concurrent WebSocket clients
-- Non-blocking broadcasting using Go channels
-- Efficient memory usage with Goroutines
-
-## Next Steps: React Native Integration
-
-Once you connect your React Native app, it will:
-1. Connect to `ws://localhost:8080/ws` (or your production URL)
-2. Receive real-time market updates
-3. Render price charts with live data
-
-## Build & Deploy
-
-### Local Build
-```bash
-go build -o stocktrack-backend.exe
+```go
+container := NewContainer()
+// ✓ Creates repositories
+// ✓ Creates token providers
+// ✓ Creates services
+// ✓ Creates handlers
+// ✓ Wires everything together
 ```
 
-### Run Compiled Binary
-```bash
-./stocktrack-backend.exe
+### Authentication Flow
+
+1. **Registration**
+   - Validate input
+   - Check if user exists
+   - Hash password with bcrypt
+   - Save user to repository
+   - Generate JWT token
+   - Return token
+
+2. **Login**
+   - Find user by email
+   - Verify password
+   - Generate JWT token
+   - Return token
+
+3. **WebSocket Protection**
+   - Extract token from query param or Authorization header
+   - Validate JWT signature and expiry
+   - Extract claims (user_id, email, username)
+   - Allow connection if valid
+
+### Market Engine Flow
+
+1. **Market Engine** (runs every 500ms)
+   - Generates random price changes
+   - Calculates percentage changes
+   - Sends update to broadcast channel
+
+2. **Broadcasting Service**
+   - Listens to market engine's broadcast channel
+   - Sends data to all connected WebSocket clients
+   - Handles client disconnections gracefully
+
+3. **WebSocket Clients**
+   - Send channel receives market data
+   - Write to client connection
+   - Automatic disconnect on error
+
+## Hexagonal Architecture Benefits
+
+### ✓ Testability
+```go
+// Easy to test - just mock the interfaces
+type MockUserRepo struct { ... }
+type MockTokenProvider struct { ... }
+
+authService := domain.NewAuthService(mockRepo, mockProvider)
+// Test without database or JWT library!
 ```
 
-### Docker Deployment (Optional)
-```dockerfile
-FROM golang:1.21-alpine
-WORKDIR /app
-COPY . .
-RUN go build -o app main.go
-EXPOSE 8080
-CMD ["./app"]
-```
+### ✓ Flexibility
+- Swap in-memory storage for PostgreSQL (just implement UserRepository)
+- Replace JWT with OAuth (just implement TokenProvider)
+- Change WebSocket library (just reimplement Handler)
+
+### ✓ Maintainability
+- Domain logic has zero framework dependencies
+- Clear separation: business logic vs infrastructure
+- Easy to understand data flow
+
+### ✓ Scalability
+- Stateless services - easy to horizontally scale
+- Pub/Sub pattern prevents bottlenecks
+- Non-blocking broadcasts
+
+## Production Checklist
+
+- [ ] Change JWT secret key in `config/config.go`
+- [ ] Use PostgreSQL/MySQL instead of in-memory storage
+- [ ] Add proper logging (zerolog, zap)
+- [ ] Add metrics (Prometheus)
+- [ ] Add request validation
+- [ ] Add rate limiting
+- [ ] Enable HTTPS/TLS
+- [ ] Add CORS middleware
+- [ ] Add request tracing
+- [ ] Add unit tests for domain layer
+- [ ] Add integration tests
+
+## Key Interview Points
+
+When explaining this architecture:
+
+1. **Separation of Concerns**
+   - Domain logic doesn't know about HTTP, JWT, or databases
+   - Each layer has a single responsibility
+
+2. **SOLID Principles**
+   - **S**ingle Responsibility: Each adapter does one thing
+   - **O**pen/Closed: Open for extension, closed for modification
+   - **L**iskov Substitution: Any implementation of port works
+   - **I**nterface Segregation: Small, focused interfaces
+   - **D**ependency Inversion: Depend on abstractions, not implementations
+
+3. **Testing Strategy**
+   ```go
+   // No mocks needed - just swap implementations
+   testAuthService := domain.NewAuthService(
+       storage.NewInMemoryUserRepository(),
+       &testTokenProvider{},
+   )
+   // Test pure business logic!
+   ```
+
+4. **Real-Time Capabilities**
+   - Go channels for elegant producer-consumer
+   - Goroutines for concurrent clients
+   - Non-blocking broadcasts
+   - Graceful connection handling
 
 ## Troubleshooting
 
-**Port 8080 already in use?**
+**Build Error: "cannot find module"**
 ```bash
-netstat -ano | findstr :8080  # Check what's using the port
+go mod download
+go mod tidy
 ```
 
-**WebSocket connection refused?**
-- Ensure server is running (`go run main.go`)
-- Check firewall isn't blocking port 8080
-- Verify client URL: `ws://localhost:8080/ws` (not `http://`)
+**WebSocket auth fails**
+- Ensure token is passed: `ws://localhost:8080/ws?token=YOUR_TOKEN`
+- Check token hasn't expired (24 hours default)
+- Try logging in again to get fresh token
 
-**Build errors?**
+**Port 8080 in use**
 ```bash
-go mod tidy       # Clean up dependencies
-go get ./...      # Re-download modules
-go build ./...    # Rebuild
+netstat -ano | findstr :8080
 ```
 
-## Interview Points
+## Dependencies
 
-✨ **Key Takeaways to Mention**:
-
-1. **Separation of Concerns**: Market engine runs independently from network layer
-2. **Race Conditions**: `sync.Mutex` prevents crashes from concurrent access
-3. **Goroutines**: Lightweight concurrency without thread overhead
-4. **Channels**: Elegant producer-consumer pattern between engine and broadcaster
-5. **Non-blocking Broadcasts**: All clients receive data simultaneously
-6. **Error Handling**: Gracefully removes disconnected clients
+- `github.com/gorilla/websocket` - WebSocket support
+- `github.com/golang-jwt/jwt/v5` - JWT tokens
+- `golang.org/x/crypto` - Password hashing (bcrypt)
 
 ---
 
-**Ready to connect React Native? Let me know! 🚀**
+**Built with clean architecture principles for production-grade trading systems.** 🚀
