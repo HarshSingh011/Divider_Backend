@@ -35,10 +35,20 @@ func main() {
 		fmt.Printf("\n=== StockTrack Backend Server ===\n")
 		fmt.Printf("Running on http://localhost%s\n\n", container.Config.Server.Port)
 		fmt.Printf("📋 API Endpoints:\n")
-		fmt.Printf("  POST   http://localhost:8080/auth/register\n")
-		fmt.Printf("  POST   http://localhost:8080/auth/login\n")
-		fmt.Printf("  GET    http://localhost:8080/health\n")
-		fmt.Printf("  WS     ws://localhost:8080/ws?token=<JWT>\n\n")
+		fmt.Printf("\n🔐 Authentication (Public):\n")
+		fmt.Printf("  POST   /auth/register\n")
+		fmt.Printf("  POST   /auth/login\n")
+		fmt.Printf("\n💹 Trading (Protected):\n")
+		fmt.Printf("  POST   /trading/trade\n")
+		fmt.Printf("  GET    /trading/wallet\n")
+		fmt.Printf("  POST   /trading/deposit\n")
+		fmt.Printf("  POST   /trading/alerts\n")
+		fmt.Printf("  GET    /trading/alerts\n")
+		fmt.Printf("  GET    /trading/candles?symbol=SYMBOL&limit=100\n")
+		fmt.Printf("\n📊 WebSocket (Protected):\n")
+		fmt.Printf("  WS     ws://localhost:8080/ws?token=<JWT>\n")
+		fmt.Printf("\n🏥 Health:\n")
+		fmt.Printf("  GET    /health\n\n")
 
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			fmt.Fprintf(os.Stderr, "Server error: %v\n", err)
@@ -61,6 +71,30 @@ func setupRoutes(c *Container) {
 
 	// Health check (unprotected)
 	http.HandleFunc("/health", c.AuthHandler.Health)
+
+	// Trading routes (protected)
+	http.HandleFunc("/trading/trade", c.AuthMiddleware.Protect(c.TradingHandler.ExecuteTrade))
+	http.HandleFunc("/trading/wallet", c.AuthMiddleware.Protect(c.TradingHandler.GetWalletSnapshot))
+	http.HandleFunc("/trading/deposit", c.AuthMiddleware.Protect(c.TradingHandler.DepositCash))
+	http.HandleFunc("/trading/alerts", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			c.AuthMiddleware.Protect(c.TradingHandler.CreateAlert)(w, r)
+		} else if r.Method == "GET" {
+			c.AuthMiddleware.Protect(c.TradingHandler.GetUserAlerts)(w, r)
+		}
+	})
+	http.HandleFunc("/trading/candles", c.TradingHandler.GetCandles)
+
+	// User profile routes (protected)
+	http.HandleFunc("/user/profile", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			c.AuthMiddleware.Protect(c.ProfileHandler.GetProfile)(w, r)
+		} else if r.Method == "PUT" {
+			c.AuthMiddleware.Protect(c.ProfileHandler.UpdateProfile)(w, r)
+		}
+	})
+	http.HandleFunc("/user/sessions", c.AuthMiddleware.Protect(c.ProfileHandler.GetSessions))
+	http.HandleFunc("/user/logout", c.AuthMiddleware.Protect(c.ProfileHandler.Logout))
 
 	// WebSocket route (protected)
 	http.HandleFunc("/ws", c.AuthMiddleware.ProtectWebSocket(c.WebSocketHub.Handler))
