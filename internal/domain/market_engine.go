@@ -5,15 +5,15 @@ import (
 	"time"
 )
 
-// MarketEngine handles core market simulation logic (no external dependencies)
 type MarketEngine struct {
-	prices    []MarketTick
-	broadcast chan []MarketTick
-	ticker    *time.Ticker
-	stopChan  chan struct{}
+	prices         []MarketTick
+	broadcast      chan []MarketTick
+	ticker         *time.Ticker
+	stopChan       chan struct{}
+	ohlcAggregator *OHLCAggregator
+	alertService   AlertService
 }
 
-// NewMarketEngine creates and returns a new market engine
 func NewMarketEngine() *MarketEngine {
 	return &MarketEngine{
 		prices: []MarketTick{
@@ -28,7 +28,14 @@ func NewMarketEngine() *MarketEngine {
 	}
 }
 
-// Start runs the market simulation
+func (m *MarketEngine) SetOHLCAggregator(aggregator *OHLCAggregator) {
+	m.ohlcAggregator = aggregator
+}
+
+func (m *MarketEngine) SetAlertService(alertService AlertService) {
+	m.alertService = alertService
+}
+
 func (m *MarketEngine) Start() {
 	rand.Seed(time.Now().UnixNano())
 
@@ -45,13 +52,11 @@ func (m *MarketEngine) Start() {
 	}()
 }
 
-// Stop halts the market engine
 func (m *MarketEngine) Stop() {
 	m.ticker.Stop()
 	m.stopChan <- struct{}{}
 }
 
-// GetCurrentPrices returns a copy of current prices
 func (m *MarketEngine) GetCurrentPrices() []MarketTick {
 	result := make([]MarketTick, len(m.prices))
 	copy(result, m.prices)
@@ -61,20 +66,31 @@ func (m *MarketEngine) GetCurrentPrices() []MarketTick {
 	return result
 }
 
-// Subscribe returns a channel for market updates
 func (m *MarketEngine) Subscribe() chan []MarketTick {
 	return m.broadcast
 }
 
-// updatePrices applies random changes to stock prices
 func (m *MarketEngine) updatePrices() {
+	currentPriceMap := make(map[string]float64)
+
 	for i := range m.prices {
 		oldPrice := m.prices[i].CurrentPrice
-		change := (rand.Float64() - 0.5) * 2 // -1.0 to +1.0
+		change := (rand.Float64() - 0.5) * 2
 		m.prices[i].CurrentPrice += change
 		if m.prices[i].CurrentPrice < 0 {
-			m.prices[i].CurrentPrice = 0.01 // Prevent negative prices
+			m.prices[i].CurrentPrice = 0.01
 		}
 		m.prices[i].PercentageChange = ((m.prices[i].CurrentPrice - oldPrice) / oldPrice) * 100
+
+		currentPriceMap[m.prices[i].Symbol] = m.prices[i].CurrentPrice
+
+		if m.ohlcAggregator != nil {
+			m.ohlcAggregator.UpdatePriceTick(m.prices[i].Symbol, m.prices[i].CurrentPrice)
+		}
+	}
+
+	if m.alertService != nil {
+		if err := m.alertService.CheckAndTriggerAlerts(currentPriceMap); err != nil {
+		}
 	}
 }

@@ -7,19 +7,16 @@ import (
 	"stocktrack-backend/internal/domain"
 )
 
-// AuthHandler handles authentication HTTP routes
 type AuthHandler struct {
 	authService domain.AuthService
 }
 
-// NewAuthHandler creates a new auth handler
 func NewAuthHandler(authService domain.AuthService) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
 	}
 }
 
-// Register handles POST /auth/register
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -43,7 +40,6 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-// Login handles POST /auth/login
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -67,7 +63,6 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-// Health handles GET /health
 func (h *AuthHandler) Health(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{

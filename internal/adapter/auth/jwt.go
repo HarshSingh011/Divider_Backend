@@ -5,25 +5,23 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"stocktrack-backend/internal/domain"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
-// JWTProvider implements TokenProvider interface
 type JWTProvider struct {
-	secretKey string
+	secretKey  string
 	expiryTime time.Duration
 }
 
-// NewJWTProvider creates a new JWT provider
 func NewJWTProvider(secretKey string, expiryTime time.Duration) *JWTProvider {
 	return &JWTProvider{
-		secretKey: secretKey,
+		secretKey:  secretKey,
 		expiryTime: expiryTime,
 	}
 }
 
-// GenerateToken creates a new JWT token
 func (jp *JWTProvider) GenerateToken(user *domain.User) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id":  user.ID,
@@ -41,10 +39,8 @@ func (jp *JWTProvider) GenerateToken(user *domain.User) (string, error) {
 	return tokenString, nil
 }
 
-// ValidateToken verifies and parses a JWT token
 func (jp *JWTProvider) ValidateToken(tokenString string) (*domain.Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
-		// Verify signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -60,7 +56,6 @@ func (jp *JWTProvider) ValidateToken(tokenString string) (*domain.Claims, error)
 		return nil, errors.New("invalid token")
 	}
 
-	// Extract claims
 	userID, ok := (*claims)["user_id"].(string)
 	if !ok {
 		return nil, errors.New("invalid user_id in token")

@@ -7,20 +7,17 @@ import (
 	"stocktrack-backend/internal/domain"
 )
 
-// InMemoryUserRepository implements UserRepository with in-memory storage
 type InMemoryUserRepository struct {
 	users map[string]*domain.User
 	mu    sync.RWMutex
 }
 
-// NewInMemoryUserRepository creates a new in-memory user repository
 func NewInMemoryUserRepository() *InMemoryUserRepository {
 	return &InMemoryUserRepository{
 		users: make(map[string]*domain.User),
 	}
 }
 
-// Save stores a user
 func (r *InMemoryUserRepository) Save(user *domain.User) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -33,7 +30,6 @@ func (r *InMemoryUserRepository) Save(user *domain.User) error {
 	return nil
 }
 
-// FindByEmail retrieves a user by email
 func (r *InMemoryUserRepository) FindByEmail(email string) (*domain.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -51,7 +47,6 @@ func (r *InMemoryUserRepository) FindByEmail(email string) (*domain.User, error)
 	return nil, errors.New("user not found")
 }
 
-// FindByID retrieves a user by ID
 func (r *InMemoryUserRepository) FindByID(id string) (*domain.User, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -68,7 +63,6 @@ func (r *InMemoryUserRepository) FindByID(id string) (*domain.User, error) {
 	return user, nil
 }
 
-// Exists checks if a user with given email exists
 func (r *InMemoryUserRepository) Exists(email string) bool {
 	r.mu.RLock()
 	defer r.mu.RUnlock()

@@ -1,38 +1,39 @@
 package config
 
 import (
+	"os"
 	"time"
 )
 
-// Config holds all application configuration
 type Config struct {
 	Server   ServerConfig
 	Auth     AuthConfig
 	Database DatabaseConfig
 }
 
-// ServerConfig holds server configuration
 type ServerConfig struct {
-	Port            string
-	ReadTimeout     time.Duration
-	WriteTimeout    time.Duration
-	IdleTimeout     time.Duration
-	MaxHeaderBytes  int
+	Port           string
+	ReadTimeout    time.Duration
+	WriteTimeout   time.Duration
+	IdleTimeout    time.Duration
+	MaxHeaderBytes int
 }
 
-// AuthConfig holds authentication configuration
 type AuthConfig struct {
-	JWTSecretKey    string
-	TokenExpiry     time.Duration
+	JWTSecretKey string
+	TokenExpiry  time.Duration
 }
 
-// DatabaseConfig holds database configuration
 type DatabaseConfig struct {
-	Driver string
-	DSN    string
+	Driver   string
+	Host     string
+	Port     string
+	User     string
+	Password string
+	DBName   string
+	SSLMode  string
 }
 
-// NewDefaultConfig returns a default configuration
 func NewDefaultConfig() *Config {
 	return &Config{
 		Server: ServerConfig{
@@ -40,15 +41,27 @@ func NewDefaultConfig() *Config {
 			ReadTimeout:    15 * time.Second,
 			WriteTimeout:   15 * time.Second,
 			IdleTimeout:    60 * time.Second,
-			MaxHeaderBytes: 1 << 20, // 1 MB
+			MaxHeaderBytes: 1 << 20,
 		},
 		Auth: AuthConfig{
-			JWTSecretKey: "your-secret-key-change-in-production", // Change in production!
+			JWTSecretKey: getEnv("JWT_SECRET_KEY", "your-secret-key-change-in-production"),
 			TokenExpiry:  24 * time.Hour,
 		},
 		Database: DatabaseConfig{
-			Driver: "memory", // Using in-memory for now, can be changed to postgres/mysql
-			DSN:    "",
+			Driver:   getEnv("DB_DRIVER", "memory"),
+			Host:     getEnv("DB_HOST", "localhost"),
+			Port:     getEnv("DB_PORT", "5432"),
+			User:     getEnv("DB_USER", "postgres"),
+			Password: getEnv("DB_PASSWORD", "postgres"),
+			DBName:   getEnv("DB_NAME", "stocktrack"),
+			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 	}
+}
+
+func getEnv(key, defaultVal string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return defaultVal
 }

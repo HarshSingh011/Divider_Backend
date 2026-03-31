@@ -1,0 +1,824 @@
+openapi: 3.0.0
+info:
+  title: StockTrack Trading API
+  description: Real-time stock trading platform with alerts, portfolio, and price monitoring
+  version: 1.0.0
+  contact:
+    name: StockTrack Team
+    email: support@stocktrack.com
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Development Server
+  - url: https://api.stocktrack.com
+    description: Production Server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/login
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: user123
+        email:
+          type: string
+          format: email
+          example: harsh@example.com
+        username:
+          type: string
+          example: harsh
+        created_at:
+          type: string
+          format: date-time
+
+    AuthRequest:
+      type: object
+      required:
+        - email
+        - username
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: harsh@example.com
+        username:
+          type: string
+          example: harsh
+        password:
+          type: string
+          format: password
+          minLength: 6
+          example: password123
+
+    AuthResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: user123
+        email:
+          type: string
+          example: harsh@example.com
+        token:
+          type: string
+          description: JWT authentication token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    MarketTick:
+      type: object
+      properties:
+        symbol:
+          type: string
+          example: RELIANCE
+        currentPrice:
+          type: number
+          format: float
+          example: 102.50
+        percentageChange:
+          type: number
+          format: float
+          example: 1.25
+        timestamp:
+          type: string
+          format: date-time
+
+    Position:
+      type: object
+      properties:
+        symbol:
+          type: string
+          example: RELIANCE
+        quantity:
+          type: integer
+          example: 100
+        averagePrice:
+          type: number
+          format: float
+          example: 100.50
+        currentPrice:
+          type: number
+          format: float
+          example: 102.50
+        profitLoss:
+          type: number
+          format: float
+          example: 200.00
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          example: txn123
+        userId:
+          type: string
+          example: user123
+        symbol:
+          type: string
+          example: RELIANCE
+        type:
+          type: string
+          enum: [BUY, SELL, DEPOSIT, WITHDRAW]
+          example: BUY
+        quantity:
+          type: integer
+          example: 50
+        price:
+          type: number
+          format: float
+          example: 102.50
+        totalAmount:
+          type: number
+          format: float
+          example: 5125.00
+        timestamp:
+          type: string
+          format: date-time
+
+    WalletSnapshot:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: user123
+        totalBalance:
+          type: number
+          format: float
+          example: 99698.75
+        investedAmount:
+          type: number
+          format: float
+          example: 10000
+        cashAvailable:
+          type: number
+          format: float
+          example: 89698.75
+        positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Position'
+        recentTransactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+
+    Candle:
+      type: object
+      properties:
+        symbol:
+          type: string
+          example: RELIANCE
+        timestamp:
+          type: string
+          format: date-time
+        open:
+          type: number
+          format: float
+          example: 102.00
+        high:
+          type: number
+          format: float
+          example: 103.50
+        low:
+          type: number
+          format: float
+          example: 101.50
+        close:
+          type: number
+          format: float
+          example: 103.20
+        volume:
+          type: integer
+          example: 1523400
+
+    Alert:
+      type: object
+      properties:
+        id:
+          type: string
+          example: alert123
+        userId:
+          type: string
+          example: user123
+        symbol:
+          type: string
+          example: RELIANCE
+        condition:
+          type: string
+          enum: ['>', '<', '>=', '<=', '==']
+          example: '>='
+        targetPrice:
+          type: number
+          format: float
+          example: 105.00
+        createdAt:
+          type: string
+          format: date-time
+        triggeredAt:
+          type: string
+          format: date-time
+          nullable: true
+        isActive:
+          type: boolean
+          example: true
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          example: user123
+        username:
+          type: string
+          example: harsh
+        email:
+          type: string
+          format: email
+          example: harsh@example.com
+        phone:
+          type: string
+          example: +91 98765 43210
+        bank_account:
+          type: string
+          example: "HDFC Bank - Savings | ***1234"
+        bank_account_status:
+          type: string
+          enum: [Verified, Pending]
+          example: Verified
+        member_since:
+          type: string
+          format: date-time
+        is_verified:
+          type: boolean
+          example: true
+        theme:
+          type: string
+          enum: [Light, Dark, Auto]
+          example: Light
+        notification_alerts:
+          type: boolean
+          example: true
+        notification_trades:
+          type: boolean
+          example: true
+        notification_news:
+          type: boolean
+          example: false
+        two_factor_enabled:
+          type: boolean
+          example: true
+
+    ActiveSession:
+      type: object
+      properties:
+        device_name:
+          type: string
+          example: "iPhone 12 - This Device"
+        last_active:
+          type: string
+          format: date-time
+        ip_address:
+          type: string
+          example: 192.168.1.100
+
+    TradeRequest:
+      type: object
+      required:
+        - symbol
+        - quantity
+        - price
+        - type
+      properties:
+        symbol:
+          type: string
+          example: RELIANCE
+        quantity:
+          type: integer
+          minimum: 1
+          example: 50
+        price:
+          type: number
+          format: float
+          minimum: 0
+          example: 102.50
+        type:
+          type: string
+          enum: [BUY, SELL]
+          example: BUY
+
+    DepositRequest:
+      type: object
+      required:
+        - amount
+      properties:
+        amount:
+          type: number
+          format: float
+          minimum: 100
+          example: 50000
+
+    AlertRequest:
+      type: object
+      required:
+        - symbol
+        - price
+        - condition
+      properties:
+        symbol:
+          type: string
+          example: RELIANCE
+        price:
+          type: number
+          format: float
+          example: 105.00
+        condition:
+          type: string
+          enum: ['>', '<', '>=', '<=', '==']
+          example: '>='
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        theme:
+          type: string
+          enum: [Light, Dark, Auto]
+          example: Light
+        notification_alerts:
+          type: boolean
+          example: true
+        notification_trades:
+          type: boolean
+          example: true
+        notification_news:
+          type: boolean
+          example: false
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Invalid request body
+        status:
+          type: integer
+          example: 400
+
+paths:
+  /health:
+    get:
+      summary: Health Check
+      description: Check if the API is running
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+
+  /auth/register:
+    post:
+      summary: Register a new user
+      description: Create a new trading account
+      operationId: registerUser
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      summary: Login user
+      description: Authenticate and receive JWT token
+      operationId: loginUser
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /trading/wallet:
+    get:
+      summary: Get Wallet Snapshot
+      description: Get current wallet balance, positions, and transactions
+      operationId: getWallet
+      tags:
+        - Trading
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Wallet snapshot retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletSnapshot'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /trading/trade:
+    post:
+      summary: Execute Trade
+      description: Buy or sell stocks
+      operationId: executeTrade
+      tags:
+        - Trading
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TradeRequest'
+      responses:
+        '200':
+          description: Trade executed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  transaction:
+                    $ref: '#/components/schemas/Transaction'
+        '400':
+          description: Invalid trade parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /trading/deposit:
+    post:
+      summary: Deposit Cash
+      description: Add funds to wallet
+      operationId: depositCash
+      tags:
+        - Trading
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepositRequest'
+      responses:
+        '200':
+          description: Deposit successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  newBalance:
+                    type: number
+                    format: float
+        '400':
+          description: Invalid deposit amount
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /trading/candles:
+    get:
+      summary: Get OHLC Candlesticks
+      description: Retrieve candlestick data for technical analysis
+      operationId: getCandles
+      tags:
+        - Trading
+      parameters:
+        - name: symbol
+          in: query
+          description: Stock symbol (e.g., RELIANCE, TCS, HDFC)
+          required: true
+          schema:
+            type: string
+            example: RELIANCE
+        - name: limit
+          in: query
+          description: Number of candles to retrieve (default 100)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+            example: 50
+      responses:
+        '200':
+          description: Candles retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Candle'
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /trading/alerts:
+    get:
+      summary: Get User Alerts
+      description: Retrieve all price alerts for the user
+      operationId: getUserAlerts
+      tags:
+        - Alerts
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Alerts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Alert'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Create Price Alert
+      description: Set up a price alert for a stock
+      operationId: createAlert
+      tags:
+        - Alerts
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertRequest'
+      responses:
+        '200':
+          description: Alert created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  alert:
+                    $ref: '#/components/schemas/Alert'
+        '400':
+          description: Invalid alert parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user/profile:
+    get:
+      summary: Get User Profile
+      description: Retrieve user profile information and settings
+      operationId: getUserProfile
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Update User Profile
+      description: Update profile settings and preferences
+      operationId: updateUserProfile
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user/sessions:
+    get:
+      summary: Get Active Sessions
+      description: List all active sessions for the user
+      operationId: getUserSessions
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Sessions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActiveSession'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user/logout:
+    post:
+      summary: Logout User
+      description: End user session
+      operationId: logoutUser
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /ws:
+    get:
+      summary: WebSocket Real-time Price Stream
+      description: Connect to real-time price updates via WebSocket
+      operationId: connectWebSocket
+      tags:
+        - WebSocket
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: token
+          in: query
+          description: JWT token via query parameter for WebSocket
+          required: true
+          schema:
+            type: string
+      responses:
+        '101':
+          description: WebSocket connection established
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Authentication
+    description: User registration and login
+  - name: Trading
+    description: Execute trades, view wallet, deposit funds
+  - name: Alerts
+    description: Create and manage price alerts
+  - name: User Profile
+    description: User profile and settings management
+  - name: WebSocket
+    description: Real-time data streaming

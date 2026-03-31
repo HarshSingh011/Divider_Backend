@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>StockTrack API Documentation</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: Montserrat, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #2E5BFF 0%, #1e40ff 100%);
+        color: white;
+        padding: 40px 20px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        font-size: 16px;
+        opacity: 0.9;
+      }
+
+      .version-badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.2);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        margin-top: 10px;
+      }
+
+      .content {
+        padding: 40px;
+      }
+
+      .section {
+        margin-bottom: 40px;
+      }
+
+      .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #2E5BFF;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #2E5BFF;
+      }
+
+      .endpoints {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 20px;
+      }
+
+      .endpoint {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+      }
+
+      .endpoint:hover {
+        box-shadow: 0 4px 12px rgba(46, 91, 255, 0.1);
+        border-color: #2E5BFF;
+      }
+
+      .endpoint-method {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: white;
+      }
+
+      .endpoint-method.get {
+        background: #4CAF50;
+      }
+
+      .endpoint-method.post {
+        background: #2196F3;
+      }
+
+      .endpoint-method.put {
+        background: #FF9800;
+      }
+
+      .endpoint-method.delete {
+        background: #F44336;
+      }
+
+      .endpoint-method.ws {
+        background: #9C27B0;
+      }
+
+      .endpoint-path {
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        color: #333;
+        margin-bottom: 10px;
+        word-break: break-all;
+      }
+
+      .endpoint-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.5;
+        margin-bottom: 12px;
+      }
+
+      .endpoint-tag {
+        display: inline-block;
+        background: #e3f2fd;
+        color: #1565c0;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        margin-right: 6px;
+        margin-bottom: 6px;
+      }
+
+      .auth-badge {
+        display: inline-block;
+        background: #fff3cd;
+        color: #856404;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        margin-top: 10px;
+      }
+
+      .base-url-info {
+        background: #f0f4ff;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        border-left: 4px solid #2E5BFF;
+      }
+
+      .base-url-info p {
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .base-url {
+        font-family: 'Courier New', monospace;
+        background: white;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #d32f2f;
+        margin-bottom: 8px;
+      }
+
+      .auth-section {
+        background: #fff3cd;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        border-left: 4px solid #ff9800;
+      }
+
+      .auth-section h3 {
+        color: #ff9800;
+        margin-bottom: 10px;
+      }
+
+      .auth-section p {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #333;
+      }
+
+      .code-block {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 15px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        margin: 10px 0;
+        overflow-x: auto;
+        line-height: 1.5;
+      }
+
+      .quick-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .quick-links a {
+        display: inline-block;
+        background: #2E5BFF;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 13px;
+        transition: all 0.3s ease;
+      }
+
+      .quick-links a:hover {
+        background: #1e40ff;
+        transform: translateY(-2px);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .stat {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .stat-number {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        opacity: 0.9;
+      }
+
+      .footer {
+        background: #f5f5f5;
+        padding: 20px;
+        text-align: center;
+        font-size: 12px;
+        color: #666;
+        border-top: 1px solid #e0e0e0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🚀 StockTrack API Documentation</h1>
+        <p>Real-time Stock Trading Platform API</p>
+        <div class="version-badge">v1.0.0</div>
+      </div>
+
+      <div class="content">
+        <!-- Stats Section -->
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-number">12</div>
+            <div class="stat-label">API Endpoints</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">5</div>
+            <div class="stat-label">Feature Groups</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Protected</div>
+          </div>
+        </div>
+
+        <!-- Base URL Info -->
+        <div class="base-url-info">
+          <p><strong>📡 Base URL</strong></p>
+          <div class="base-url">http://localhost:8080</div>
+          <p><strong>Production:</strong> https://api.stocktrack.com</p>
+        </div>
+
+        <!-- Authentication Section -->
+        <div class="auth-section">
+          <h3>🔐 Authentication</h3>
+          <p>Most endpoints require JWT Bearer token authentication. Get your token by logging in:</p>
+          <div class="code-block">
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"harsh@example.com","password":"password123"}'
+          </div>
+          <p style="margin-top: 10px;">Then use the token in all protected requests:</p>
+          <div class="code-block">
+curl -X GET http://localhost:8080/trading/wallet \
+  -H "Authorization: Bearer {TOKEN}"
+          </div>
+        </div>
+
+        <!-- Authentication Endpoints -->
+        <div class="section">
+          <h3 class="section-title">🔑 Authentication</h3>
+          <div class="endpoints">
+            <div class="endpoint">
+              <span class="endpoint-method post">POST</span>
+              <div class="endpoint-path">/auth/register</div>
+              <div class="endpoint-description">Create a new trading account</div>
+              <span class="endpoint-tag">Auth</span>
+              <div class="code-block">
+{
+  "email": "harsh@example.com",
+  "username": "harsh",
+  "password": "password123"
+}
+              </div>
+            </div>
+
+            <div class="endpoint">
+              <span class="endpoint-method post">POST</span>
+              <div class="endpoint-path">/auth/login</div>
+              <div class="endpoint-description">Authenticate and get JWT token</div>
+              <span class="endpoint-tag">Auth</span>
+              <div class="code-block">
+{
+  "email": "harsh@example.com",
+  "password": "password123"
+}
+              </div>
+            </div>
+
+            <div class="endpoint">
+              <span class="endpoint-method get">GET</span>
+              <div class="endpoint-path">/health</div>
+              <div class="endpoint-description">Check API health status</div>
+              <span class="endpoint-tag">Health</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trading Endpoints -->
+        <div class="section">
+          <h3 class="section-title">💰 Trading</h3>
+          <div class="endpoints">
+            <div class="endpoint">
+              <span class="endpoint-method get">GET</span>
+              <div class="endpoint-path">/trading/wallet</div>
+              <div class="endpoint-description">Get wallet snapshot with balance and positions</div>
+              <span class="endpoint-tag">Trading</span>
+              <div class="auth-badge">🔒 Requires Auth</div>
+            </div>
+
+            <div class="endpoint">
+              <span class="endpoint-method post">POST</span>
+              <div class="endpoint-path">/trading/trade</div>
+              <div class="endpoint-description">Execute BUY or SELL trade</div>
+              <span class="endpoint-tag">Trading</span>
+              <div class="code-block">
+{
+  "symbol": "RELIANCE",
+  "quantity": 50,
+  "price": 102.50,
+  "type": "BUY"
+}
+              </div>
+              <div class="auth-badge">🔒 Requires Auth</div>
+            </div>
+
+            <div class="endpoint">
+              <span class="endpoint-method post">POST</span>
+              <div class="endpoint-path">/trading/deposit</div>
+              <div class="endpoint-description">Add funds to wallet</div>
+              <span class="endpoint-tag">Trading</span>
+              <div class="code-block">
+{
+  "amount": 50000
+}
+              </div>
+              <div class="auth-badge">🔒 Requires Auth</div>
+            </div>
+
+            <div class="endpoint">
+              <span class="endpoint-method get">GET</span>
+              <div class="endpoint-path">/trading/candles</div>
+              <div class="endpoint-description">Get OHLC candlestick data for charts</div>
+              <span class="endpoint-tag">Trading</span>
+              <p style="font-size: 12px; color: #666; margin-top: 10px;"><strong>Query Params:</strong></p>
+              <p style="font-size: 12px; color: #666;">symbol (required), limit (default: 100)</p>
+              <p style="font-size: 12px; color: #666; margin-top: 5px;"><strong>Example:</strong> /trading/candles?symbol=RELIANCE&limit=50</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts Endpoints -->
+        <div class="section">
+          <h3 class="section-title">🔔 Alerts</h3>
+          <div class="endpoints">
+            <div class="endpoint">
+              <span class="endpoint-method get">GET</span>
+              <div class="endpoint-path">/trading/alerts</div>
+              <div class="endpoint-description">Get all user price alerts</div>
+              <span class="endpoint-tag">Alerts</span>
+              <div class="auth-badge">🔒 Requires Auth</div>
+            </div>
+
+            <div class="endpoint">
+              <span class="endpoint-method post">POST</span>
+              <div class="endpoint-path">/trading/alerts</div>
+              <div class="endpoint-description">Create a new price alert</div>
+              <span class="endpoint-tag">Alerts</span>
+              <div class="code-block">
+{
+  "symbol": "RELIANCE",
+  "price": 105.00,
+  "condition": ">="
+}
+              </div>
+              <div class="auth-badge">🔒 Requires Auth</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Profile Endpoints -->
+        <div class="section">
+          <h3 class="section-title">👤 User Profile</h3>
+          <div class="endpoints">
+            <div class="endpoint">
+              <span class="endpoint-method get">GET</span>
+              <div class="endpoint-path">/user/profile</div>
+              <div class="endpoint-description">Get user profile info with bank account & phone</div>
+              <span class="endpoint-tag">Profile</span>
+              <div class="auth-badge">🔒 Requires Auth</div>
+            </div>
+
+            <div class="endpoint">
+              <span class="endpoint-method put">PUT</span>
+              <div class="endpoint-path">/user/profile</div>
+              <div class="endpoint-description">Update profile settings & preferences</div>
+              <span class="endpoint-tag">Profile</span>
+              <div class="code-block">
+{
+  "theme": "Dark",
+  "notification_alerts": true,
+  "notification_trades": true
+}
+              </div>
+              <div class="auth-badge">🔒 Requires Auth</div>
+            </div>
+
+            <div class="endpoint">
+              <span class="endpoint-method get">GET</span>
+              <div class="endpoint-path">/user/sessions</div>
+              <div class="endpoint-description">List active sessions (devices)</div>
+              <span class="endpoint-tag">Profile</span>
+              <div class="auth-badge">🔒 Requires Auth</div>
+            </div>
+
+            <div class="endpoint">
+              <span class="endpoint-method post">POST</span>
+              <div class="endpoint-path">/user/logout</div>
+              <div class="endpoint-description">End user session</div>
+              <span class="endpoint-tag">Profile</span>
+              <div class="auth-badge">🔒 Requires Auth</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WebSocket Endpoint -->
+        <div class="section">
+          <h3 class="section-title">⚡ Real-time Streaming</h3>
+          <div class="endpoints">
+            <div class="endpoint">
+              <span class="endpoint-method ws">WS</span>
+              <div class="endpoint-path">/ws</div>
+              <div class="endpoint-description">Real-time price updates via WebSocket</div>
+              <span class="endpoint-tag">Streaming</span>
+              <p style="font-size: 12px; color: #666; margin-top: 10px;"><strong>Connection URL:</strong></p>
+              <div class="code-block">ws://localhost:8080/ws?token={JWT_TOKEN}</div>
+              <p style="font-size: 12px; color: #666; margin-top: 10px;"><strong>Receive prices every 500ms:</strong></p>
+              <div class="code-block">
+{
+  "symbol": "RELIANCE",
+  "currentPrice": 102.50,
+  "percentageChange": 1.25,
+  "timestamp": "2026-03-30T10:30:00Z"
+}
+              </div>
+              <div class="auth-badge">🔒 Requires Auth</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Reference -->
+        <div class="section">
+          <h3 class="section-title">📚 Quick Reference</h3>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+            <h4 style="color: #333; margin-bottom: 10px;">Common Stock Symbols</h4>
+            <p style="font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.8;">
+              RELIANCE • INFY • TCS • HDFC • ICICI • SBIN • LT • BAJAJ • WIPRO • MARUTI
+            </p>
+
+            <h4 style="color: #333; margin-bottom: 10px; margin-top: 20px;">Alert Conditions</h4>
+            <p style="font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.8;">
+              ">" | "<" | ">=" | "<=" | "=="
+            </p>
+
+            <h4 style="color: #333; margin-bottom: 10px; margin-top: 20px;">Trade Types</h4>
+            <p style="font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.8;">
+              BUY | SELL | DEPOSIT | WITHDRAW
+            </p>
+
+            <h4 style="color: #333; margin-bottom: 10px; margin-top: 20px;">Response Status Codes</h4>
+            <ul style="margin-left: 20px; font-size: 13px; line-height: 1.8;">
+              <li><strong>200:</strong> Success</li>
+              <li><strong>400:</strong> Bad Request (invalid data)</li>
+              <li><strong>401:</strong> Unauthorized (missing/invalid token)</li>
+              <li><strong>404:</strong> Not Found</li>
+              <li><strong>500:</strong> Server Error</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Testing Tools -->
+        <div class="section">
+          <h3 class="section-title">🔧 Testing Tools</h3>
+          <div class="quick-links">
+            <a href="https://swagger.io/tools/swagger-ui/" target="_blank">📘 Swagger UI Docs</a>
+            <a href="https://www.postman.com/" target="_blank">📮 Postman (API Client)</a>
+            <a href="https://curl.se/" target="_blank">💻 cURL (Command Line)</a>
+            <a href="https://insomnia.rest/" target="_blank">✨ Insomnia (REST Client)</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>StockTrack API v1.0.0 | Build Date: March 30, 2026 | © 2026 StockTrack Trading Platform</p>
+      </div>
+    </div>
+  </body>
+</html>

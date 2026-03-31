@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockTrack - Trading Platform UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #2E5BFF;
+            --success-green: #4CAF50;
+            --danger-red: #F44336;
+            --warning-orange: #FF9800;
+            --bg-light: #FFFFFF;
+            --bg-dark: #F5F5F5;
+            --text-primary: #000000;
+            --text-secondary: #666666;
+            --border-color: #E0E0E0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #1e40ff 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-lg);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .navbar-items {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .navbar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .navbar-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 220px;
+            background: var(--bg-light);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem 0;
+            margin-top: 60px;
+            position: fixed;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+
+        .sidebar-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-secondary);
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-dark);
+            color: var(--primary-blue);
+            border-left-color: var(--primary-blue);
+        }
+
+        .sidebar-item.active {
+            background: var(--bg-dark);
+            color: var(--primary-blue);
+            border-left-color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 220px;
+            margin-top: 60px;
+            padding: 2rem;
+            width: calc(100% - 220px);
+            background: var(--bg-dark);
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--bg-light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        /* PRICE DISPLAY */
+        .price-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .price-card {
+            background: var(--bg-light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        .price-card.up {
+            border-left-color: var(--success-green);
+        }
+
+        .price-card.down {
+            border-left-color: var(--danger-red);
+        }
+
+        .price-symbol {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-change {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .price-change.up {
+            color: var(--success-green);
+        }
+
+        .price-change.down {
+            color: var(--danger-red);
+        }
+
+        .arrow {
+            font-size: 1rem;
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1a47ff;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-success {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #da190b;
+        }
+
+        /* FORM */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(46, 91, 255, 0.1);
+        }
+
+        /* TABLES */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table thead {
+            background: var(--bg-dark);
+            font-weight: 600;
+        }
+
+        .table th, .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table tbody tr:hover {
+            background: var(--bg-dark);
+        }
+
+        /* ALERT / NOTIFICATION */
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        /* STATS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .stat-change {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success-green);
+        }
+
+        .stat-change.negative {
+            color: var(--danger-red);
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* CHART PLACEHOLDER */
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-secondary);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .navbar-items {
+                gap: 1rem;
+            }
+
+            .price-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 1rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: var(--primary-blue);
+        }
+
+        .tab.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="navbar-brand">
+            🚀 StockTrack
+        </div>
+        <div class="navbar-items">
+            <div class="navbar-item">🟢 Online</div>
+            <div class="navbar-item">🔔 2</div>
+            <div class="navbar-item">👤 Harsh</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-item active" onclick="showTab('dashboard')">
+                🏠 Dashboard
+            </div>
+            <div class="sidebar-item" onclick="showTab('charts')">
+                📈 Charts
+            </div>
+            <div class="sidebar-item" onclick="showTab('wallet')">
+                💰 My Wallet
+            </div>
+            <div class="sidebar-item" onclick="showTab('alerts')">
+                🔔 My Alerts
+            </div>
+            <div class="sidebar-item" onclick="showTab('history')">
+                📋 History
+            </div>
+            <div class="sidebar-item" onclick="showTab('settings')">
+                ⚙️ Settings
+            </div>
+            <hr style="margin: 1rem 0;">
+            <div class="sidebar-item" onclick="logout()">
+                🚪 Logout
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- DASHBOARD TAB -->
+            <div id="dashboard-tab" class="tab-content active">
+                <h1 style="margin-bottom: 2rem;">Dashboard</h1>
+
+                <!-- STATS -->
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Total Balance</div>
+                        <div class="stat-value">$99,698.75</div>
+                        <div class="stat-change positive">▲ +$1,500 (1.53%)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Available Cash</div>
+                        <div class="stat-value">$89,698.75</div>
+                        <div class="stat-change">89.82% of portfolio</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Invested</div>
+                        <div class="stat-value">$10,000</div>
+                        <div class="stat-change">4 holdings</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Today's Change</div>
+                        <div class="stat-value" style="color: var(--success-green);">+$450</div>
+                        <div class="stat-change positive">+0.45%</div>
+                    </div>
+                </div>
+
+                <!-- LIVE PRICES -->
+                <div class="card">
+                    <div class="card-title">📈 Live Market Prices</div>
+                    <div class="price-grid">
+                        <div class="price-card up">
+                            <div class="price-symbol">RELIANCE-CE-2900</div>
+                            <div class="price-value">$102.50</div>
+                            <div class="price-change up">
+                                <span class="arrow">▲▲</span> +2.45% (+$2.45)
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                                Bid: $102.48 | Ask: $102.52
+                            </div>
+                        </div>
+
+                        <div class="price-card down">
+                            <div class="price-symbol">HDFC-PE-1400</div>
+                            <div class="price-value">$95.20</div>
+                            <div class="price-change down">
+                                <span class="arrow">▼▼</span> -1.02% (-$0.98)
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                                Bid: $95.18 | Ask: $95.22
+                            </div>
+                        </div>
+
+                        <div class="price-card up">
+                            <div class="price-symbol">INFY-CE-1500</div>
+                            <div class="price-value">$62.75</div>
+                            <div class="price-change up">
+                                <span class="arrow">▲</span> +0.52% (+$0.32)
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                                Bid: $62.73 | Ask: $62.77
+                            </div>
+                        </div>
+
+                        <div class="price-card up">
+                            <div class="price-symbol">TCS-PE-3500</div>
+                            <div class="price-value">$85.30</div>
+                            <div class="price-change up">
+                                <span class="arrow">▲▲</span> +1.18% (+$0.99)
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                                Bid: $85.28 | Ask: $85.32
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QUICK TRADE -->
+                <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <div class="card-title" style="color: white;">⚡ Quick Trade</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                        <div class="form-group">
+                            <label style="color: rgba(255,255,255,0.8);">Stock Symbol</label>
+                            <select class="form-select" style="background: rgba(255,255,255,0.9);">
+                                <option>RELIANCE-CE-2900</option>
+                                <option>HDFC-PE-1400</option>
+                                <option>INFY-CE-1500</option>
+                                <option>TCS-PE-3500</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="color: rgba(255,255,255,0.8);">Trade Type</label>
+                            <select class="form-select" style="background: rgba(255,255,255,0.9);">
+                                <option>🟢 BUY</option>
+                                <option>🔴 SELL</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="color: rgba(255,255,255,0.8);">Quantity</label>
+                            <input type="number" class="form-input" placeholder="100" value="100" style="background: rgba(255,255,255,0.9);">
+                        </div>
+                        <div class="form-group">
+                            <label style="color: rgba(255,255,255,0.8);">Price</label>
+                            <input type="number" class="form-input" placeholder="102.50" value="102.50" style="background: rgba(255,255,255,0.9);">
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 4px; margin-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Est. Cost:</span>
+                            <span style="font-weight: bold;">$10,250.00</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Fee (0.5%):</span>
+                            <span style="font-weight: bold;">$51.25</span>
+                        </div>
+                        <div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 0.5rem; display: flex; justify-content: space-between;">
+                            <span>Total:</span>
+                            <span style="font-weight: bold; font-size: 1.2rem;">$10,301.25</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button class="btn btn-success" style="flex: 1;">✓ EXECUTE TRADE</button>
+                        <button class="btn" style="flex: 1; background: rgba(255,255,255,0.2); color: white;">CANCEL</button>
+                    </div>
+                </div>
+
+                <!-- PORTFOLIO -->
+                <div class="card">
+                    <div class="card-title">💹 Your Portfolio</div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Stock</th>
+                                <th>Quantity</th>
+                                <th>Avg Cost</th>
+                                <th>Current</th>
+                                <th>Value</th>
+                                <th>P&L</th>
+                                <th>%Gain</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>RELIANCE</strong></td>
+                                <td>100</td>
+                                <td>$102.50</td>
+                                <td>$102.50</td>
+                                <td>$10,250</td>
+                                <td style="color: var(--text-secondary);">$0</td>
+                                <td style="color: var(--text-secondary);">0.0%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>HDFC</strong></td>
+                                <td>50</td>
+                                <td>$95.00</td>
+                                <td>$95.20</td>
+                                <td>$4,760</td>
+                                <td style="color: var(--success-green);">+$10</td>
+                                <td style="color: var(--success-green);">+0.2%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>INFY</strong></td>
+                                <td>75</td>
+                                <td>$62.00</td>
+                                <td>$62.75</td>
+                                <td>$4,706</td>
+                                <td style="color: var(--success-green);">+$56</td>
+                                <td style="color: var(--success-green);">+1.2%</td>
+                            </tr>
+                            <tr>
+                                <td><strong>TCS</strong></td>
+                                <td>30</td>
+                                <td>$84.50</td>
+                                <td>$85.30</td>
+                                <td>$2,559</td>
+                                <td style="color: var(--success-green);">+$24</td>
+                                <td style="color: var(--success-green);">+0.9%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CHARTS TAB -->
+            <div id="charts-tab" class="tab-content">
+                <h1 style="margin-bottom: 2rem;">Charts & Technical Analysis</h1>
+                
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                    <select class="form-select" style="flex: 1; min-width: 200px;">
+                        <option>RELIANCE-CE-2900</option>
+                        <option>HDFC-PE-1400</option>
+                        <option>INFY-CE-1500</option>
+                        <option>TCS-PE-3500</option>
+                    </select>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-primary">1 Min</button>
+                        <button class="btn" style="background: var(--bg-dark); border: 1px solid var(--border-color);">5 Min</button>
+                        <button class="btn" style="background: var(--bg-dark); border: 1px solid var(--border-color);">15 Min</button>
+                        <button class="btn" style="background: var(--bg-dark); border: 1px solid var(--border-color);">1 Hour</button>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    📊 Candlestick Chart (Realtime Updates) - Chart.js Integration
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📋 Candle Data (Last 10)</div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Open</th>
+                                <th>High</th>
+                                <th>Low</th>
+                                <th>Close</th>
+                                <th>Volume</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>14:40 ✓</td>
+                                <td>$102.80</td>
+                                <td style="color: var(--success-green);">$103.50</td>
+                                <td>$102.50</td>
+                                <td>$103.10</td>
+                                <td>1,240</td>
+                            </tr>
+                            <tr>
+                                <td>14:39</td>
+                                <td>$102.50</td>
+                                <td>$103.20</td>
+                                <td>$102.30</td>
+                                <td>$102.80</td>
+                                <td>1,150</td>
+                            </tr>
+                            <tr>
+                                <td>14:38</td>
+                                <td>$102.00</td>
+                                <td style="color: var(--success-green);">$103.80</td>
+                                <td>$102.00</td>
+                                <td>$103.20</td>
+                                <td>1,180</td>
+                            </tr>
+                            <tr>
+                                <td>14:37</td>
+                                <td>$102.50</td>
+                                <td>$103.10</td>
+                                <td>$102.40</td>
+                                <td>$102.50</td>
+                                <td>1,095</td>
+                            </tr>
+                            <tr>
+                                <td>14:36</td>
+                                <td>$103.00</td>
+                                <td>$103.50</td>
+                                <td style="color: var(--danger-red);">$101.50</td>
+                                <td>$102.00</td>
+                                <td>1,320</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- WALLET TAB -->
+            <div id="wallet-tab" class="tab-content">
+                <h1 style="margin-bottom: 2rem;">My Wallet</h1>
+
+                <div class="card">
+                    <div class="card-title">💰 Wallet Summary</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                        <div>
+                            <div class="stat-label">Total Balance</div>
+                            <div class="stat-value">$99,698.75</div>
+                            <div class="stat-change positive">▲ +$1,500</div>
+                        </div>
+                        <div>
+                            <div class="stat-label">Available Cash</div>
+                            <div class="stat-value">$89,698.75</div>
+                            <div class="stat-change">89.82%</div>
+                        </div>
+                        <div>
+                            <div class="stat-label">Invested Amount</div>
+                            <div class="stat-value">$10,000</div>
+                            <div class="stat-change">In 4 stocks</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="showModal('depositModal')">📥 DEPOSIT</button>
+                        <button class="btn" style="background: var(--primary-blue); color: white;">📤 WITHDRAW</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📊 Recent Transactions</div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Action</th>
+                                <th>Symbol</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>14:35</td>
+                                <td>🟢 BUY</td>
+                                <td>INFY</td>
+                                <td>75 @ $62.75</td>
+                                <td><span class="badge badge-success">✓ COMPLETED</span></td>
+                            </tr>
+                            <tr>
+                                <td>14:31</td>
+                                <td>🟢 BUY</td>
+                                <td>TCS</td>
+                                <td>30 @ $84.50</td>
+                                <td><span class="badge badge-success">✓ COMPLETED</span></td>
+                            </tr>
+                            <tr>
+                                <td>14:25</td>
+                                <td>🔴 SELL</td>
+                                <td>HDFC</td>
+                                <td>25 @ $94.00</td>
+                                <td><span class="badge badge-success">✓ COMPLETED</span></td>
+                            </tr>
+                            <tr>
+                                <td>14:20</td>
+                                <td>💳 DEPOSIT</td>
+                                <td>CASH</td>
+                                <td>$50,000</td>
+                                <td><span class="badge badge-success">✓ COMPLETED</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ALERTS TAB -->
+            <div id="alerts-tab" class="tab-content">
+                <h1 style="margin-bottom: 2rem;">Price Alerts</h1>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="card">
+                        <div class="card-title">✅ Active Alerts</div>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 4px; border-left: 3px solid var(--success-green);">
+                                <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                                    RELIANCE ≥ $105
+                                </div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                                    Created: 1 hour ago
+                                </div>
+                                <div style="font-size: 0.9rem; color: var(--success-green); margin-top: 0.5rem;">
+                                    🟢 ACTIVE
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                    <button class="btn" style="flex: 1; font-size: 0.8rem; padding: 0.5rem;">Edit</button>
+                                    <button class="btn btn-danger" style="flex: 1; font-size: 0.8rem; padding: 0.5rem;">Delete</button>
+                                </div>
+                            </div>
+
+                            <div style="padding: 1rem; background: var(--bg-dark); border-radius: 4px; border-left: 3px solid var(--success-green);">
+                                <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                                    TCS ≤ $82
+                                </div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                                    Created: 2 hours ago
+                                </div>
+                                <div style="font-size: 0.9rem; color: var(--success-green); margin-top: 0.5rem;">
+                                    🟢 ACTIVE
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">🔔 Create Alert</div>
+                        <div class="form-group">
+                            <label class="form-label">Stock Symbol</label>
+                            <select class="form-select">
+                                <option>Select Stock...</option>
+                                <option>RELIANCE-CE-2900</option>
+                                <option>HDFC-PE-1400</option>
+                                <option>INFY-CE-1500</option>
+                                <option>TCS-PE-3500</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Price Target</label>
+                            <input type="number" class="form-input" placeholder="100.00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Condition</label>
+                            <select class="form-select">
+                                <option>ABOVE (price goes up)</option>
+                                <option>BELOW (price goes down)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notifications</label>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                                    <input type="checkbox" checked> Email
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                                    <input type="checkbox" checked> SMS
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                                    <input type="checkbox" checked> In-App
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                                    <input type="checkbox" checked> Sound
+                                </label>
+                            </div>
+                        </div>
+                        <button class="btn btn-success" style="width: 100%; margin-top: 1rem;">✓ CREATE ALERT</button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div class="card-title">🔴 Triggered Alerts</div>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="padding: 1rem; background: var(--bg-dark); border-radius: 4px; border-left: 3px solid var(--danger-red);">
+                            <div style="font-weight: 600;">INFY < $60</div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">Triggered: 4:30 PM Today</div>
+                        </div>
+                        <div style="padding: 1rem; background: var(--bg-dark); border-radius: 4px; border-left: 3px solid var(--danger-red);">
+                            <div style="font-weight: 600;">RELIANCE > $110</div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">Triggered: 3:15 PM Today</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HISTORY TAB -->
+            <div id="history-tab" class="tab-content">
+                <h1 style="margin-bottom: 2rem;">Transaction History</h1>
+
+                <div class="card">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Type</th>
+                                <th>Symbol</th>
+                                <th>Qty/Amount</th>
+                                <th>Price</th>
+                                <th>Fee</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>3/30</td>
+                                <td>14:35</td>
+                                <td>🟢 BUY</td>
+                                <td>INFY</td>
+                                <td>75</td>
+                                <td>$62.00</td>
+                                <td>$23.30</td>
+                                <td>$4,673.30</td>
+                                <td><span class="badge badge-success">✓</span></td>
+                            </tr>
+                            <tr>
+                                <td>3/30</td>
+                                <td>14:31</td>
+                                <td>🟢 BUY</td>
+                                <td>TCS</td>
+                                <td>30</td>
+                                <td>$84.50</td>
+                                <td>$12.70</td>
+                                <td>$2,552.70</td>
+                                <td><span class="badge badge-success">✓</span></td>
+                            </tr>
+                            <tr>
+                                <td>3/30</td>
+                                <td>14:25</td>
+                                <td>🔴 SELL</td>
+                                <td>HDFC</td>
+                                <td>25</td>
+                                <td>$94.00</td>
+                                <td>$11.75</td>
+                                <td>$2,338.25</td>
+                                <td><span class="badge badge-success">✓</span></td>
+                            </tr>
+                            <tr>
+                                <td>3/30</td>
+                                <td>14:20</td>
+                                <td>🟢 BUY</td>
+                                <td>HDFC</td>
+                                <td>75</td>
+                                <td>$95.00</td>
+                                <td>$35.63</td>
+                                <td>$7,160.63</td>
+                                <td><span class="badge badge-success">✓</span></td>
+                            </tr>
+                            <tr>
+                                <td>3/30</td>
+                                <td>14:10</td>
+                                <td>🟢 BUY</td>
+                                <td>REL</td>
+                                <td>100</td>
+                                <td>$102.50</td>
+                                <td>$51.25</td>
+                                <td>$10,301.25</td>
+                                <td><span class="badge badge-success">✓</span></td>
+                            </tr>
+                            <tr>
+                                <td>3/30</td>
+                                <td>14:00</td>
+                                <td>💳 DEPOSIT</td>
+                                <td>CASH</td>
+                                <td>$100,000</td>
+                                <td>-</td>
+                                <td>$0</td>
+                                <td>$100,000</td>
+                                <td><span class="badge badge-success">✓</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SETTINGS TAB -->
+            <div id="settings-tab" class="tab-content">
+                <h1 style="margin-bottom: 2rem;">Settings</h1>
+
+                <div class="card">
+                    <div class="card-title">⚙️ Account Settings</div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-input" value="harsh@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-input" value="harsh">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Theme</label>
+                        <select class="form-select">
+                            <option>Light Mode</option>
+                            <option>Dark Mode</option>
+                            <option>Auto (System)</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary">💾 SAVE CHANGES</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🔐 Security</div>
+                    <button class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">🔑 Change Password</button>
+                    <button class="btn" style="width: 100%; background: var(--primary-blue); color: white; margin-bottom: 1rem;">🔐 Two-Factor Authentication</button>
+                    <button class="btn btn-danger" style="width: 100%;">❌ LOGOUT ALL DEVICES</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DEPOSIT MODAL -->
+    <div id="depositModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Deposit Funds
+                <button class="modal-close" onclick="closeModal('depositModal')">×</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Amount</label>
+                <input type="number" class="form-input" placeholder="0.00">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Quick Select</label>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+                    <button class="btn" style="background: var(--bg-dark); border: 1px solid var(--border-color);">$1,000</button>
+                    <button class="btn" style="background: var(--bg-dark); border: 1px solid var(--border-color);">$5,000</button>
+                    <button class="btn" style="background: var(--bg-dark); border: 1px solid var(--border-color);">$10,000</button>
+                    <button class="btn" style="background: var(--bg-dark); border: 1px solid var(--border-color);">$50,000</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Payment Method</label>
+                <select class="form-select">
+                    <option>Bank Transfer</option>
+                    <option>Credit Card</option>
+                    <option>Debit Card</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn btn-primary" style="flex: 1;">✓ PROCEED</button>
+                <button class="btn" style="flex: 1; background: var(--bg-dark); border: 1px solid var(--border-color);" onclick="closeModal('depositModal')">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // TAB SWITCHING
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+
+            // Update sidebar
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            sidebarItems.forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // MODAL FUNCTIONS
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        function logout() {
+            alert('Logged out successfully!');
+            // In real app, would redirect to login page
+            // window.location.href = '/login';
+        }
+
+        // SIMULATE LIVE PRICE UPDATES
+        setInterval(() => {
+            const priceElements = document.querySelectorAll('.price-value');
+            priceElements.forEach(el => {
+                const currentPrice = parseFloat(el.textContent.replace('$', ''));
+                const change = (Math.random() - 0.5) * 2;
+                const newPrice = (currentPrice + change).toFixed(2);
+                el.textContent = '$' + newPrice;
+                
+                // Flash animation
+                el.style.transition = 'color 0.3s';
+                el.style.color = change > 0 ? 'var(--success-green)' : 'var(--danger-red)';
+                setTimeout(() => {
+                    el.style.color = 'var(--text-primary)';
+                }, 300);
+            });
+        }, 2000);
+
+        console.log('✓ UI Loaded Successfully!');
+    </script>
+</body>
+</html>
