@@ -64,6 +64,8 @@ func setupRoutes(c *Container) {
 	http.HandleFunc("/trading/trade", corsHandler(c.AuthMiddleware.Protect(c.TradingHandler.ExecuteTrade)))
 	http.HandleFunc("/trading/wallet", corsHandler(c.AuthMiddleware.Protect(c.TradingHandler.GetWalletSnapshot)))
 	http.HandleFunc("/trading/deposit", corsHandler(c.AuthMiddleware.Protect(c.TradingHandler.DepositCash)))
+	http.HandleFunc("/trading/candles", corsHandler(c.TradingHandler.GetCandles))
+	http.HandleFunc("/market/data", corsHandler(c.AuthMiddleware.Protect(c.TradingHandler.GetMarketData)))
 	http.HandleFunc("/trading/alerts", corsHandler(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			c.AuthMiddleware.Protect(c.TradingHandler.CreateAlert)(w, r)
@@ -71,7 +73,6 @@ func setupRoutes(c *Container) {
 			c.AuthMiddleware.Protect(c.TradingHandler.GetUserAlerts)(w, r)
 		}
 	}))
-	http.HandleFunc("/trading/candles", corsHandler(c.TradingHandler.GetCandles))
 
 	http.HandleFunc("/user/profile", corsHandler(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {

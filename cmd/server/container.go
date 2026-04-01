@@ -34,7 +34,7 @@ type Container struct {
 
 func NewContainer() *Container {
 	cfg := config.NewDefaultConfig()
-// Initialize PostgreSQL database
+	// Initialize PostgreSQL database
 	database, err := db.NewDatabase(db.Config{
 		Host:     os.Getenv("DB_HOST"),
 		Port:     os.Getenv("DB_PORT"),
@@ -65,6 +65,9 @@ func NewContainer() *Container {
 	marketEngine := domain.NewMarketEngine()
 	marketEngine.SetOHLCAggregator(ohlcAggregator)
 	marketEngine.SetAlertService(alertService)
+	
+	// Set market engine on wallet service for price lookups
+	walletService.SetMarketEngine(marketEngine)
 
 	wsHub := ws.NewHub()
 

@@ -157,6 +157,15 @@
             }
         }
 
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         .login-logo {
             font-size: 48px;
             margin-bottom: 16px;
@@ -732,11 +741,22 @@
                 <div id="ws-debug-panel" style="background:white; border-radius:4px; max-height:80px; overflow-y:auto; padding:6px; font-size:10px; border:1px solid #e0e0e0;"></div>
             </div>
 
+            <!-- Trading Debug Console -->
+            <div style="background:#fff3cd; padding:10px; margin:8px; border-radius:6px; border-left:4px solid #FF9800;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <div style="font-size:12px; font-weight:600;">🔧 Trade Debug Console</div>
+                    <button onclick="toggleDebugConsole()" style="background:none; border:none; cursor:pointer; font-size:12px; padding:2px 8px; border-radius:3px; background:#FF9800; color:white;">
+                        <span id="debugToggleText">Show</span>
+                    </button>
+                </div>
+                <div id="trade-debug-console" style="display:none; background:#1e1e1e; border-radius:4px; max-height:200px; overflow-y:auto; padding:8px; font-size:10px; border:1px solid #FF9800; font-family:monospace; color:#00ff00; line-height:1.5;"></div>
+            </div>
+
             <div class="quick-trade">
                 <div class="qt-title">⚡ Quick Action</div>
                 <div class="qt-buttons">
-                    <button class="qt-btn qt-btn-buy" onclick="showModal('tradeModal')">🟢 BUY</button>
-                    <button class="qt-btn qt-btn-sell" onclick="showModal('tradeModal')">🔴 SELL</button>
+                    <button class="qt-btn qt-btn-buy" onclick="showModal('tradeModal', 'BUY')">🟢 BUY</button>
+                    <button class="qt-btn qt-btn-sell" onclick="showModal('tradeModal', 'SELL')">🔴 SELL</button>
                 </div>
             </div>
 
@@ -786,78 +806,22 @@
         <div class="app-content" id="charts-screen" style="display: none;">
             <div class="header" style="padding-bottom: 12px;">
                 <div style="font-size: 14px; color: white; margin-bottom: 8px;">📈 Charts</div>
-                <select style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-size: 14px;">
-                    <option>RELIANCE-CE-2900</option>
-                    <option>HDFC-PE-1400</option>
-                    <option>INFY-CE-1500</option>
-                    <option>TCS-PE-3500</option>
+                <select id="symbolSelect" onchange="onSymbolChange()" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-size: 14px;">
+                    <option value="RELIANCE-CE-2900">RELIANCE-CE-2900</option>
+                    <option value="HDFC-PE-1400">HDFC-PE-1400</option>
+                    <option value="INFY-CE-1500">INFY-CE-1500</option>
+                    <option value="TCS-PE-3500">TCS-PE-3500</option>
                 </select>
             </div>
 
-            <div class="timeframe-buttons">
-                <button class="tf-btn active">1m</button>
-                <button class="tf-btn">5m</button>
-                <button class="tf-btn">15m</button>
-                <button class="tf-btn">1h</button>
-                <button class="tf-btn">4h</button>
-                <button class="tf-btn">1d</button>
+            <div id="charts-container" class="section" style="display:none;">
+                <div style="text-align: center; padding: 20px; color: #666;">Loading chart data...</div>
             </div>
 
-            <div class="chart-container">
-                📊 Candlestick Chart (Real-time interactive chart)
-            </div>
-
-            <div class="section">
-                <div class="section-title">Current Candle (14:40)</div>
-                <div style="background: white; border-radius: 12px; padding: 12px; margin: 0 16px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
-                        <div>
-                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Open</div>
-                            <div style="font-weight: 600;">$102.80</div>
-                        </div>
-                        <div>
-                            <div style="color: var(--text-secondary); margin-bottom: 2px;">High ⬆️</div>
-                            <div style="font-weight: 600; color: var(--success);">$103.50</div>
-                        </div>
-                        <div>
-                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Low ⬇️</div>
-                            <div style="font-weight: 600;">$102.50</div>
-                        </div>
-                        <div>
-                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Close</div>
-                            <div style="font-weight: 600; color: var(--success);">$103.10</div>
-                        </div>
-                        <div>
-                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Volume</div>
-                            <div style="font-weight: 600;">1,240</div>
-                        </div>
-                        <div>
-                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Trend</div>
-                            <div style="font-weight: 600; color: var(--success);">📈 Bullish</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">📊 Technical Indicators</div>
-                <div style="background: white; border-radius: 12px; padding: 12px; margin: 0 16px; font-size: 13px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="color: var(--text-secondary);">RSI(14):</span>
-                        <span style="font-weight: 600;">62.5 (Neutral)</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="color: var(--text-secondary);">MACD:</span>
-                        <span style="font-weight: 600; color: var(--success);">Bullish ✓</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="color: var(--text-secondary);">MA50:</span>
-                        <span style="font-weight: 600;">$101.20 (Above)</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: var(--text-secondary);">BB(20):</span>
-                        <span style="font-weight: 600;">Mid: $102.50</span>
-                    </div>
+            <div id="current-candle-container" class="section">
+                <div class="section-title">📊 Current Candle</div>
+                <div style="background: white; border-radius: 12px; padding: 12px; margin: 0 16px; text-align: center; color: #999;">
+                    Loading candle data...
                 </div>
             </div>
 
@@ -952,23 +916,23 @@
         <div class="app-content" id="portfolio-screen" style="display: none;">
             <div class="header">
                 <div class="header-title">💰 My Portfolio</div>
-                <div class="header-balance">$99,698</div>
-                <div class="header-change">4 Holdings | Day: +$450</div>
+                <div id="portfolio-header-balance" class="header-balance">₹0.00</div>
+                <div id="portfolio-header-info" class="header-change">0 Holdings | Loading...</div>
             </div>
 
             <div class="section" style="background: white; margin: 0 16px; border-radius: 12px; padding: 12px;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 12px;">
                     <div>
                         <div style="color: var(--text-secondary); margin-bottom: 2px;">Total</div>
-                        <div style="font-weight: 600; font-size: 14px;">$99,698</div>
+                        <div id="portfolio-total" style="font-weight: 600; font-size: 14px;">₹0.00</div>
                     </div>
                     <div>
                         <div style="color: var(--text-secondary); margin-bottom: 2px;">Invested</div>
-                        <div style="font-weight: 600; font-size: 14px; color: var(--primary);">$10,000</div>
+                        <div id="portfolio-invested" style="font-weight: 600; font-size: 14px; color: var(--primary);">₹0.00</div>
                     </div>
                     <div>
                         <div style="color: var(--text-secondary); margin-bottom: 2px;">Cash</div>
-                        <div style="font-weight: 600; font-size: 14px; color: var(--success);">$89,698</div>
+                        <div id="portfolio-cash" style="font-weight: 600; font-size: 14px; color: var(--success);">₹0.00</div>
                     </div>
                 </div>
                 <div style="display: flex; gap: 8px; margin-top: 12px;">
@@ -980,6 +944,11 @@
             <div class="section">
                 <div class="section-title">Your Holdings</div>
                 
+                <div id="holdings-container" style="padding: 15px;">
+                    <div style="text-align: center; color: #999;">Loading holdings...</div>
+                </div>
+
+                <div id="holdings-placeholder-content" style="display:none;">
                 <div class="portfolio-item">
                     <div class="portfolio-header">
                         <span class="portfolio-symbol">🔴 RELIANCE-CE-2900</span>
@@ -1035,10 +1004,17 @@
                         Current: $85.30 | P&L: +$24
                     </div>
                 </div>
+                </div>
             </div>
 
             <div class="section">
                 <div class="section-title">📊 Recent Transactions</div>
+                
+                <div id="transactions-container" style="padding: 15px;">
+                    <div style="text-align: center; color: #999;">Loading transactions...</div>
+                </div>
+
+                <div id="transactions-placeholder-content" style="display:none;">
                 <div class="transaction-item">
                     <div class="transaction-info">
                         <div class="transaction-type">🟢 BUY 75 INFY</div>
@@ -1073,6 +1049,7 @@
                         <div class="transaction-time">14:00 Today</div>
                     </div>
                     <div class="transaction-amount">+$100,000</div>
+                </div>
                 </div>
             </div>
 
@@ -1121,6 +1098,11 @@
             <div class="section">
                 <div class="section-title">✅ Active Alerts (3)</div>
                 
+                <div id="alerts-container" style="padding: 15px;">
+                    <div style="text-align: center; color: #999;">Loading alerts...</div>
+                </div>
+
+                <div id="alerts-placeholder-content" style="display:none;">
                 <div class="alert-item" style="flex-direction: column; align-items: flex-start;">
                     <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 6px;">
                         <div class="alert-symbol">#1: RELIANCE ≥ $105</div>
@@ -1254,6 +1236,14 @@
         <div class="app-content" id="profile-screen" style="display: none;">
             <div class="header">
                 <div style="font-size: 14px; color: white; margin-bottom: 12px;">👤 Profile</div>
+            </div>
+
+            <div id="profile-container" style="padding: 15px;">
+                <div style="text-align: center; padding: 30px; color: #999;">Loading profile...</div>
+            </div>
+
+            <div id="profile-placeholder-content" style="display:none;">
+            <div class="header" style="display:none;">
                 <div style="text-align: center;">
                     <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.3); border-radius: 50%; margin: 0 auto 12px;"></div>
                     <div style="font-size: 18px; font-weight: bold;">Harsh Kumar</div>
@@ -1383,6 +1373,7 @@
             </div>
 
             <div style="height: 20px;"></div>
+            </div>
         </div>
 
         <div class="bottom-nav">
@@ -1419,7 +1410,7 @@
 
             <div class="input-group">
                 <label class="input-label">Select Stock</label>
-                <select class="input-field">
+                <select class="input-field" id="tradeSymbol" onchange="updateTradeTotal()">
                     <option>RELIANCE-CE-2900</option>
                     <option>HDFC-PE-1400</option>
                     <option>INFY-CE-1500</option>
@@ -1429,38 +1420,49 @@
 
             <div class="input-group">
                 <label class="input-label">Trade Type</label>
-                <select class="input-field">
-                    <option>🟢 BUY</option>
-                    <option>🔴 SELL</option>
+                <select class="input-field" id="tradeType" onchange="updateTradeTotal()">
+                    <option value="BUY">🟢 BUY</option>
+                    <option value="SELL">🔴 SELL</option>
                 </select>
             </div>
 
             <div class="input-group">
                 <label class="input-label">Quantity</label>
-                <input type="number" class="input-field" placeholder="100" value="100">
+                <input type="number" class="input-field" id="tradeQuantity" placeholder="100" value="100" min="1" oninput="updateTradeTotal()">
             </div>
 
             <div class="input-group">
                 <label class="input-label">Price per Unit</label>
-                <input type="number" class="input-field" placeholder="102.50" value="102.50">
+                <input type="number" class="input-field" id="tradePrice" placeholder="102.50" value="102.50" min="0.01" step="0.01" oninput="updateTradeTotal()">
             </div>
 
             <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
                 <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
                     <span>Total Cost:</span>
-                    <span style="font-weight: 600;">$10,250</span>
+                    <span style="font-weight: 600;" id="tradeCost">₹0.00</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
                     <span>Fee (0.5%):</span>
-                    <span style="font-weight: 600;">$51.25</span>
+                    <span style="font-weight: 600;" id="tradeFee">₹0.00</span>
                 </div>
                 <div style="border-top: 1px solid var(--border); padding-top: 8px; display: flex; justify-content: space-between; font-size: 14px;">
                     <span style="font-weight: 600;">Total:</span>
-                    <span style="font-weight: 700; color: var(--primary);">$10,301.25</span>
+                    <span style="font-weight: 700; color: var(--primary);" id="tradeTotal">₹0.00</span>
                 </div>
             </div>
 
-            <button class="btn-full">✓ EXECUTE TRADE</button>
+            <div id="tradeError" style="background: rgba(244, 67, 54, 0.1); color: #F44336; padding: 8px; border-radius: 6px; margin-bottom: 12px; font-size: 12px; display: none;"></div>
+
+            <!-- Trade Loader -->
+            <div id="tradeLoader" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 9999; display: none; justify-content: center; align-items: center;">
+                <div style="background: white; border-radius: 12px; padding: 40px; text-align: center; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);">
+                    <div style="display: inline-block; width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid #2E5BFF; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px;"></div>
+                    <div style="font-size: 16px; font-weight: 600; color: #333;">Processing Trade...</div>
+                    <div style="font-size: 12px; color: #999; margin-top: 8px;">Please wait while your order is being executed</div>
+                </div>
+            </div>
+
+            <button class="btn-full" onclick="executeTradeModal()">✓ EXECUTE TRADE</button>
             <button class="btn-full" style="background: var(--border); color: var(--text-primary); margin-top: 12px; margin-bottom: 40px;" onclick="closeModal('tradeModal')">Cancel</button>
         </div>
     </div>
@@ -1527,6 +1529,7 @@
             const logMsg = `[${timestamp}] ${message}`;
             console.log(logMsg, data || '');
             updateDebugPanel(logMsg);
+            addDebugLog(message, 'info');
         }
 
         // Update debug panel on page
@@ -1876,15 +1879,23 @@
 
         // ========== AUTHENTICATION APIs ==========
         async function registerUser(email, username, password) {
+            addDebugLog('═══════════════════════════════════════', 'info');
+            addDebugLog('📝 Registration attempt', 'info');
+            addDebugLog(`📧 Email: ${email}, Username: ${username}`, 'info');
+            
             try {
+                addDebugLog('🔄 Sending registration request...', 'info');
                 const response = await fetch(`${API_BASE}/auth/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, username, password })
                 });
                 
+                addDebugLog(`📨 Response: ${response.status}`, 'info');
+                
                 if (!response.ok) {
                     const error = await response.text();
+                    addDebugLog(`❌ Registration failed: ${error}`, 'error');
                     alert(`Registration failed: ${error}`);
                     return false;
                 }
@@ -1892,24 +1903,35 @@
                 const result = await response.json();
                 token = result.token;
                 localStorage.setItem('token', token);
+                addDebugLog('✅ Registration successful, token stored', 'success');
+                addDebugLog('═══════════════════════════════════════', 'info');
                 alert('✅ Registration successful!');
                 return true;
             } catch (error) {
-                console.error('Register error:', error);
+                addDebugLog(`💥 Registration error: ${error.message}`, 'error');
+                addDebugLog('═══════════════════════════════════════', 'info');
                 alert('Registration failed: ' + error.message);
                 return false;
             }
         }
 
         async function loginUser(email, password) {
+            addDebugLog('═══════════════════════════════════════', 'info');
+            addDebugLog('🔐 Login attempt', 'info');
+            addDebugLog(`📧 Email: ${email}`, 'info');
+            
             try {
+                addDebugLog('🔄 Sending login request...', 'info');
                 const response = await fetch(`${API_BASE}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
                 
+                addDebugLog(`📨 Response: ${response.status}`, 'info');
+                
                 if (!response.ok) {
+                    addDebugLog('❌ Login failed: Invalid credentials', 'error');
                     alert('Login failed: Invalid credentials');
                     return false;
                 }
@@ -1917,23 +1939,44 @@
                 const result = await response.json();
                 token = result.token;
                 localStorage.setItem('token', token);
+                addDebugLog('✅ Login successful, token stored', 'success');
+                addDebugLog('═══════════════════════════════════════', 'info');
                 alert('✅ Login successful!');
                 return true;
             } catch (error) {
-                console.error('Login error:', error);
+                addDebugLog(`💥 Login error: ${error.message}`, 'error');
+                addDebugLog('═══════════════════════════════════════', 'info');
                 alert('Login failed: ' + error.message);
                 return false;
+            }
+        }
+
+        // ========== LOADER FUNCTIONS ==========
+        function showTradeLoader() {
+            const loader = document.getElementById('tradeLoader');
+            if (loader) {
+                loader.style.display = 'flex';
+                addDebugLog('⏳ Loader displayed', 'info');
+            }
+        }
+
+        function hideTradeLoader() {
+            const loader = document.getElementById('tradeLoader');
+            if (loader) {
+                loader.style.display = 'none';
+                addDebugLog('✓ Loader hidden', 'info');
             }
         }
 
         // ========== PORTFOLIO APIs ==========
         async function loadWalletData() {
             if (!token) {
-                console.warn('No token available');
+                addDebugLog('⚠️ No token available', 'warning');
                 return null;
             }
 
             try {
+                addDebugLog('💼 Fetching wallet data...', 'info');
                 const response = await fetch(`${API_BASE}/trading/wallet`, {
                     method: 'GET',
                     headers: {
@@ -1942,71 +1985,140 @@
                     }
                 });
 
-                if (!response.ok) return null;
+                if (!response.ok) {
+                    addDebugLog(`❌ Wallet fetch failed: ${response.status}`, 'error');
+                    return null;
+                }
                 
                 const wallet = await response.json();
+                addDebugLog(`✅ Wallet loaded: ₹${wallet.total_balance?.toFixed(2)}, ${Object.keys(wallet.positions || {}).length} holdings`, 'success');
                 updatePortfolioUI(wallet);
                 return wallet;
             } catch (error) {
-                console.error('Error loading wallet:', error);
+                addDebugLog(`💥 Error loading wallet: ${error.message}`, 'error');
                 return null;
             }
         }
 
         function updatePortfolioUI(wallet) {
-            // Update home screen balance display
+            if (!wallet) {
+                addDebugLog('❌ No wallet data provided', 'error');
+                return;
+            }
+
+            addDebugLog('🎨 Updating UI with portfolio data...', 'info');
+
+            // Extract values from wallet
+            const totalBalance = wallet.total_balance || 0;
+            const availableCash = wallet.available_cash || 0;
+            const invested = totalBalance - availableCash;
+            const positions = wallet.positions || {};
+            const holdingsCount = Object.keys(positions).length;
+
+            addDebugLog(`📊 Portfolio: Balance=₹${totalBalance.toFixed(2)}, Cash=₹${availableCash.toFixed(2)}, Holdings=${holdingsCount}`, 'info');
+
+            // ========== Update Header ==========
+            const headerBalance = document.getElementById('portfolio-header-balance');
+            if (headerBalance) {
+                headerBalance.textContent = `₹${totalBalance.toFixed(2)}`;
+            }
+
+            const headerInfo = document.getElementById('portfolio-header-info');
+            if (headerInfo) {
+                headerInfo.textContent = `${holdingsCount} ${holdingsCount === 1 ? 'Holding' : 'Holdings'}`;
+            }
+
+            // ========== Update Stats Section ==========
+            // Total Balance
+            const totalEl = document.getElementById('portfolio-total');
+            if (totalEl) {
+                totalEl.textContent = `₹${totalBalance.toFixed(2)}`;
+            }
+
+            // Invested Amount (calculated)
+            const investedEl = document.getElementById('portfolio-invested');
+            if (investedEl) {
+                investedEl.textContent = `₹${invested.toFixed(2)}`;
+            }
+
+            // Available Cash
+            const cashEl = document.getElementById('portfolio-cash');
+            if (cashEl) {
+                cashEl.textContent = `₹${availableCash.toFixed(2)}`;
+            }
+
+            // ========== Update Home Screen Balance ==========
             if (document.getElementById('home-balance')) {
-                document.getElementById('home-balance').textContent = `₹${wallet.available_cash?.toFixed(2) || '0.00'}`;
-            }
-            if (document.getElementById('home-change')) {
-                const totalPnl = wallet.total_balance - wallet.available_cash;
-                const changeIcon = totalPnl >= 0 ? '▲' : '▼';
-                const changeColor = totalPnl >= 0 ? '#4CAF50' : '#F44336';
-                document.getElementById('home-change').textContent = `${changeIcon} ${changeIcon === '▲' ? '+' : ''}₹${totalPnl?.toFixed(2) || '0.00'}`;
-                document.getElementById('home-change').style.color = changeColor;
+                document.getElementById('home-balance').textContent = `₹${availableCash.toFixed(2)}`;
             }
 
-            // Update balance display in portfolio screen
-            const balanceElements = document.querySelectorAll('#portfolio-screen [style*="font-size: 24px"]');
-            if (balanceElements[0]) {
-                balanceElements[0].textContent = `₹${wallet.available_cash?.toFixed(2) || '0.00'}`;
-            }
-
-            // Update portfolio value
-            const valueElements = document.querySelectorAll('#portfolio-screen [style*="font-size: 14px"]');
-            if (valueElements[0]) {
-                valueElements[0].textContent = `Total Value: ₹${wallet.total_value?.toFixed(2) || '0.00'}`;
-            }
-
-            // Update holdings list
-            if (wallet.holdings && wallet.holdings.length > 0) {
-                let holdingsHTML = '<div style="padding:15px; background:white; border-radius:8px;">';
-                wallet.holdings.forEach(holding => {
+            // ========== Update Holdings Section ==========
+            const holdingsContainer = document.getElementById('holdings-container');
+            
+            if (holdingsCount === 0) {
+                // No holdings - show message
+                if (holdingsContainer) {
+                    holdingsContainer.innerHTML = `
+                        <div style="text-align:center; padding:30px; color:#999;">
+                            <div style="font-size:14px; margin-bottom:10px;">📊 No holdings yet</div>
+                            <div style="font-size:12px;">Start trading to build your portfolio</div>
+                        </div>
+                    `;
+                }
+            } else {
+                // Display holdings
+                let holdingsHTML = '';
+                
+                Object.entries(positions).forEach(([symbol, position]) => {
+                    const pnl = position.unrealized_pnl || 0;
+                    const percentage = position.percentage || 0;
+                    const pnlColor = pnl >= 0 ? 'var(--success)' : 'var(--danger)';
+                    const emoji = pnl >= 0 ? '🟢' : '🔴';
+                    const arrow = pnl >= 0 ? '↑' : '↓';
+                    const currentValue = (position.quantity * position.current_price).toFixed(2);
+                    
                     holdingsHTML += `
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px; padding:10px; border-bottom:1px solid #eee;">
-                            <div>
-                                <div style="font-weight:600; color:#333;">${holding.symbol}</div>
-                                <div style="font-size:12px; color:#666;">${holding.quantity} units @ ₹${holding.average_price}</div>
+                        <div class="portfolio-item">
+                            <div class="portfolio-header">
+                                <span class="portfolio-symbol">${emoji} ${symbol}</span>
+                                <span class="portfolio-value" style="color: ${pnlColor};">${pnl >= 0 ? '+' : ''}₹${pnl.toFixed(2)}</span>
                             </div>
-                            <div style="text-align:right;">
-                                <div style="font-weight:600; color:#2E5BFF;">₹${holding.current_value?.toFixed(2)}</div>
-                                <div style="font-size:12px; color:${holding.pnl >= 0 ? '#4CAF50' : '#F44336'}; font-weight:500;">${holding.pnl >= 0 ? '+' : ''}${holding.pnl?.toFixed(2)}</div>
+                            <div class="portfolio-sub">
+                                <span>${position.quantity} units @ ₹${position.average_cost.toFixed(2)} avg</span>
+                                <span style="color: ${pnlColor};">${arrow} ${Math.abs(percentage).toFixed(2)}%</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                                Current: ₹${position.current_price.toFixed(2)} | Value: ₹${currentValue}
                             </div>
                         </div>
                     `;
                 });
-                holdingsHTML += '</div>';
                 
-                const holdingsContainer = document.getElementById('holdings-container') || 
-                    document.querySelector('#portfolio-screen [style*="Holdings"]');
                 if (holdingsContainer) {
                     holdingsContainer.innerHTML = holdingsHTML;
                 }
             }
+
+            // ========== Update Transactions Section ==========
+            const transactionsContainer = document.getElementById('transactions-container');
+            if (transactionsContainer) {
+                transactionsContainer.innerHTML = `
+                    <div style="text-align:center; padding:20px; color:#999;">
+                        <div style="font-size:12px;">📋 Transaction history coming soon</div>
+                    </div>
+                `;
+            }
+
+            addDebugLog('✅ Portfolio UI updated successfully', 'success');
         }
 
         async function depositCash(amount) {
-            if (!token) return false;
+            if (!token) {
+                addDebugLog('❌ No token available', 'error');
+                return false;
+            }
+
+            addDebugLog(`💰 Processing deposit: ₹${amount}`, 'info');
 
             try {
                 const response = await fetch(`${API_BASE}/trading/deposit`, {
@@ -2019,93 +2131,449 @@
                 });
 
                 if (!response.ok) {
+                    addDebugLog(`❌ Deposit failed: ${response.status}`, 'error');
                     alert('Deposit failed');
                     return false;
                 }
 
+                addDebugLog(`✅ Deposit successful: ₹${amount}`, 'success');
                 alert(`✅ Deposited ₹${amount}`);
                 await loadWalletData();
                 return true;
             } catch (error) {
-                console.error('Deposit error:', error);
+                addDebugLog(`💥 Deposit error: ${error.message}`, 'error');
                 return false;
             }
         }
 
         async function executeTrade(symbol, quantity, price, type) {
-            if (!token) return false;
+            if (!token) {
+                addDebugLog('❌ No token available', 'error');
+                return false;
+            }
+
+            addDebugLog(`🔄 Executing trade: ${type} ${quantity} × ${symbol} @ ₹${price}`, 'info');
 
             try {
+                const tradeData = {
+                    symbol: symbol,
+                    quantity: parseFloat(quantity),
+                    price: parseFloat(price),
+                    type: type
+                };
+
+                addDebugLog(`📤 POST /trading/trade`, 'info');
+
                 const response = await fetch(`${API_BASE}/trading/trade`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ symbol, quantity, price, type })
+                    body: JSON.stringify(tradeData)
                 });
 
+                addDebugLog(`📥 Response: ${response.status} ${response.statusText}`, 'info');
+
                 if (!response.ok) {
-                    alert('Trade failed');
-                    return false;
+                    const errorText = await response.text();
+                    addDebugLog(`❌ API Error: ${response.status} - ${errorText}`, 'error');
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
                 }
 
                 const result = await response.json();
-                alert(`✅ ${type} trade executed:\n${quantity} units of ${symbol}\nTotal: ₹${result.total}`);
-                await loadWalletData();
+                addDebugLog(`📦 API Response: ${JSON.stringify(result)}`, 'info');
+
+                // Handle the response - calculate total if not provided
+                let total = result.total;
+                if (!total) {
+                    // Calculate total from response data if not provided
+                    if (result.quantity && result.price) {
+                        total = result.quantity * result.price * 1.005; // Including 0.5% fee
+                        addDebugLog(`📊 Calculated total: ₹${total.toFixed(2)} (from quantity & price)`, 'info');
+                    } else {
+                        // Fallback to trade parameters
+                        total = quantity * price * 1.005;
+                        addDebugLog(`📊 Calculated total: ₹${total.toFixed(2)} (from trade params)`, 'info');
+                    }
+                }
+
+                addDebugLog(`✅ Trade executed: ₹${parseFloat(total).toFixed(2)} total`, 'success');
+
+                // Show success alert
+                alert(`✅ ${type} trade executed successfully!\n${quantity} units of ${symbol}\nTotal: ₹${parseFloat(total).toFixed(2)}`);
+                
+                // Refresh wallet data
+                addDebugLog(`🔄 Fetching updated wallet...`, 'info');
+                const walletData = await loadWalletData();
+                
+                if (walletData) {
+                    const holdings = Object.keys(walletData.positions || {}).length;
+                    addDebugLog(`✅ Wallet loaded: ₹${walletData.available_cash.toFixed(2)} cash, ${holdings} holdings`, 'success');
+                } else {
+                    addDebugLog(`⚠️ Could not load wallet data`, 'warning');
+                }
+                
                 return true;
             } catch (error) {
-                console.error('Trade error:', error);
+                addDebugLog(`💥 Trade failed: ${error.message}`, 'error');
+                alert(`❌ Trade failed: ${error.message}`);
                 return false;
             }
         }
 
+        // ========== TRADE MODAL FUNCTIONS ==========
+        function updateTradeTotal() {
+            const quantity = parseFloat(document.getElementById('tradeQuantity').value) || 0;
+            const price = parseFloat(document.getElementById('tradePrice').value) || 0;
+            const cost = quantity * price;
+            const fee = cost * 0.005; // 0.5% fee
+            const total = cost + fee;
+
+            document.getElementById('tradeCost').textContent = `₹${cost.toFixed(2)}`;
+            document.getElementById('tradeFee').textContent = `₹${fee.toFixed(2)}`;
+            document.getElementById('tradeTotal').textContent = `₹${total.toFixed(2)}`;
+        }
+
+        async function executeTradeModal() {
+            addDebugLog('═══════════════════════════════════════', 'info');
+            addDebugLog('🟢 Execute Trade button clicked', 'info');
+            
+            const tradeError = document.getElementById('tradeError');
+            tradeError.style.display = 'none';
+            tradeError.textContent = '';
+
+            if (!token) {
+                const msg = '❌ Please login first';
+                addDebugLog(msg, 'error');
+                tradeError.textContent = msg;
+                tradeError.style.display = 'block';
+                return;
+            }
+
+            // Get form values
+            const symbol = (document.getElementById('tradeSymbol').value || '').trim();
+            const type = (document.getElementById('tradeType').value || '').trim();
+            const quantityStr = (document.getElementById('tradeQuantity').value || '').trim();
+            const priceStr = (document.getElementById('tradePrice').value || '').trim();
+
+            addDebugLog(`📋 Form: ${type} ${quantityStr} × ${symbol} @ ₹${priceStr}`, 'info');
+
+            // Validation
+            if (!symbol || symbol === '') {
+                const msg = '❌ Please select a stock';
+                addDebugLog(msg, 'error');
+                tradeError.textContent = msg;
+                tradeError.style.display = 'block';
+                return;
+            }
+
+            if (!quantityStr || isNaN(quantityStr) || parseFloat(quantityStr) <= 0) {
+                const msg = '❌ Please enter a valid quantity (> 0)';
+                addDebugLog(msg, 'error');
+                tradeError.textContent = msg;
+                tradeError.style.display = 'block';
+                return;
+            }
+
+            if (!priceStr || isNaN(priceStr) || parseFloat(priceStr) <= 0) {
+                const msg = '❌ Please enter a valid price (> 0)';
+                addDebugLog(msg, 'error');
+                tradeError.textContent = msg;
+                tradeError.style.display = 'block';
+                return;
+            }
+
+            if (!type || (type !== 'BUY' && type !== 'SELL')) {
+                const msg = '❌ Please select BUY or SELL';
+                addDebugLog(msg, 'error');
+                tradeError.textContent = msg;
+                tradeError.style.display = 'block';
+                return;
+            }
+
+            const quantity = parseFloat(quantityStr);
+            const price = parseFloat(priceStr);
+            const totalCost = quantity * price * 1.005; // Including fee
+
+            addDebugLog(`💰 Costs: cost=₹${(quantity * price).toFixed(2)}, fee=₹${((quantity * price) * 0.005).toFixed(2)}, total=₹${totalCost.toFixed(2)}`, 'info');
+
+            // For BUY: Check if user has enough cash
+            if (type === 'BUY') {
+                addDebugLog(`🔍 Checking available balance for BUY...`, 'info');
+                try {
+                    const walletResponse = await fetch(`${API_BASE}/trading/wallet`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (walletResponse.ok) {
+                        const wallet = await walletResponse.json();
+                        const availableCash = wallet.available_cash || 0;
+
+                        addDebugLog(`💵 Check: available=₹${availableCash.toFixed(2)}, required=₹${totalCost.toFixed(2)}`, 'info');
+
+                        if (availableCash < totalCost) {
+                            const msg = `❌ Insufficient funds. Available: ₹${availableCash.toFixed(2)}, Required: ₹${totalCost.toFixed(2)}`;
+                            addDebugLog(msg, 'error');
+                            tradeError.textContent = msg;
+                            tradeError.style.display = 'block';
+                            return;
+                        }
+                    } else {
+                        addDebugLog(`⚠️ Could not verify funds, continuing...`, 'warning');
+                    }
+                } catch (error) {
+                    addDebugLog(`⚠️ Error checking funds: ${error.message}`, 'warning');
+                }
+            }
+
+            // Execute the trade
+            const button = document.querySelector('#tradeModal .btn-full');
+            
+            if (!button) {
+                const msg = '❌ Trade button not found';
+                addDebugLog(msg, 'error');
+                tradeError.textContent = msg;
+                tradeError.style.display = 'block';
+                return;
+            }
+
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.textContent = '⏳ Processing...';
+
+            addDebugLog(`🚀 Sending trade request...`, 'info');
+            showTradeLoader();
+
+            try {
+                const success = await executeTrade(symbol, quantity, price, type);
+
+                if (success) {
+                    addDebugLog(`✨ Trade completed, closing modal`, 'success');
+                    
+                    // Clear form
+                    document.getElementById('tradeQuantity').value = '100';
+                    document.getElementById('tradePrice').value = '102.50';
+                    updateTradeTotal();
+                    
+                    // Close modal after a brief delay
+                    setTimeout(() => {
+                        hideTradeLoader();
+                        closeModal('tradeModal');
+                        button.disabled = false;
+                        button.textContent = originalText;
+                    }, 1500);
+                } else {
+                    hideTradeLoader();
+                    button.disabled = false;
+                    button.textContent = originalText;
+                    tradeError.textContent = '❌ Trade execution failed. Check debug console for details.';
+                    tradeError.style.display = 'block';
+                }
+            } catch (error) {
+                hideTradeLoader();
+                addDebugLog(`💥 Unexpected error: ${error.message}`, 'error');
+                button.disabled = false;
+                button.textContent = originalText;
+                tradeError.textContent = `❌ An error occurred: ${error.message}`;
+                tradeError.style.display = 'block';
+            }
+            
+            addDebugLog('═══════════════════════════════════════', 'info');
+        }
+
+        // ========== MARKET DATA APIs ==========
+        async function fetchMarketData() {
+            addDebugLog('📈 Fetching market data...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/market/data`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch market data: ${response.status}`);
+                }
+                
+                const responseData = await response.json();
+                addDebugLog(`✅ Market data loaded: ${responseData.data?.stocks?.length || 0} stocks`, 'success');
+                
+                // responseData is { data: { stocks: [...] } }
+                const marketsData = responseData.data || responseData;
+                const stocks = marketsData.stocks || [];
+                
+                // Update markets display
+                const marketsContainer = document.getElementById('markets-container');
+                if (!marketsContainer) return;
+                
+                if (stocks.length === 0) {
+                    marketsContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">No market data available</div>';
+                    return;
+                }
+                
+                let html = '';
+                stocks.forEach(stock => {
+                    const current_price = stock.current_price || 0;
+                    const change = stock.change || 0;
+                    const changePercent = stock.change_percent || 0;
+                    const isPositive = change >= 0;
+                    const color = isPositive ? 'var(--success)' : 'var(--danger)';
+                    const emoji = isPositive ? '🟢 ↑' : '🔴 ↓';
+                    
+                    html += `
+                        <div class="market-item" data-symbol="${stock.symbol}">
+                            <div class="market-header">
+                                <h3>${stock.symbol}</h3>
+                                <span style="color: ${color}; font-weight: 600;">${isPositive ? '+' : ''}${change.toFixed(2)} (${changePercent.toFixed(2)}%)</span>
+                            </div>
+                            <div class="market-detail">
+                                <span>₹${current_price.toFixed(2)}</span>
+                                <span style="color: ${color}">${emoji}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                marketsContainer.innerHTML = html;
+                
+                // Add click handlers for market items
+                document.querySelectorAll('.market-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const symbol = item.dataset.symbol;
+                        if (symbol) {
+                            showScreen('trading-screen');
+                            loadTradingInterface(symbol);
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                addDebugLog(`💥 Error fetching market data: ${error.message}`, 'error');
+            }
+        }
+
         // ========== CHARTS APIs ==========
+        function onSymbolChange() {
+            const symbol = document.getElementById('symbolSelect').value;
+            addDebugLog(`📊 Symbol changed to: ${symbol}`, 'info');
+            loadCandleData(symbol);
+        }
+
         async function loadCandleData(symbol) {
+            addDebugLog(`📊 Loading candle data for ${symbol}...`, 'info');
+            
             try {
                 const response = await fetch(`${API_BASE}/trading/candles?symbol=${symbol}&limit=50`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 });
 
-                if (!response.ok) return null;
+                if (!response.ok) {
+                    addDebugLog(`❌ Failed to load candles: ${response.status}`, 'error');
+                    return null;
+                }
                 
                 const candles = await response.json();
+                addDebugLog(`✅ Candles loaded: ${candles.length} records for ${symbol}`, 'success');
                 updateChartsUI(candles);
                 return candles;
             } catch (error) {
-                console.error('Error loading candles:', error);
+                addDebugLog(`💥 Error loading candles: ${error.message}`, 'error');
                 return null;
             }
         }
 
         function updateChartsUI(candles) {
-            if (!candles || candles.length === 0) return;
+            if (!candles || candles.length === 0) {
+                addDebugLog('⚠️ No candles data available', 'warning');
+                return;
+            }
 
-            // Simple text-based candlestick display
-            let chartHTML = '<div style="padding:15px; font-family:monospace; font-size:11px; background:#f5f5f5; border-radius:8px; overflow-x:auto;">';
-            chartHTML += '<div style="margin-bottom:10px; font-weight:600;">OHLC Candlestick Data (Last 10)</div>';
+            addDebugLog(`🎨 Rendering chart with ${candles.length} candles...`, 'info');
+            const isUp = latestCandle.close >= latestCandle.open;
+
+            // Update Current Candle section with latest data
+            const currentCandleHTML = `
+                <div style="background: white; border-radius: 12px; padding: 12px; margin: 0 16px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
+                        <div>
+                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Open</div>
+                            <div style="font-weight: 600;">₹${latestCandle.open.toFixed(2)}</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-secondary); margin-bottom: 2px;">High ⬆️</div>
+                            <div style="font-weight: 600; color: var(--success);">₹${latestCandle.high.toFixed(2)}</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Low ⬇️</div>
+                            <div style="font-weight: 600;">₹${latestCandle.low.toFixed(2)}</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Close</div>
+                            <div style="font-weight: 600; color: ${isUp ? 'var(--success)' : 'var(--danger)'};">₹${latestCandle.close.toFixed(2)}</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Volume</div>
+                            <div style="font-weight: 600;">${latestCandle.volume.toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-secondary); margin-bottom: 2px;">Trend</div>
+                            <div style="font-weight: 600; color: ${isUp ? 'var(--success)' : 'var(--danger)'};">
+                                ${isUp ? '📈 Bullish' : '📉 Bearish'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const currentCandleContainer = document.getElementById('current-candle-container');
+            if (currentCandleContainer) {
+                currentCandleContainer.innerHTML = `
+                    <div class="section-title">📊 Current Candle</div>
+                    ${currentCandleHTML}
+                `;
+            }
+
+            // Create candlestick table display
+            let chartHTML = '<div style="background: white; border-radius: 8px; overflow: hidden; font-size: 11px;">';
+            chartHTML += '<div style="display: grid; grid-template-columns: 60px 50px 50px 50px 50px 70px; gap: 0; background: var(--bg-secondary); padding: 8px; font-weight: 600; border-bottom: 1px solid var(--border);">';
+            chartHTML += '<div>Time</div><div>O</div><div>H</div><div>L</div><div>C</div><div>Vol</div></div>';
             
-            candles.slice(-10).forEach(candle => {
-                const color = candle.close >= candle.open ? '#4CAF50' : '#F44336';
+            candles.slice(-10).forEach((candle, idx) => {
+                const isUpCandle = candle.close >= candle.open;
+                const candleTime = new Date(candle.timestamp).toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'});
                 chartHTML += `
-                    <div style="margin:5px 0; padding:8px; background:white; border-left:3px solid ${color};">
-                        O:${candle.open.toFixed(2)} H:${candle.high.toFixed(2)} L:${candle.low.toFixed(2)} C:${candle.close.toFixed(2)} V:${candle.volume}
+                    <div style="display: grid; grid-template-columns: 60px 50px 50px 50px 50px 70px; gap: 0; padding: 8px; border-bottom: 1px solid var(--border);">
+                        <div>${idx === candles.length - 1 ? '✓ Now' : candleTime}</div>
+                        <div>${candle.open.toFixed(2)}</div>
+                        <div style="color: ${isUpCandle ? 'var(--success)' : 'inherit'}">${candle.high.toFixed(2)}</div>
+                        <div>${candle.low.toFixed(2)}</div>
+                        <div style="color: ${isUpCandle ? 'var(--success)' : 'var(--danger)'}">${candle.close.toFixed(2)}</div>
+                        <div>${(candle.volume / 1000).toFixed(1)}k</div>
                     </div>
                 `;
             });
             chartHTML += '</div>';
 
-            const chartsContainer = document.getElementById('charts-container') || 
-                document.querySelector('#charts-screen');
+            const chartsContainer = document.getElementById('charts-container');
             if (chartsContainer) {
+                chartsContainer.style.display = 'block';
                 chartsContainer.innerHTML = chartHTML;
             }
         }
 
         // ========== ALERTS APIs ==========
         async function loadAlertsData() {
-            if (!token) return null;
+            if (!token) {
+                addDebugLog('⚠️ No token available for alerts', 'warning');
+                return null;
+            }
+
+            addDebugLog('🔔 Loading alerts...', 'info');
 
             try {
                 const response = await fetch(`${API_BASE}/trading/alerts`, {
@@ -2116,48 +2584,60 @@
                     }
                 });
 
-                if (!response.ok) return null;
+                if (!response.ok) {
+                    addDebugLog(`❌ Failed to load alerts: ${response.status}`, 'error');
+                    return null;
+                }
                 
                 const alerts = await response.json();
+                addDebugLog(`✅ Alerts loaded: ${alerts.length} alerts`, 'success');
                 updateAlertsUI(alerts);
                 return alerts;
             } catch (error) {
-                console.error('Error loading alerts:', error);
+                addDebugLog(`💥 Error loading alerts: ${error.message}`, 'error');
                 return null;
             }
         }
 
         function updateAlertsUI(alerts) {
-            let alertsHTML = '<div style="padding:15px;">';
+            let alertsHTML = '';
             
             if (!alerts || alerts.length === 0) {
-                alertsHTML += '<div style="text-align:center; padding:30px; color:#666;">No active alerts</div>';
+                alertsHTML = '<div style="text-align:center; padding:30px; color:#999;">No active alerts yet</div>';
             } else {
                 alerts.forEach(alert => {
+                    const badgeColor = alert.is_active ? 'var(--success)' : '#999';
+                    const badgeText = alert.is_active ? '🟢 Active' : '🟡 Inactive';
                     alertsHTML += `
                         <div style="background:white; padding:12px; margin-bottom:10px; border-radius:8px; border-left:4px solid #2E5BFF;">
-                            <div style="font-weight:600; margin-bottom:4px;">${alert.symbol}</div>
-                            <div style="font-size:12px; color:#666;">
-                                Alert when price goes ${alert.condition} ₹${alert.threshold_price}
-                                <div style="margin-top:4px; color:${alert.is_active ? '#4CAF50' : '#999'};">
-                                    ${alert.is_active ? '● Active' : '● Inactive'}
-                                </div>
+                            <div style="font-weight:600; margin-bottom:4px;">
+                                <span>${alert.symbol}</span>
+                                <span style="float:right; font-size:11px; color:${badgeColor};">${badgeText}</span>
+                            </div>
+                            <div style="font-size:12px; color:#666; margin-bottom:8px;">
+                                Alert when price ${alert.condition} ₹${alert.threshold_price}
+                            </div>
+                            <div style="font-size:11px; color:var(--text-secondary);">
+                                Created: Now | Current: Monitoring
                             </div>
                         </div>
                     `;
                 });
             }
-            alertsHTML += '</div>';
 
-            const alertsContainer = document.getElementById('alerts-container') || 
-                document.querySelector('#alerts-screen');
+            const alertsContainer = document.getElementById('alerts-container');
             if (alertsContainer) {
                 alertsContainer.innerHTML = alertsHTML;
             }
         }
 
         async function createAlert(symbol, price, condition) {
-            if (!token) return false;
+            if (!token) {
+                addDebugLog('⚠️ No token available', 'warning');
+                return false;
+            }
+
+            addDebugLog(`🔔 Creating alert: ${symbol} ${condition} ₹${price}`, 'info');
 
             try {
                 const response = await fetch(`${API_BASE}/trading/alerts`, {
@@ -2170,15 +2650,17 @@
                 });
 
                 if (!response.ok) {
+                    addDebugLog(`❌ Failed to create alert: ${response.status}`, 'error');
                     alert('Failed to create alert');
                     return false;
                 }
 
+                addDebugLog(`✅ Alert created: ${symbol} ${condition} ₹${price}`, 'success');
                 alert(`✅ Alert created: ${symbol} ${condition} ₹${price}`);
                 await loadAlertsData();
                 return true;
             } catch (error) {
-                console.error('Alert creation error:', error);
+                addDebugLog(`💥 Alert creation error: ${error.message}`, 'error');
                 return false;
             }
         }
@@ -2186,9 +2668,11 @@
         // ========== PROFILE APIs ==========
         async function loadUserProfile() {
             if (!token) {
-                console.warn('No token available - skipping profile load');
+                addDebugLog('⚠️ No token available for profile load', 'warning');
                 return;
             }
+
+            addDebugLog('👤 Loading user profile...', 'info');
 
             try {
                 const response = await fetch(`${API_BASE}/user/profile`, {
@@ -2199,46 +2683,46 @@
                     }
                 });
 
-                if (!response.ok) return;
+                if (!response.ok) {
+                    addDebugLog(`❌ Failed to load profile: ${response.status}`, 'error');
+                    return;
+                }
 
                 const profile = await response.json();
+                addDebugLog(`✅ Profile loaded: ${profile.username || 'User'}`, 'success');
                 updateProfileUI(profile);
             } catch (error) {
-                console.error('Error loading profile:', error);
+                addDebugLog(`💥 Error loading profile: ${error.message}`, 'error');
             }
         }
 
         function updateProfileUI(profile) {
             let profileHTML = `
-                <div style="padding:20px;">
-                    <div style="background:#f0f4ff; padding:20px; border-radius:12px; margin-bottom:20px;">
-                        <div style="font-size:18px; font-weight:600; color:#333; margin-bottom:4px;">${profile.username || 'User'}</div>
-                        <div style="font-size:13px; color:#666;">${profile.email || 'N/A'}</div>
+                <div style="background:white; border-radius:12px; padding:15px; margin-bottom:15px;">
+                    <div style="text-align:center; margin-bottom:15px;">
+                        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; margin: 0 auto 10px;"></div>
+                        <div style="font-size:16px; font-weight:600; color:#333;">${profile.username || 'User'}</div>
+                        <div style="font-size:13px; color:#666; margin-top:4px;">${profile.email || 'N/A'}</div>
                     </div>
+                </div>
 
-                    <div style="background:white; border-radius:8px; overflow:hidden;">
-                        <div style="padding:15px; border-bottom:1px solid #eee;">
-                            <div style="font-size:12px; color:#999; margin-bottom:4px;">EMAIL</div>
-                            <div style="font-weight:500;">${profile.email || 'N/A'}</div>
-                        </div>
-                        <div style="padding:15px; border-bottom:1px solid #eee;">
-                            <div style="font-size:12px; color:#999; margin-bottom:4px;">PHONE</div>
-                            <div style="font-weight:500;">${profile.phone || 'Not set'}</div>
-                        </div>
-                        <div style="padding:15px; border-bottom:1px solid #eee;">
-                            <div style="font-size:12px; color:#999; margin-bottom:4px;">PORTFOLIO VALUE</div>
-                            <div style="font-weight:600; color:#2E5BFF; font-size:16px;">₹${profile.total_portfolio_value?.toFixed(2) || '0.00'}</div>
-                        </div>
-                        <div style="padding:15px;">
-                            <div style="font-size:12px; color:#999; margin-bottom:4px;">MEMBER SINCE</div>
-                            <div style="font-weight:500;">${new Date(profile.created_at).toLocaleDateString()}</div>
-                        </div>
+                <div style="background:white; border-radius:8px; overflow:hidden;">
+                    <div style="padding:12px; border-bottom:1px solid #eee;">
+                        <div style="font-size:11px; color:#999; margin-bottom:4px; font-weight:600;">EMAIL</div>
+                        <div style="font-weight:500; font-size:13px;">${profile.email || 'N/A'}</div>
+                    </div>
+                    <div style="padding:12px; border-bottom:1px solid #eee;">
+                        <div style="font-size:11px; color:#999; margin-bottom:4px; font-weight:600;">PORTFOLIO VALUE</div>
+                        <div style="font-weight:600; color:#2E5BFF; font-size:15px;">₹${profile.total_portfolio_value?.toFixed(2) || '0.00'}</div>
+                    </div>
+                    <div style="padding:12px;">
+                        <div style="font-size:11px; color:#999; margin-bottom:4px; font-weight:600;">MEMBER SINCE</div>
+                        <div style="font-weight:500; font-size:13px;">${profile.created_at ? new Date(profile.created_at).toLocaleDateString() : 'N/A'}</div>
                     </div>
                 </div>
             `;
 
-            const profileContainer = document.getElementById('profile-container') || 
-                document.querySelector('#profile-screen');
+            const profileContainer = document.getElementById('profile-container');
             if (profileContainer) {
                 profileContainer.innerHTML = profileHTML;
             }
@@ -2338,12 +2822,82 @@
         }
 
         // ========== UI FUNCTIONS ==========
-        function showModal(id) {
-            document.getElementById(id)?.classList.add('active');
+        function showModal(id, tradeType = null) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            
+            modal.classList.add('active');
+            
+            // If it's the trade modal and a trade type is specified, set it
+            if (id === 'tradeModal' && tradeType) {
+                const tradeTypeSelect = document.getElementById('tradeType');
+                if (tradeTypeSelect) {
+                    tradeTypeSelect.value = tradeType;
+                }
+            }
+            
+            // Calculate trade total if trade modal
+            if (id === 'tradeModal') {
+                setTimeout(() => updateTradeTotal(), 100);
+            }
         }
 
         function closeModal(id) {
             document.getElementById(id)?.classList.remove('active');
+        }
+
+        // ========== DEBUG CONSOLE FUNCTIONS ==========
+        const debugLogs = [];
+        const MAX_DEBUG_LOGS = 50;
+
+        function addDebugLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            debugLogs.push({ message: logEntry, type });
+            if (debugLogs.length > MAX_DEBUG_LOGS) {
+                debugLogs.shift();
+            }
+            
+            updateDebugConsoleDisplay();
+        }
+
+        function updateDebugConsoleDisplay() {
+            const console = document.getElementById('trade-debug-console');
+            if (!console) return;
+
+            let html = '';
+            debugLogs.forEach(log => {
+                let color = '#00ff00';
+                if (log.type === 'error') color = '#ff3333';
+                else if (log.type === 'warning') color = '#ffcc00';
+                else if (log.type === 'success') color = '#33ff33';
+                
+                html += `<div style="color:${color};">${log.message}</div>`;
+            });
+
+            console.innerHTML = html;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function toggleDebugConsole() {
+            const console = document.getElementById('trade-debug-console');
+            const toggle = document.getElementById('debugToggleText');
+            
+            if (console.style.display === 'none') {
+                console.style.display = 'block';
+                toggle.textContent = 'Hide';
+                addDebugLog('📂 Debug console opened', 'info');
+            } else {
+                console.style.display = 'none';
+                toggle.textContent = 'Show';
+            }
+        }
+
+        function clearDebugLogs() {
+            debugLogs.length = 0;
+            updateDebugConsoleDisplay();
+            addDebugLog('🗑️ Debug logs cleared', 'info');
         }
 
         function switchScreen(index) {
@@ -2361,7 +2915,11 @@
                     loadWalletData();
                     loadUserProfile();
                 }
-                if (index === 1) loadCandleData('RELIANCE-CE-2900');  // Charts
+                if (index === 1) {
+                    // Charts - load selected symbol
+                    const symbol = document.getElementById('symbolSelect')?.value || 'RELIANCE-CE-2900';
+                    loadCandleData(symbol);
+                }
                 if (index === 2) loadWalletData();                     // Portfolio
                 if (index === 3) loadAlertsData();                     // Alerts
                 if (index === 4) loadUserProfile();                    // Profile
@@ -2472,6 +3030,74 @@
                 console.log('debugWebSocket.help() - Show this help');
                 console.log('%c=== Example ===', 'color: #FF9800; font-size: 12px;');
                 console.log('In browser console, type: debugWebSocket.help()');
+            }
+        };
+
+        // Add trading debug functions
+        window.debugTrading = {
+            refreshWallet: async () => {
+                console.log('🔄 Refreshing wallet...');
+                const wallet = await loadWalletData();
+                console.log('💼 Current wallet:', wallet);
+                return wallet;
+            },
+            checkBalance: async () => {
+                if (!token) {
+                    console.error('❌ No token available');
+                    return;
+                }
+                try {
+                    const response = await fetch(`${API_BASE}/trading/wallet`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const wallet = await response.json();
+                    console.log('💵 Wallet Data:', {
+                        totalBalance: wallet.total_balance,
+                        availableCash: wallet.available_cash,
+                        positionsCount: Object.keys(wallet.positions || {}).length,
+                        positions: wallet.positions
+                    });
+                    // Also display in console in a nicer format
+                    if (wallet.positions && Object.keys(wallet.positions).length > 0) {
+                        console.log('%c📊 Your Holdings:', 'color: #4CAF50; font-weight: bold; font-size: 14px;');
+                        for (const [symbol, pos] of Object.entries(wallet.positions)) {
+                            console.log(`  ${symbol}: ${pos.quantity} units @ ₹${pos.average_cost.toFixed(2)}`);
+                            if (pos.current_price) {
+                                console.log(`    Current: ₹${pos.current_price.toFixed(2)}, P&L: ₹${(pos.unrealized_pnl || 0).toFixed(2)}`);
+                            }
+                        }
+                    }
+                    return wallet;
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                }
+            },
+            testTrade: async () => {
+                console.log('🧪 Testing trade execution...');
+                const success = await executeTrade('RELIANCE-CE-2900', 10, 100, 'BUY');
+                console.log('✅ Trade result:', success);
+            },
+            showPortfolio: () => {
+                const container = document.getElementById('holdings-container');
+                if (container) {
+                    console.log('📋 Holdings HTML:', container.innerHTML);
+                } else {
+                    console.error('❌ Holdings container not found');
+                }
+            },
+            help: () => {
+                console.log('%c=== Trading Debug Commands ===', 'color: #4CAF50; font-size: 14px; font-weight: bold;');
+                console.log('debugTrading.checkBalance() - Check current wallet balance and holdings');
+                console.log('debugTrading.refreshWallet() - Refresh wallet from server');
+                console.log('debugTrading.testTrade() - Execute a test BUY trade');
+                console.log('debugTrading.showPortfolio() - Show portfolio HTML content');
+                console.log('debugTrading.help() - Show this help');
+                console.log('%c=== Usage ===', 'color: #FF9800; font-size: 12px;');
+                console.log('In browser F12 console, type: debugTrading.help()');
             }
         };
     </script>

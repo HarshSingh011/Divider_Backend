@@ -8,6 +8,7 @@ import (
 
 type WalletServiceImpl struct {
 	transactionRepo TransactionRepository
+	marketEngine    *MarketEngine
 	mu              sync.RWMutex
 }
 
@@ -15,6 +16,10 @@ func NewWalletService(transactionRepo TransactionRepository) *WalletServiceImpl 
 	return &WalletServiceImpl{
 		transactionRepo: transactionRepo,
 	}
+}
+
+func (ws *WalletServiceImpl) SetMarketEngine(engine *MarketEngine) {
+	ws.marketEngine = engine
 }
 
 func (ws *WalletServiceImpl) ExecuteTrade(userID, symbol string, quantity, price float64, tradeType string) error {
@@ -94,6 +99,16 @@ func (ws *WalletServiceImpl) GetWalletSnapshot(userID string) (*WalletSnapshot, 
 		return nil, fmt.Errorf("failed to fetch transactions: %w", err)
 	}
 
+	// Get current market prices
+	var currentPrices map[string]float64
+	if ws.marketEngine != nil {
+		currentPrices = make(map[string]float64)
+		prices := ws.marketEngine.GetCurrentPrices()
+		for _, tick := range prices {
+			currentPrices[tick.Symbol] = tick.CurrentPrice
+		}
+	}
+
 	availableCash := 100000.0
 	positions := make(map[string]Position)
 
@@ -139,10 +154,40 @@ func (ws *WalletServiceImpl) GetWalletSnapshot(userID string) (*WalletSnapshot, 
 		}
 	}
 
+	// Calculate current prices, PnL, and percentages for all positions
+	if currentPrices != nil {
+		for symbol, pos := range positions {
+			if currentPrice, ok := currentPrices[symbol]; ok {
+				pos.CurrentPrice = currentPrice
+				// Calculate unrealized PnL
+				costBasis := pos.AverageCost * pos.Quantity
+				currentValue := currentPrice * pos.Quantity
+				pos.UnrealizedPnL = currentValue - costBasis
+				// Calculate percentage change
+				if costBasis > 0 {
+					pos.Percentage = (pos.UnrealizedPnL / costBasis) * 100
+				}
+				positions[symbol] = pos
+			}
+		}
+	} else {
+		// If market engine not available, use average cost as current price
+		for symbol, pos := range positions {
+			pos.CurrentPrice = pos.AverageCost
+			pos.UnrealizedPnL = 0
+			pos.Percentage = 0
+			positions[symbol] = pos
+		}
+	}
+
 	totalBalance := availableCash
 	for symbol := range positions {
 		pos := positions[symbol]
-		totalBalance += (pos.AverageCost * pos.Quantity)
+		if pos.CurrentPrice > 0 {
+			totalBalance += (pos.CurrentPrice * pos.Quantity)
+		} else {
+			totalBalance += (pos.AverageCost * pos.Quantity)
+		}
 	}
 
 	snapshot := &WalletSnapshot{
