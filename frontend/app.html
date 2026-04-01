@@ -2379,6 +2379,12 @@
 
             // If token exists but trying to access without loading, load the data
             if (token) {
+                if (index === 0) {
+                    // Home screen - connect WebSocket
+                    setTimeout(() => connectWebSocket(), 500);
+                    loadWalletData();
+                    loadUserProfile();
+                }
                 if (index === 1) loadCandleData('RELIANCE-CE-2900');  // Charts
                 if (index === 2) loadWalletData();                     // Portfolio
                 if (index === 3) loadAlertsData();                     // Alerts
