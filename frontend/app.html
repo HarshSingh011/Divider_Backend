@@ -722,8 +722,8 @@
         <div class="app-content" id="home-screen">
             <div class="header">
                 <div class="header-title">Total Balance</div>
-                <div class="header-balance">$99,698</div>
-                <div class="header-change">▲ +$1,500 today</div>
+                <div class="header-balance" id="home-balance">💿 Loading...</div>
+                <div class="header-change" id="home-change">📊 Loading...</div>
             </div>
 
             <!-- WebSocket Debug Panel -->
@@ -742,44 +742,9 @@
 
             <div class="section">
                 <div class="section-title">💹 Live Prices</div>
-                
-                <div class="price-item up">
-                    <div class="price-left">
-                        <div class="price-symbol">RELIANCE</div>
-                        <div class="price-value">$102.50</div>
-                    </div>
-                    <div class="price-right">
-                        <div class="price-change up">▲ +2.45%</div>
-                    </div>
-                </div>
-
-                <div class="price-item down">
-                    <div class="price-left">
-                        <div class="price-symbol">HDFC</div>
-                        <div class="price-value">$95.20</div>
-                    </div>
-                    <div class="price-right">
-                        <div class="price-change down">▼ -1.02%</div>
-                    </div>
-                </div>
-
-                <div class="price-item up">
-                    <div class="price-left">
-                        <div class="price-symbol">INFY</div>
-                        <div class="price-value">$62.75</div>
-                    </div>
-                    <div class="price-right">
-                        <div class="price-change up">▲ +0.52%</div>
-                    </div>
-                </div>
-
-                <div class="price-item up">
-                    <div class="price-left">
-                        <div class="price-symbol">TCS</div>
-                        <div class="price-value">$85.30</div>
-                    </div>
-                    <div class="price-right">
-                        <div class="price-change up">▲ +1.18%</div>
+                <div id="prices-container" style="padding:15px;">
+                    <div style="text-align:center; padding:20px; color:#999;">
+                        ⏳ Loading live prices from WebSocket...
                     </div>
                 </div>
             </div>
@@ -1989,7 +1954,19 @@
         }
 
         function updatePortfolioUI(wallet) {
-            // Update balance display
+            // Update home screen balance display
+            if (document.getElementById('home-balance')) {
+                document.getElementById('home-balance').textContent = `₹${wallet.available_cash?.toFixed(2) || '0.00'}`;
+            }
+            if (document.getElementById('home-change')) {
+                const totalPnl = wallet.total_balance - wallet.available_cash;
+                const changeIcon = totalPnl >= 0 ? '▲' : '▼';
+                const changeColor = totalPnl >= 0 ? '#4CAF50' : '#F44336';
+                document.getElementById('home-change').textContent = `${changeIcon} ${changeIcon === '▲' ? '+' : ''}₹${totalPnl?.toFixed(2) || '0.00'}`;
+                document.getElementById('home-change').style.color = changeColor;
+            }
+
+            // Update balance display in portfolio screen
             const balanceElements = document.querySelectorAll('#portfolio-screen [style*="font-size: 24px"]');
             if (balanceElements[0]) {
                 balanceElements[0].textContent = `₹${wallet.available_cash?.toFixed(2) || '0.00'}`;
@@ -2337,25 +2314,24 @@
             // Update prices on home screen
             if (!Array.isArray(marketData)) return;
 
-            let pricesHTML = '<div style="padding:15px;">';
-            marketData.slice(0, 8).forEach(stock => {
+            let pricesHTML = '';
+            marketData.slice(0, 4).forEach(stock => {
                 const changeColor = stock.percentageChange >= 0 ? '#4CAF50' : '#F44336';
+                const changeIcon = stock.percentageChange >= 0 ? '📈' : '📉';
                 pricesHTML += `
-                    <div style="display:flex; justify-content:space-between; padding:12px; margin-bottom:8px; background:white; border-radius:8px;">
-                        <div>
-                            <div style="font-weight:600;">${stock.symbol}</div>
-                            <div style="font-size:12px; color:#666;">₹${stock.currentPrice?.toFixed(2)}</div>
+                    <div class="price-item ${stock.percentageChange >= 0 ? 'up' : 'down'}">
+                        <div class="price-left">
+                            <div class="price-symbol">${stock.symbol}</div>
+                            <div class="price-value">₹${stock.currentPrice?.toFixed(2) || '0.00'}</div>
                         </div>
-                        <div style="text-align:right; color:${changeColor}; font-weight:600;">
-                            ${stock.percentageChange >= 0 ? '📈' : '📉'} ${(stock.percentageChange || 0).toFixed(2)}%
+                        <div class="price-right">
+                            <div class="price-change ${stock.percentageChange >= 0 ? 'up' : 'down'}">${changeIcon} ${(stock.percentageChange || 0).toFixed(2)}%</div>
                         </div>
                     </div>
                 `;
             });
-            pricesHTML += '</div>';
 
-            const pricesContainer = document.getElementById('prices-container') || 
-                document.querySelector('#home-screen [style*="Market"]');
+            const pricesContainer = document.getElementById('prices-container');
             if (pricesContainer) {
                 pricesContainer.innerHTML = pricesHTML;
             }
