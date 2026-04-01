@@ -102,9 +102,6 @@ func (c *Container) Start() error {
 
 	c.WebSocketHub.Start()
 
-	if c.DB != nil {
-		c.DB.Close()
-	}
 	go func() {
 		for marketData := range c.MarketEngine.Subscribe() {
 			c.WebSocketHub.Broadcast(marketData)

@@ -1769,20 +1769,27 @@
                     let errorData = null;
                     
                     try {
-                        errorData = await response.json();
+                        const responseCopy = response.clone();
+                        errorData = await responseCopy.json();
                         errorText = errorData.message || errorData.error || JSON.stringify(errorData);
                         logDebug(`📄 Error Response (JSON): ${errorText}`);
                     } catch (parseErr) {
-                        errorText = await response.text();
-                        logDebug(`📄 Error Response (Text): ${errorText}`);
+                        try {
+                            const responseCopy2 = response.clone();
+                            errorText = await responseCopy2.text();
+                            logDebug(`📄 Error Response (Text): ${errorText}`);
+                        } catch (textErr) {
+                            errorText = 'Unable to parse error response';
+                            logDebug(`📄 Error Response: Unable to parse`);
+                        }
                     }
                     
                     logDebug('');
                     logDebug('--- ERROR ANALYSIS ---');
                     
                     if (response.status === 401 || response.status === 400) {
-                        logDebug(`🔒 Auth Error (${response.status}): Invalid credentials`);
-                        showLoginError('Invalid email or password');
+                        logDebug(`🔒 Auth Error (${response.status}): Invalid credentials or user not found`);
+                        showLoginError('Invalid email or password, or account not registered');
                     } else if (response.status === 500) {
                         logDebug('💥 Server Error (500): Backend is throwing errors');
                         logDebug('💡 Suggestion: Check backend logs on Render dashboard');
