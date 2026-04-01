@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"stocktrack-backend/internal/domain"
 )
@@ -24,8 +25,32 @@ func isValidEmail(email string) bool {
 }
 
 func isValidPassword(password string) bool {
-	passwordRegex := regexp.MustCompile(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[a-zA-Z\d@$!%*?&]{8,}$`)
-	return passwordRegex.MatchString(password)
+	// Check minimum length
+	if len(password) < 8 {
+		return false
+	}
+
+	hasLower := false
+	hasUpper := false
+	hasDigit := false
+	hasSpecial := false
+
+	specialChars := "@$!%*?&"
+
+	for _, char := range password {
+		switch {
+		case char >= 'a' && char <= 'z':
+			hasLower = true
+		case char >= 'A' && char <= 'Z':
+			hasUpper = true
+		case char >= '0' && char <= '9':
+			hasDigit = true
+		case rune(char) >= 0 && strings.ContainsRune(specialChars, char):
+			hasSpecial = true
+		}
+	}
+
+	return hasLower && hasUpper && hasDigit && hasSpecial
 }
 
 func isValidUsername(username string) bool {
