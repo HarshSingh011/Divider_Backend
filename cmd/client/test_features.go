@@ -40,7 +40,7 @@ type DepositRequest struct {
 }
 
 func main() {
-	baseURL := "http://localhost:8080"
+	baseURL := "https://divider-backend.onrender.com"
 
 	fmt.Println("\n════════════════════════════════════════════════════════════")
 	fmt.Println("🚀 StockTrack Trading Platform - Feature Demonstration")
@@ -240,7 +240,7 @@ func getCandles(baseURL, symbol string, limit int) ([]map[string]interface{}, er
 }
 
 func connectToWebSocket(token string) error {
-	wsURL := fmt.Sprintf("ws://localhost:8080/ws?token=%s", token)
+	wsURL := fmt.Sprintf("wss://divider-backend.onrender.com/ws?token=%s", token)
 
 	dialer := websocket.Dialer{
 		HandshakeTimeout: 5 * time.Second,

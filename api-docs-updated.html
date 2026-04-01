@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockTrack API Documentation - Complete Reference</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2E5BFF 0%, #1e40ff 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-right: 10px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2E5BFF;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #2E5BFF;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            font-size: 32px;
+        }
+
+        .endpoint-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .endpoint-card:hover {
+            box-shadow: 0 8px 24px rgba(46, 91, 255, 0.15);
+            border-color: #2E5BFF;
+        }
+
+        .endpoint-header {
+            background: #f0f4ff;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .method-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .method-get {
+            background: #4CAF50;
+        }
+
+        .method-post {
+            background: #2196F3;
+        }
+
+        .method-put {
+            background: #FF9800;
+        }
+
+        .method-delete {
+            background: #F44336;
+        }
+
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e40ff;
+            flex: 1;
+            word-break: break-all;
+        }
+
+        .endpoint-auth {
+            background: #fff3cd;
+            color: #856404;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .endpoint-body {
+            padding: 20px;
+        }
+
+        .endpoint-description {
+            margin-bottom: 20px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .code-section {
+            margin-bottom: 20px;
+        }
+
+        .code-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2E5BFF;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            line-height: 1.6;
+            border-left: 4px solid #2E5BFF;
+        }
+
+        .code-block.response {
+            border-left-color: #4CAF50;
+        }
+
+        .code-block.error {
+            border-left-color: #F44336;
+        }
+
+        .field-list {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .field-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .field-item:last-child {
+            border-bottom: none;
+        }
+
+        .field-name {
+            font-weight: 600;
+            color: #2E5BFF;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .field-type {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .field-required {
+            color: #F44336;
+            font-weight: 700;
+        }
+
+        .field-description {
+            color: #666;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .status-code {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .status-code.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .toc {
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .toc-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2E5BFF;
+            margin-bottom: 15px;
+        }
+
+        .toc-section {
+            margin-bottom: 15px;
+        }
+
+        .toc-section-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .toc-item {
+            margin-left: 20px;
+            padding: 5px 0;
+        }
+
+        .toc-item a {
+            color: #2E5BFF;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .toc-item a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            background: #f5f5f5;
+            padding: 25px 40px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .base-url {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #1565c0;
+        }
+
+        .note {
+            background: #fff9c4;
+            border-left: 4px solid #FBC02D;
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .success-note {
+            background: #e8f5e9;
+            border-left-color: #4CAF50;
+            color: #2e7d32;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📈 StockTrack API Documentation</h1>
+            <p>Complete API Reference with Request & Response Examples</p>
+            <div>
+                <span class="version-badge">Version 1.0</span>
+                <span class="version-badge">Updated: April 2026</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Table of Contents -->
+            <div class="toc">
+                <div class="toc-title">📑 Quick Navigation</div>
+                <div class="toc-section">
+                    <div class="toc-section-name">🏠 Home Screen</div>
+                    <div class="toc-item"><a href="#auth">Authentication APIs</a></div>
+                </div>
+                <div class="toc-section">
+                    <div class="toc-section-name">📊 Charts Screen</div>
+                    <div class="toc-item"><a href="#candles">Candlestick (OHLC) APIs</a></div>
+                </div>
+                <div class="toc-section">
+                    <div class="toc-section-name">💼 Portfolio Screen</div>
+                    <div class="toc-item"><a href="#trading">Trading APIs</a></div>
+                    <div class="toc-item"><a href="#wallet">Wallet APIs</a></div>
+                </div>
+                <div class="toc-section">
+                    <div class="toc-section-name">🚨 Alerts Screen</div>
+                    <div class="toc-item"><a href="#alerts">Alert Management APIs</a></div>
+                </div>
+                <div class="toc-section">
+                    <div class="toc-section-name">👤 Profile Screen</div>
+                    <div class="toc-item"><a href="#profile">Profile APIs</a></div>
+                </div>
+            </div>
+
+            <div class="base-url">
+                🔗 Base URL: https://divider-backend.onrender.com
+            </div>
+
+            <!-- SECTION 1: HOME SCREEN - AUTHENTICATION -->
+            <div class="section" id="auth">
+                <div class="section-title">
+                    <span class="section-icon">🏠</span>
+                    Home Screen - Authentication
+                </div>
+
+                <!-- Health Check -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-url">/health</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Check if the API server is running and healthy. No authentication required.
+                        </div>
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+{
+  "status": "OK"
+}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Register -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-post">POST</span>
+                        <span class="endpoint-url">/auth/register</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Create a new user account. Validates email format, password strength, and username format.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Body</div>
+                            <div class="field-list">
+                                <div class="field-item">
+                                    <span class="field-name">email</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Valid email address (e.g., user@example.com)</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">username</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">3-20 characters, letters/numbers/hyphens/underscores only</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">password</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Min 8 chars: uppercase, lowercase, number, special char (@$!%*?&)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Example</div>
+                            <div class="code-block">
+curl -X POST https://divider-backend.onrender.com/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john.doe@example.com",
+    "username": "john_doe",
+    "password": "SecurePass123!"
+  }'
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (201 Created)</div>
+                            <div class="code-block response">
+{
+  "id": "usr_12345abcde",
+  "email": "john.doe@example.com",
+  "username": "john_doe",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "created_at": "2026-04-01T10:30:00Z"
+}
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Error Responses</div>
+                            <div class="code-block error">
+400 Bad Request - Invalid email format
+{
+  "error": "Invalid email format. Example: user@example.com"
+}
+                            </div>
+                            <div class="code-block error" style="margin-top: 10px;">
+400 Bad Request - Weak password
+{
+  "error": "Password must be at least 8 characters and contain uppercase, lowercase, number, and special character (@$!%*?&)"
+}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Login -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-post">POST</span>
+                        <span class="endpoint-url">/auth/login</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Authenticate user and receive JWT token for protected endpoints.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Body</div>
+                            <div class="field-list">
+                                <div class="field-item">
+                                    <span class="field-name">email</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Registered email address</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">password</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Account password</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Example</div>
+                            <div class="code-block">
+curl -X POST https://divider-backend.onrender.com/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john.doe@example.com",
+    "password": "SecurePass123!"
+  }'
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+{
+  "id": "usr_12345abcde",
+  "email": "john.doe@example.com",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "authenticated": true
+}
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Error Response</div>
+                            <div class="code-block error">
+401 Unauthorized - Invalid credentials
+{
+  "error": "invalid email or password"
+}
+                            </div>
+                        </div>
+
+                        <div class="note">
+                            💡 <strong>Save the token!</strong> Use it in the Authorization header for all protected endpoints:
+                            <div style="margin-top: 8px; font-family: monospace; font-size: 12px;">
+                                Authorization: Bearer &lt;your_token_here&gt;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: CHARTS SCREEN - CANDLESTICKS -->
+            <div class="section" id="candles">
+                <div class="section-title">
+                    <span class="section-icon">📊</span>
+                    Charts Screen - Candlestick (OHLC) Data
+                </div>
+
+                <!-- Get Candles -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-url">/trading/candles</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Retrieve OHLC (Open, High, Low, Close) candlestick data for a specific stock symbol. Data is aggregated in 1-minute intervals.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Query Parameters</div>
+                            <div class="field-list">
+                                <div class="field-item">
+                                    <span class="field-name">symbol</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Stock symbol (e.g., RELIANCE-CE-2900, INFY-CE-1500)</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">limit</span>
+                                    <span class="field-type">integer</span>
+                                    <div class="field-description">Number of candles to return (default: 50, max: 200)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Example</div>
+                            <div class="code-block">
+curl -X GET "https://divider-backend.onrender.com/trading/candles?symbol=RELIANCE-CE-2900&limit=10"
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+[
+  {
+    "symbol": "RELIANCE-CE-2900",
+    "open": 45.20,
+    "high": 47.80,
+    "low": 44.90,
+    "close": 47.50,
+    "volume": 125000,
+    "timestamp": "2026-04-01T10:35:00Z"
+  },
+  {
+    "symbol": "RELIANCE-CE-2900",
+    "open": 47.50,
+    "high": 49.10,
+    "low": 47.30,
+    "close": 48.90,
+    "volume": 98500,
+    "timestamp": "2026-04-01T10:36:00Z"
+  }
+]
+                            </div>
+                        </div>
+
+                        <div class="note success-note">
+                            ✅ <strong>Display Tip:</strong> Use this data to render candlestick/bar charts on the Charts screen showing price movements over time.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: PORTFOLIO SCREEN - TRADING & WALLET -->
+            <div class="section" id="trading">
+                <div class="section-title">
+                    <span class="section-icon">💼</span>
+                    Portfolio Screen - Trading & Transactions
+                </div>
+
+                <!-- Execute Trade -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-post">POST</span>
+                        <span class="endpoint-url">/trading/trade</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Execute a BUY or SELL trade. Updates wallet, records transaction in immutable ledger, and updates portfolio.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Body</div>
+                            <div class="field-list">
+                                <div class="field-item">
+                                    <span class="field-name">symbol</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Stock symbol (e.g., RELIANCE-CE-2900)</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">quantity</span>
+                                    <span class="field-type">number</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Number of units to buy/sell</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">price</span>
+                                    <span class="field-type">number</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Price per unit</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">type</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Either "BUY" or "SELL"</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Example</div>
+                            <div class="code-block">
+curl -X POST https://divider-backend.onrender.com/trading/trade \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "symbol": "RELIANCE-CE-2900",
+    "quantity": 10,
+    "price": 45.50,
+    "type": "BUY"
+  }'
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+{
+  "transaction_id": "txn_abc123def456",
+  "symbol": "RELIANCE-CE-2900",
+  "type": "BUY",
+  "quantity": 10,
+  "price": 45.50,
+  "amount": 455.00,
+  "fee": 2.275,
+  "total": 457.275,
+  "remaining_cash": 49542.725,
+  "timestamp": "2026-04-01T10:30:00Z"
+}
+                            </div>
+                        </div>
+
+                        <div class="note">
+                            📌 <strong>Fee Calculation:</strong> Automatically deducted at 0.5% of transaction amount (amount × 0.005)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deposit Cash -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-post">POST</span>
+                        <span class="endpoint-url">/trading/deposit</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Deposit cash into wallet. Creates a deposit transaction in the immutable ledger.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Body</div>
+                            <div class="field-list">
+                                <div class="field-item">
+                                    <span class="field-name">amount</span>
+                                    <span class="field-type">number</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Amount to deposit (in rupees)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Example</div>
+                            <div class="code-block">
+curl -X POST https://divider-backend.onrender.com/trading/deposit \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "amount": 50000
+  }'
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+{
+  "deposit_id": "dep_xyz789",
+  "amount": 50000,
+  "previous_balance": 0,
+  "new_balance": 50000,
+  "timestamp": "2026-04-01T10:25:00Z"
+}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="wallet">
+                <div class="section-title">
+                    <span class="section-icon">💰</span>
+                    Portfolio Screen - Wallet Status
+                </div>
+
+                <!-- Get Wallet Snapshot -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-url">/trading/wallet</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Get current wallet status including available cash, holdings, and total balance.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Example</div>
+                            <div class="code-block">
+curl -X GET https://divider-backend.onrender.com/trading/wallet \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+{
+  "user_id": "usr_12345abcde",
+  "available_cash": 42500.50,
+  "invested": 7499.50,
+  "total_value": 49999.00,
+  "total_balance": 49999.00,
+  "holdings": [
+    {
+      "symbol": "RELIANCE-CE-2900",
+      "quantity": 10,
+      "average_price": 45.50,
+      "current_value": 475.00,
+      "pnl": -5.50
+    },
+    {
+      "symbol": "INFY-CE-1500",
+      "quantity": 5,
+      "average_price": 62.75,
+      "current_value": 312.50,
+      "pnl": 12.50
+    }
+  ],
+  "currency": "INR"
+}
+                            </div>
+                        </div>
+
+                        <div class="note success-note">
+                            ✅ <strong>Display on Portfolio Screen:</strong> Show available_cash, total_value, and list all holdings with their P&L.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: ALERTS SCREEN -->
+            <div class="section" id="alerts">
+                <div class="section-title">
+                    <span class="section-icon">🚨</span>
+                    Alerts Screen - Price Alerts
+                </div>
+
+                <!-- Create Alert -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-post">POST</span>
+                        <span class="endpoint-url">/trading/alerts</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Create a price alert for a stock. Alert triggers when price goes ABOVE or BELOW threshold.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Body</div>
+                            <div class="field-list">
+                                <div class="field-item">
+                                    <span class="field-name">symbol</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Stock symbol</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">price</span>
+                                    <span class="field-type">number</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Threshold price</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">condition</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Either "ABOVE" or "BELOW"</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Example</div>
+                            <div class="code-block">
+curl -X POST https://divider-backend.onrender.com/trading/alerts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "symbol": "RELIANCE-CE-2900",
+    "price": 50.00,
+    "condition": "ABOVE"
+  }'
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (201 Created)</div>
+                            <div class="code-block response">
+{
+  "alert_id": "alrt_abc123",
+  "user_id": "usr_12345abcde",
+  "symbol": "RELIANCE-CE-2900",
+  "threshold_price": 50.00,
+  "condition": "ABOVE",
+  "is_active": true,
+  "created_at": "2026-04-01T10:30:00Z"
+}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Get User Alerts -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-url">/trading/alerts</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Retrieve all alerts for the current user (active and triggered).
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Example</div>
+                            <div class="code-block">
+curl -X GET https://divider-backend.onrender.com/trading/alerts \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+[
+  {
+    "alert_id": "alrt_abc123",
+    "symbol": "RELIANCE-CE-2900",
+    "threshold_price": 50.00,
+    "condition": "ABOVE",
+    "is_active": true,
+    "created_at": "2026-04-01T10:30:00Z"
+  },
+  {
+    "alert_id": "alrt_def456",
+    "symbol": "HDFC-PE-1400",
+    "threshold_price": 10.00,
+    "condition": "BELOW",
+    "is_active": true,
+    "created_at": "2026-04-01T10:32:00Z"
+  }
+]
+                            </div>
+                        </div>
+
+                        <div class="note success-note">
+                            ✅ <strong>Display on Alerts Screen:</strong> Show list of all active alerts with symbol, threshold, and condition.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: PROFILE SCREEN -->
+            <div class="section" id="profile">
+                <div class="section-title">
+                    <span class="section-icon">👤</span>
+                    Profile Screen - User Information
+                </div>
+
+                <!-- Get Profile -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-url">/user/profile</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Get current user's profile information including account details and statistics.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Example</div>
+                            <div class="code-block">
+curl -X GET https://divider-backend.onrender.com/user/profile \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+{
+  "id": "usr_12345abcde",
+  "email": "john.doe@example.com",
+  "username": "john_doe",
+  "full_name": "John Doe",
+  "phone": "+91-XXXXXXXXXX",
+  "total_trades": 15,
+  "total_portfolio_value": 49999.00,
+  "win_rate": 65.5,
+  "created_at": "2026-03-15T08:00:00Z",
+  "updated_at": "2026-04-01T10:30:00Z"
+}
+                            </div>
+                        </div>
+
+                        <div class="note success-note">
+                            ✅ <strong>Display on Profile Screen:</strong> Show user email, username, portfolio value, and trading statistics.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Update Profile -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-put">PUT</span>
+                        <span class="endpoint-url">/user/profile</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Update user profile information (all fields optional).
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Body (All Optional)</div>
+                            <div class="field-list">
+                                <div class="field-item">
+                                    <span class="field-name">full_name</span>
+                                    <span class="field-type">string</span>
+                                    <div class="field-description">User's full name</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">phone</span>
+                                    <span class="field-type">string</span>
+                                    <div class="field-description">Phone number</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">bio</span>
+                                    <span class="field-type">string</span>
+                                    <div class="field-description">User bio/about section</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Example</div>
+                            <div class="code-block">
+curl -X PUT https://divider-backend.onrender.com/user/profile \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "full_name": "John Doe",
+    "phone": "+91-9876543210",
+    "bio": "Experienced trader with 5+ years in derivatives"
+  }'
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+{
+  "success": true,
+  "message": "Profile updated successfully",
+  "user": {
+    "id": "usr_12345abcde",
+    "email": "john.doe@example.com",
+    "username": "john_doe",
+    "full_name": "John Doe",
+    "phone": "+91-9876543210",
+    "bio": "Experienced trader with 5+ years in derivatives",
+    "updated_at": "2026-04-01T10:35:00Z"
+  }
+}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Get Sessions -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-url">/user/sessions</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Get list of active sessions for the user.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+[
+  {
+    "session_id": "sess_abc123",
+    "device": "Chrome on Windows",
+    "ip_address": "192.168.1.100",
+    "created_at": "2026-04-01T10:00:00Z",
+    "last_active": "2026-04-01T10:35:00Z"
+  }
+]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logout -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-post">POST</span>
+                        <span class="endpoint-url">/user/logout</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Logout the current user and invalidate the JWT token.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+{
+  "success": true,
+  "message": "Logged out successfully"
+}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WebSocket API -->
+            <div class="section">
+                <div class="section-title">
+                    <span class="section-icon">🔄</span>
+                    Real-Time Updates - WebSocket API
+                </div>
+
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge" style="background: #9C27B0;">WS</span>
+                        <span class="endpoint-url">ws://divider-backend.onrender.com/ws</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Real-time market data streaming via WebSocket. Connects with JWT token in query parameter.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Connection Example</div>
+                            <div class="code-block">
+// JavaScript
+const token = "YOUR_JWT_TOKEN";
+const ws = new WebSocket(
+  `wss://divider-backend.onrender.com/ws?token=${token}`
+);
+
+ws.onmessage = (event) => {
+  const marketData = JSON.parse(event.data);
+  // Update UI with real-time prices
+};
+
+ws.onerror = (error) => {
+  console.log("WebSocket error:", error);
+};
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Incoming Data (Real-Time Prices)</div>
+                            <div class="code-block response">
+[
+  {
+    "symbol": "RELIANCE-CE-2900",
+    "currentPrice": 48.75,
+    "volume": 125000,
+    "percentageChange": 2.35
+  },
+  {
+    "symbol": "INFY-CE-1500",
+    "currentPrice": 63.50,
+    "volume": 89500,
+    "percentageChange": -1.20
+  }
+]
+                            </div>
+                        </div>
+
+                        <div class="note success-note">
+                            ✅ <strong>Display on Home Screen:</strong> Use WebSocket data to show real-time price updates, volume, and percentage changes. Updates every 500ms.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            <p><strong>StockTrack API v1.0</strong> | Last updated: April 2026</p>
+            <p>All API responses use HTTP status codes. Authentication tokens expire after 24 hours.</p>
+            <p>For support or questions, contact: support@stocktrack.io</p>
+        </div>
+    </div>
+</body>
+</html>

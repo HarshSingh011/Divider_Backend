@@ -40,32 +40,48 @@ func main() {
 }
 
 func setupRoutes(c *Container) {
-	http.HandleFunc("/auth/register", c.AuthHandler.Register)
-	http.HandleFunc("/auth/login", c.AuthHandler.Login)
+	// CORS middleware wrapper
+	corsHandler := func(handler http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-User-ID, X-Email, X-Username")
+			w.Header().Set("Access-Control-Max-Age", "3600")
 
-	http.HandleFunc("/health", c.AuthHandler.Health)
+			if r.Method == "OPTIONS" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
 
-	http.HandleFunc("/trading/trade", c.AuthMiddleware.Protect(c.TradingHandler.ExecuteTrade))
-	http.HandleFunc("/trading/wallet", c.AuthMiddleware.Protect(c.TradingHandler.GetWalletSnapshot))
-	http.HandleFunc("/trading/deposit", c.AuthMiddleware.Protect(c.TradingHandler.DepositCash))
-	http.HandleFunc("/trading/alerts", func(w http.ResponseWriter, r *http.Request) {
+			handler(w, r)
+		}
+	}
+
+	http.HandleFunc("/auth/register", corsHandler(c.AuthHandler.Register))
+	http.HandleFunc("/auth/login", corsHandler(c.AuthHandler.Login))
+	http.HandleFunc("/health", corsHandler(c.AuthHandler.Health))
+
+	http.HandleFunc("/trading/trade", corsHandler(c.AuthMiddleware.Protect(c.TradingHandler.ExecuteTrade)))
+	http.HandleFunc("/trading/wallet", corsHandler(c.AuthMiddleware.Protect(c.TradingHandler.GetWalletSnapshot)))
+	http.HandleFunc("/trading/deposit", corsHandler(c.AuthMiddleware.Protect(c.TradingHandler.DepositCash)))
+	http.HandleFunc("/trading/alerts", corsHandler(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			c.AuthMiddleware.Protect(c.TradingHandler.CreateAlert)(w, r)
 		} else if r.Method == "GET" {
 			c.AuthMiddleware.Protect(c.TradingHandler.GetUserAlerts)(w, r)
 		}
-	})
-	http.HandleFunc("/trading/candles", c.TradingHandler.GetCandles)
+	}))
+	http.HandleFunc("/trading/candles", corsHandler(c.TradingHandler.GetCandles))
 
-	http.HandleFunc("/user/profile", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/user/profile", corsHandler(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			c.AuthMiddleware.Protect(c.ProfileHandler.GetProfile)(w, r)
 		} else if r.Method == "PUT" {
 			c.AuthMiddleware.Protect(c.ProfileHandler.UpdateProfile)(w, r)
 		}
-	})
-	http.HandleFunc("/user/sessions", c.AuthMiddleware.Protect(c.ProfileHandler.GetSessions))
-	http.HandleFunc("/user/logout", c.AuthMiddleware.Protect(c.ProfileHandler.Logout))
+	}))
+	http.HandleFunc("/user/sessions", corsHandler(c.AuthMiddleware.Protect(c.ProfileHandler.GetSessions)))
+	http.HandleFunc("/user/logout", corsHandler(c.AuthMiddleware.Protect(c.ProfileHandler.Logout)))
 
 	http.HandleFunc("/ws", c.AuthMiddleware.ProtectWebSocket(c.WebSocketHub.Handler))
 }

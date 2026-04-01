@@ -77,19 +77,19 @@ func (h *ProfileHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	profile := UserProfile{
-		ID:                userID,
-		Username:          username,
-		Email:             email,
-		Phone:             generateFakePhoneNumber(userID),
-		BankAccount:       generateFakeBankAccount(userID),
-		BankAccountStatus: "Verified",
-		MemberSince:       time.Now().AddDate(-1, 0, 0),
-		IsVerified:        true,
-		Theme:             "Light",
+		ID:                 userID,
+		Username:           username,
+		Email:              email,
+		Phone:              generateFakePhoneNumber(userID),
+		BankAccount:        generateFakeBankAccount(userID),
+		BankAccountStatus:  "Verified",
+		MemberSince:        time.Now().AddDate(-1, 0, 0),
+		IsVerified:         true,
+		Theme:              "Light",
 		NotificationAlerts: true,
 		NotificationTrades: true,
-		NotificationNews:  false,
-		TwoFactorEnabled:  true,
+		NotificationNews:   false,
+		TwoFactorEnabled:   true,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -125,11 +125,11 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		"success": true,
 		"message": "Profile updated successfully",
 		"data": map[string]interface{}{
-			"theme":                  req.Theme,
-			"notification_alerts":    req.NotificationAlerts,
-			"notification_trades":    req.NotificationTrades,
-			"notification_news":      req.NotificationNews,
-			"two_factor_enabled":     true,
+			"theme":               req.Theme,
+			"notification_alerts": req.NotificationAlerts,
+			"notification_trades": req.NotificationTrades,
+			"notification_news":   req.NotificationNews,
+			"two_factor_enabled":  true,
 		},
 	}
 

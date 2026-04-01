@@ -113,7 +113,6 @@ func (r *PostgresUserRepository) Exists(email string) bool {
 	return exists == 1
 }
 
-
 type PostgresCandleRepository struct {
 	db *sql.DB
 }

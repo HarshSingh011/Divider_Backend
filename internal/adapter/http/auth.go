@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
 
 	"stocktrack-backend/internal/domain"
 )
@@ -17,6 +18,21 @@ func NewAuthHandler(authService domain.AuthService) *AuthHandler {
 	}
 }
 
+func isValidEmail(email string) bool {
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	return emailRegex.MatchString(email)
+}
+
+func isValidPassword(password string) bool {
+	passwordRegex := regexp.MustCompile(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[a-zA-Z\d@$!%*?&]{8,}$`)
+	return passwordRegex.MatchString(password)
+}
+
+func isValidUsername(username string) bool {
+	usernameRegex := regexp.MustCompile(`^[a-zA-Z0-9_-]{3,20}$`)
+	return usernameRegex.MatchString(username)
+}
+
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -26,6 +42,21 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req domain.AuthRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !isValidEmail(req.Email) {
+		http.Error(w, "Invalid email format. Example: user@example.com", http.StatusBadRequest)
+		return
+	}
+
+	if !isValidUsername(req.Username) {
+		http.Error(w, "Username must be 3-20 characters and contain only letters, numbers, hyphens, and underscores", http.StatusBadRequest)
+		return
+	}
+
+	if !isValidPassword(req.Password) {
+		http.Error(w, "Password must be at least 8 characters and contain uppercase, lowercase, number, and special character (@$!%*?&)", http.StatusBadRequest)
 		return
 	}
 
@@ -49,6 +80,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req domain.AuthRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if !isValidEmail(req.Email) {
+		http.Error(w, "Invalid email format", http.StatusBadRequest)
 		return
 	}
 
