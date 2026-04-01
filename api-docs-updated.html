@@ -363,7 +363,22 @@
                     <div class="toc-section-name">👤 Profile Screen</div>
                     <div class="toc-item"><a href="#profile">Profile APIs</a></div>
                 </div>
-            </div>
+                <div class="toc-section">
+                    <div class="toc-section-name">📈 Markets Screen</div>
+                    <div class="toc-item"><a href="#markets">Market Data APIs</a></div>
+                </div>
+                <div class="toc-section">
+                    <div class="toc-section-name">🤝 Trading Operations</div>
+                    <div class="toc-item"><a href="#buy-sell">Buy & Sell Stocks</a></div>
+                </div>
+                <div class="toc-section">
+                    <div class="toc-section-name">⚡ Real-Time</div>
+                    <div class="toc-item"><a href="#websocket-advanced">WebSocket Advanced</a></div>
+                </div>
+                <div class="toc-section">
+                    <div class="toc-section-name">⚠️ Support</div>
+                    <div class="toc-item"><a href="#errors">Error Codes & Troubleshooting</a></div>
+                </div>
 
             <div class="base-url">
                 🔗 Base URL: https://divider-backend.onrender.com
@@ -1125,66 +1140,515 @@ curl -X PUT https://divider-backend.onrender.com/user/profile \
                 </div>
             </div>
 
-            <!-- WebSocket API -->
-            <div class="section">
+            <!-- SECTION 6: MARKETS SCREEN -->
+            <div class="section" id="markets">
                 <div class="section-title">
-                    <span class="section-icon">🔄</span>
-                    Real-Time Updates - WebSocket API
+                    <span class="section-icon">📈</span>
+                    Markets Screen - Market Data
+                </div>
+
+                <!-- Get Market Data -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-url">/market/data</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Get current market data for all available stocks including current price, change, and volume.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Example</div>
+                            <div class="code-block">
+curl -X GET https://divider-backend.onrender.com/market/data \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+{
+  "data": {
+    "stocks": [
+      {
+        "symbol": "RELIANCE-CE-2900",
+        "current_price": 48.75,
+        "change": 2.25,
+        "change_percent": 4.84,
+        "volume": 125000,
+        "high": 49.50,
+        "low": 45.20,
+        "open": 46.50
+      },
+      {
+        "symbol": "HDFC-PE-1400",
+        "current_price": 38.90,
+        "change": -1.10,
+        "change_percent": -2.75,
+        "volume": 98500,
+        "high": 40.00,
+        "low": 37.80,
+        "open": 40.00
+      },
+      {
+        "symbol": "INFY-CE-1500",
+        "current_price": 63.50,
+        "change": -0.75,
+        "change_percent": -1.17,
+        "volume": 112300,
+        "high": 64.25,
+        "low": 62.80,
+        "open": 64.25
+      },
+      {
+        "symbol": "TCS-PE-3500",
+        "current_price": 102.30,
+        "change": 3.50,
+        "change_percent": 3.53,
+        "volume": 156200,
+        "high": 103.00,
+        "low": 99.80,
+        "open": 98.80
+      }
+    ]
+  },
+  "timestamp": "2026-04-01T10:35:00Z"
+}
+                            </div>
+                        </div>
+
+                        <div class="note success-note">
+                            ✅ <strong>Display on Markets Screen:</strong> Show all stocks with current price, daily change %, volume, and high/low. Green for gains, red for losses.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 7: BUYING & SELLING STOCKS -->
+            <div class="section" id="buy-sell">
+                <div class="section-title">
+                    <span class="section-icon">🤝</span>
+                    Trading Operations - Buy & Sell Stocks
+                </div>
+
+                <!-- BUY Stock -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-post">POST</span>
+                        <span class="endpoint-url">/trading/trade</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            <strong>Buy Stock:</strong> Purchase shares of a stock at specified price. Validates sufficient available cash, deducts fee (0.5%), and updates portfolio.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Body</div>
+                            <div class="field-list">
+                                <div class="field-item">
+                                    <span class="field-name">symbol</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Stock symbol to buy (e.g., RELIANCE-CE-2900)</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">quantity</span>
+                                    <span class="field-type">number</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Number of shares to buy (must be > 0)</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">price</span>
+                                    <span class="field-type">number</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Price per share (must be > 0)</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">type</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Must be "BUY"</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">BUY Request Example</div>
+                            <div class="code-block">
+curl -X POST https://divider-backend.onrender.com/trading/trade \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "symbol": "RELIANCE-CE-2900",
+    "quantity": 10,
+    "price": 48.75,
+    "type": "BUY"
+  }'
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK) - BUY</div>
+                            <div class="code-block response">
+{
+  "status": "Trade executed successfully",
+  "symbol": "RELIANCE-CE-2900",
+  "type": "BUY",
+  "quantity": 10,
+  "price": 48.75,
+  "total": 487.50,
+  "transaction_id": "txn_abc123def456",
+  "timestamp": "2026-04-01T10:35:00Z"
+}
+                            </div>
+                        </div>
+
+                        <div class="note">
+                            📌 <strong>BUY Order Flow:</strong><br>
+                            1. Validates available cash ≥ (quantity × price × 1.005)<br>
+                            2. Deducts amount from wallet<br>
+                            3. Creates transaction record<br>
+                            4. Updates portfolio with new holding
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SELL Stock -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-post">POST</span>
+                        <span class="endpoint-url">/trading/trade</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            <strong>Sell Stock:</strong> Sell shares from your portfolio at specified price. Validates sufficient holdings, deducts fee (0.5%), and credits to wallet.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Body (Same as BUY)</div>
+                            <div class="field-list">
+                                <div class="field-item">
+                                    <span class="field-name">symbol</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Stock symbol to sell (e.g., INFY-CE-1500)</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">quantity</span>
+                                    <span class="field-type">number</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Number of shares to sell (must ≤ holdings)</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">price</span>
+                                    <span class="field-type">number</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Price per share</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">type</span>
+                                    <span class="field-type">string</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Must be "SELL"</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">SELL Request Example</div>
+                            <div class="code-block">
+curl -X POST https://divider-backend.onrender.com/trading/trade \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "symbol": "INFY-CE-1500",
+    "quantity": 5,
+    "price": 63.50,
+    "type": "SELL"
+  }'
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK) - SELL</div>
+                            <div class="code-block response">
+{
+  "status": "Trade executed successfully",
+  "symbol": "INFY-CE-1500",
+  "type": "SELL",
+  "quantity": 5,
+  "price": 63.50,
+  "total": 317.50,
+  "transaction_id": "txn_xyz789abc123",
+  "timestamp": "2026-04-01T10:36:00Z"
+}
+                            </div>
+                        </div>
+
+                        <div class="note">
+                            📌 <strong>SELL Order Flow:</strong><br>
+                            1. Validates sufficient holdings (quantity in portfolio)<br>
+                            2. Calculates net proceeds = (quantity × price) - fee<br>
+                            3. Adds net proceeds to wallet<br>
+                            4. Creates transaction record<br>
+                            5. Updates portfolio, removes if quantity reaches 0
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Error Response (Insufficient Holdings)</div>
+                            <div class="code-block error">
+400 Bad Request - Not enough holdings
+{
+  "error": "insufficient holdings: need 20 units but only have 15"
+}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 8: WEBSOCKET - ADVANCED -->
+            <div class="section" id="websocket-advanced">
+                <div class="section-title">
+                    <span class="section-icon">⚡</span>
+                    Real-Time Updates - WebSocket Advanced Guide
                 </div>
 
                 <div class="endpoint-card">
                     <div class="endpoint-header">
                         <span class="method-badge" style="background: #9C27B0;">WS</span>
-                        <span class="endpoint-url">ws://divider-backend.onrender.com/ws</span>
+                        <span class="endpoint-url">wss://divider-backend.onrender.com/ws</span>
                         <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
                     </div>
                     <div class="endpoint-body">
                         <div class="endpoint-description">
-                            Real-time market data streaming via WebSocket. Connects with JWT token in query parameter.
+                            WebSocket connection for real-time market data streaming. Connect with JWT token and receive live price updates every 500ms.
                         </div>
 
                         <div class="code-section">
-                            <div class="code-section-title">Connection Example</div>
+                            <div class="code-section-title">Connection Setup (JavaScript)</div>
                             <div class="code-block">
-// JavaScript
-const token = "YOUR_JWT_TOKEN";
+// Get JWT token from login
+const token = localStorage.getItem('token');
+
+// Create WebSocket connection
 const ws = new WebSocket(
   `wss://divider-backend.onrender.com/ws?token=${token}`
 );
 
-ws.onmessage = (event) => {
-  const marketData = JSON.parse(event.data);
-  // Update UI with real-time prices
+// Handle connection opened
+ws.onopen = () => {
+  console.log('WebSocket connected');
 };
 
+// Handle incoming messages
+ws.onmessage = (event) => {
+  try {
+    const marketData = JSON.parse(event.data);
+    console.log('Market update:', marketData);
+    
+    // Update UI with real-time prices
+    marketData.forEach(stock => {
+      updateStockDisplay(stock.symbol, stock.currentPrice);
+    });
+  } catch (error) {
+    console.error('Message parse error:', error);
+  }
+};
+
+// Handle errors
 ws.onerror = (error) => {
-  console.log("WebSocket error:", error);
+  console.error('WebSocket error:', error);
+  // Attempt reconnect after delay
+  setTimeout(() => connectWebSocket(), 5000);
+};
+
+// Handle disconnection
+ws.onclose = () => {
+  console.log('WebSocket disconnected');
+  // Auto-reconnect
+  setTimeout(() => connectWebSocket(), 5000);
 };
                             </div>
                         </div>
 
                         <div class="code-section">
-                            <div class="code-section-title">Incoming Data (Real-Time Prices)</div>
+                            <div class="code-section-title">Real-Time Data Format</div>
                             <div class="code-block response">
 [
   {
     "symbol": "RELIANCE-CE-2900",
     "currentPrice": 48.75,
     "volume": 125000,
-    "percentageChange": 2.35
+    "percentageChange": 4.84
+  },
+  {
+    "symbol": "HDFC-PE-1400",
+    "currentPrice": 38.90,
+    "volume": 98500,
+    "percentageChange": -2.75
   },
   {
     "symbol": "INFY-CE-1500",
     "currentPrice": 63.50,
-    "volume": 89500,
-    "percentageChange": -1.20
+    "volume": 112300,
+    "percentageChange": -1.17
+  },
+  {
+    "symbol": "TCS-PE-3500",
+    "currentPrice": 102.30,
+    "volume": 156200,
+    "percentageChange": 3.53
   }
 ]
                             </div>
                         </div>
 
+                        <div class="code-section">
+                            <div class="code-section-title">Update Frequency</div>
+                            <div class="field-list">
+                                <div class="field-item">
+                                    <span class="field-name">Interval</span>
+                                    <span class="field-type">500ms</span>
+                                    <div class="field-description">Market data updates sent every 500 milliseconds</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">Connection Timeout</span>
+                                    <span class="field-type">60 seconds</span>
+                                    <div class="field-description">Inactive connections closed after 60 seconds of no activity</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">Max Message Size</span>
+                                    <span class="field-type">64KB</span>
+                                    <div class="field-description">Maximum size of each WebSocket message frame</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="note success-note">
-                            ✅ <strong>Display on Home Screen:</strong> Use WebSocket data to show real-time price updates, volume, and percentage changes. Updates every 500ms.
+                            ✅ <strong>Best Practices:</strong><br>
+                            • Implement auto-reconnect with exponential backoff<br>
+                            • Parse JSON messages safely with try/catch<br>
+                            • Use throttling to prevent UI update flooding<br>
+                            • Keep connection alive with periodic pings<br>
+                            • Update only changed values for performance
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 9: ERROR CODES & TROUBLESHOOTING -->
+            <div class="section" id="errors">
+                <div class="section-title">
+                    <span class="section-icon">⚠️</span>
+                    Error Codes & Troubleshooting
+                </div>
+
+                <div class="endpoint-card">
+                    <div class="endpoint-body">
+                        <div class="code-section">
+                            <div class="code-section-title">HTTP Status Codes</div>
+                            <div class="field-list">
+                                <div class="field-item">
+                                    <span class="field-name">200</span>
+                                    <span class="field-type">OK</span>
+                                    <div class="field-description">Request successful</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">201</span>
+                                    <span class="field-type">Created</span>
+                                    <div class="field-description">Resource created successfully</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">400</span>
+                                    <span class="field-type">Bad Request</span>
+                                    <div class="field-description">Invalid request parameters or insufficient funds</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">401</span>
+                                    <span class="field-type">Unauthorized</span>
+                                    <div class="field-description">Missing or invalid JWT token</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">403</span>
+                                    <span class="field-type">Forbidden</span>
+                                    <div class="field-description">Authenticated but not authorized for this resource</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">404</span>
+                                    <span class="field-type">Not Found</span>
+                                    <div class="field-description">Resource or endpoint not found</div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">500</span>
+                                    <span class="field-type">Server Error</span>
+                                    <div class="field-description">Internal server error - try again later</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Common Error Messages</div>
+                            <div class="code-block error">
+// Invalid credentials
+{
+  "error": "invalid email or password"
+}
+
+// Token expired
+{
+  "error": "token expired"
+}
+
+// Insufficient funds for BUY
+{
+  "error": "insufficient funds: need ₹487.50 but have ₹250.00"
+}
+
+// Insufficient holdings for SELL
+{
+  "error": "insufficient holdings: need 20 units but only have 15"
+}
+
+// Invalid stock symbol
+{
+  "error": "invalid symbol"
+}
+
+// Weak password
+{
+  "error": "Password must be at least 8 characters and contain uppercase, lowercase, number, and special character"
+}
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Authentication Troubleshooting</div>
+                            <div class="field-list">
+                                <div class="field-item">
+                                    <span class="field-name">401 Error on Protected Endpoint</span>
+                                    <div class="field-description">
+                                        ✓ Check token is present in Authorization header<br>
+                                        ✓ Use format: "Authorization: Bearer YOUR_TOKEN"<br>
+                                        ✓ Verify token hasn't expired (24 hour limit)<br>
+                                        ✓ Try logging in again to get fresh token
+                                    </div>
+                                </div>
+                                <div class="field-item">
+                                    <span class="field-name">CORS Errors</span>
+                                    <div class="field-description">
+                                        ✓ All endpoints support CORS<br>
+                                        ✓ Ensure requests include proper headers<br>
+                                        ✓ Check Content-Type is application/json for POST<br>
+                                        ✓ WebSocket URL should use wss:// (not ws://)
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1193,9 +1657,9 @@ ws.onerror = (error) => {
         </div>
 
         <div class="footer">
-            <p><strong>StockTrack API v1.0</strong> | Last updated: April 2026</p>
-            <p>All API responses use HTTP status codes. Authentication tokens expire after 24 hours.</p>
-            <p>For support or questions, contact: support@stocktrack.io</p>
+            <p><strong>StockTrack API v1.2</strong> | Last updated: April 2, 2026</p>
+            <p>✅ Latest Updates: Complete Buy/Sell API documentation, Markets data, Advanced WebSocket guide, Error codes & troubleshooting</p>
+            <p>All API responses use HTTP status codes. Authentication tokens expire after 24 hours. For support: support@stocktrack.io</p>
         </div>
     </div>
 </body>
