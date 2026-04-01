@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"stocktrack-backend/config"
 	"stocktrack-backend/internal/adapter/auth"
+	"stocktrack-backend/internal/adapter/db"
 	"stocktrack-backend/internal/adapter/http"
 	"stocktrack-backend/internal/adapter/storage"
 	"stocktrack-backend/internal/adapter/ws"
@@ -11,6 +14,7 @@ import (
 
 type Container struct {
 	Config                *config.Config
+	DB                    *db.Database
 	UserRepository        domain.UserRepository
 	CandleRepository      domain.CandleRepository
 	AlertRepository       domain.AlertRepository
@@ -30,11 +34,23 @@ type Container struct {
 
 func NewContainer() *Container {
 	cfg := config.NewDefaultConfig()
+// Initialize PostgreSQL database
+	database, err := db.NewDatabase(db.Config{
+		Host:     os.Getenv("DB_HOST"),
+		Port:     os.Getenv("DB_PORT"),
+		User:     os.Getenv("DB_USER"),
+		Password: os.Getenv("DB_PASSWORD"),
+		DBName:   os.Getenv("DB_NAME"),
+		SSLMode:  os.Getenv("DB_SSLMODE"),
+	})
+	if err != nil {
+		panic(fmt.Sprintf("Failed to connect to database: %v", err))
+	}
 
-	userRepo := storage.NewInMemoryUserRepository()
-	candleRepo := storage.NewInMemoryCandleRepository()
-	alertRepo := storage.NewInMemoryAlertRepository()
-	transactionRepo := storage.NewInMemoryTransactionRepository()
+	userRepo := storage.NewPostgresUserRepository(database.GetConn())
+	candleRepo := storage.NewPostgresCandleRepository(database.GetConn())
+	alertRepo := storage.NewPostgresAlertRepository(database.GetConn())
+	transactionRepo := storage.NewPostgresTransactionRepository(database.GetConn())
 
 	tokenProvider := auth.NewJWTProvider(cfg.Auth.JWTSecretKey, cfg.Auth.TokenExpiry)
 
@@ -60,6 +76,7 @@ func NewContainer() *Container {
 
 	return &Container{
 		Config:                cfg,
+		DB:                    database,
 		UserRepository:        userRepo,
 		CandleRepository:      candleRepo,
 		AlertRepository:       alertRepo,
@@ -85,6 +102,9 @@ func (c *Container) Start() error {
 
 	c.WebSocketHub.Start()
 
+	if c.DB != nil {
+		c.DB.Close()
+	}
 	go func() {
 		for marketData := range c.MarketEngine.Subscribe() {
 			c.WebSocketHub.Broadcast(marketData)

@@ -16,7 +16,7 @@ func NewPostgresUserRepository(db *sql.DB) *PostgresUserRepository {
 	return &PostgresUserRepository{db: db}
 }
 
-func (r *PostgresUserRepository) SaveUser(user *domain.User) error {
+func (r *PostgresUserRepository) Save(user *domain.User) error {
 	if user == nil || user.Email == "" {
 		return errors.New("invalid user")
 	}
