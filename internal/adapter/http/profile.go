@@ -27,6 +27,7 @@ type UserProfile struct {
 	Phone              string    `json:"phone"`
 	BankAccount        string    `json:"bank_account"`
 	BankAccountStatus  string    `json:"bank_account_status"`
+	CreatedAt          time.Time `json:"created_at"`
 	MemberSince        time.Time `json:"member_since"`
 	IsVerified         bool      `json:"is_verified"`
 	Theme              string    `json:"theme"`
@@ -83,6 +84,7 @@ func (h *ProfileHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 		Phone:              generateFakePhoneNumber(userID),
 		BankAccount:        generateFakeBankAccount(userID),
 		BankAccountStatus:  "Verified",
+		CreatedAt:          time.Now().AddDate(-1, 0, 0),
 		MemberSince:        time.Now().AddDate(-1, 0, 0),
 		IsVerified:         true,
 		Theme:              "Light",

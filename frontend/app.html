@@ -45,6 +45,25 @@
             display: flex;
             flex-direction: column;
             position: relative;
+            transition: opacity 0.2s, visibility 0.2s;
+            z-index: 1;
+        }
+
+        #phone-login-home {
+            display: flex;
+            visibility: visible;
+            opacity: 1;
+            z-index: 10;
+        }
+
+        #phone-charts,
+        #phone-portfolio,
+        #phone-alerts,
+        #phone-profile {
+            display: none;
+            visibility: hidden;
+            opacity: 0;
+            z-index: 0;
         }
 
         .phone::before {
@@ -79,6 +98,8 @@
 
         .app-content {
             flex: 1;
+            display: flex;
+            flex-direction: column;
             overflow-y: auto;
             overflow-x: hidden;
             background: var(--bg-secondary);
@@ -101,7 +122,7 @@
         .bottom-nav {
             background: var(--bg);
             border-top: 1px solid var(--border);
-            display: none;
+            display: flex;
             justify-content: space-around;
             padding: 12px 0 24px;
         }
@@ -667,7 +688,7 @@
 </head>
 <body>
     <!-- PHONE 1: LOGIN SCREEN -->
-    <div class="phone">
+    <div class="phone" id="phone-login-home">
         <div class="status-bar">
             <div class="status-left">9:41</div>
             <div class="status-right">📶 📡 🔋</div>
@@ -731,8 +752,8 @@
         <div class="app-content" id="home-screen">
             <div class="header">
                 <div class="header-title">Total Balance</div>
-                <div class="header-balance" id="home-balance">💿 Loading...</div>
-                <div class="header-change" id="home-change">📊 Loading...</div>
+                <div class="header-balance" id="home-balance">₹0.00</div>
+                <div class="header-change" id="home-change">0 Holdings</div>
             </div>
 
             <!-- WebSocket Debug Panel -->
@@ -763,8 +784,17 @@
             <div class="section">
                 <div class="section-title">💹 Live Prices</div>
                 <div id="prices-container" style="padding:15px;">
-                    <div style="text-align:center; padding:20px; color:#999;">
-                        ⏳ Loading live prices from WebSocket...
+                    <div class="price-item up">
+                        <div class="price-left">
+                            <div class="price-symbol">RELIANCE</div>
+                            <div class="price-value">₹0.00</div>
+                        </div>
+                        <div class="price-right">
+                            <div class="price-change up">📈 0.00%</div>
+                        </div>
+                    </div>
+                    <div style="text-align:center; padding:10px; color:#999; font-size:12px;">
+                        ⏳ Connecting to live market data...
                     </div>
                 </div>
             </div>
@@ -797,13 +827,13 @@
     </div>
 
     <!-- PHONE 2: CHARTS SCREEN -->
-    <div class="phone">
+    <div class="phone" id="phone-charts">
         <div class="status-bar">
             <div class="status-left">9:41</div>
             <div class="status-right">📶 📡 🔋</div>
         </div>
 
-        <div class="app-content" id="charts-screen" style="display: none;">
+        <div class="app-content" id="charts-screen">
             <div class="header" style="padding-bottom: 12px;">
                 <div style="font-size: 14px; color: white; margin-bottom: 8px;">📈 Charts</div>
                 <select id="symbolSelect" onchange="onSymbolChange()" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-size: 14px;">
@@ -883,23 +913,23 @@
         </div>
 
         <div class="bottom-nav">
-            <div class="nav-item" onclick="switchScreenPhone2(0)">
+            <div class="nav-item" onclick="switchScreen(0)">
                 <div class="nav-icon">🏠</div>
                 <div>Home</div>
             </div>
-            <div class="nav-item active" onclick="switchScreenPhone2(1)">
+            <div class="nav-item active" onclick="switchScreen(1)">
                 <div class="nav-icon">📈</div>
                 <div>Charts</div>
             </div>
-            <div class="nav-item" onclick="switchScreenPhone2(2)">
+            <div class="nav-item" onclick="switchScreen(2)">
                 <div class="nav-icon">💰</div>
                 <div>Portfolio</div>
             </div>
-            <div class="nav-item" onclick="switchScreenPhone2(3)">
+            <div class="nav-item" onclick="switchScreen(3)">
                 <div class="nav-icon">🔔</div>
                 <div>Alerts</div>
             </div>
-            <div class="nav-item" onclick="switchScreenPhone2(4)">
+            <div class="nav-item" onclick="switchScreen(4)">
                 <div class="nav-icon">👤</div>
                 <div>Profile</div>
             </div>
@@ -907,13 +937,13 @@
     </div>
 
     <!-- PHONE 3: PORTFOLIO SCREEN -->
-    <div class="phone">
+    <div class="phone" id="phone-portfolio">
         <div class="status-bar">
             <div class="status-left">9:41</div>
             <div class="status-right">📶 📡 🔋</div>
         </div>
 
-        <div class="app-content" id="portfolio-screen" style="display: none;">
+        <div class="app-content" id="portfolio-screen">
             <div class="header">
                 <div class="header-title">💰 My Portfolio</div>
                 <div id="portfolio-header-balance" class="header-balance">₹0.00</div>
@@ -1057,23 +1087,23 @@
         </div>
 
         <div class="bottom-nav">
-            <div class="nav-item" onclick="switchScreenPhone3(0)">
+            <div class="nav-item" onclick="switchScreen(0)">
                 <div class="nav-icon">🏠</div>
                 <div>Home</div>
             </div>
-            <div class="nav-item" onclick="switchScreenPhone3(1)">
+            <div class="nav-item" onclick="switchScreen(1)">
                 <div class="nav-icon">📈</div>
                 <div>Charts</div>
             </div>
-            <div class="nav-item active" onclick="switchScreenPhone3(2)">
+            <div class="nav-item active" onclick="switchScreen(2)">
                 <div class="nav-icon">💰</div>
                 <div>Portfolio</div>
             </div>
-            <div class="nav-item" onclick="switchScreenPhone3(3)">
+            <div class="nav-item" onclick="switchScreen(3)">
                 <div class="nav-icon">🔔</div>
                 <div>Alerts</div>
             </div>
-            <div class="nav-item" onclick="switchScreenPhone3(4)">
+            <div class="nav-item" onclick="switchScreen(4)">
                 <div class="nav-icon">👤</div>
                 <div>Profile</div>
             </div>
@@ -1081,13 +1111,13 @@
     </div>
 
     <!-- PHONE 4: ALERTS SCREEN -->
-    <div class="phone">
+    <div class="phone" id="phone-alerts">
         <div class="status-bar">
             <div class="status-left">9:41</div>
             <div class="status-right">📶 📡 🔋</div>
         </div>
 
-        <div class="app-content" id="alerts-screen" style="display: none;">
+        <div class="app-content" id="alerts-screen">
             <div class="header">
                 <div class="header-title">🔔 Price Alerts</div>
                 <div style="display: flex; gap: 8px; margin-top: 12px;">
@@ -1203,23 +1233,23 @@
         </div>
 
         <div class="bottom-nav">
-            <div class="nav-item" onclick="switchScreenPhone4(0)">
+            <div class="nav-item" onclick="switchScreen(0)">
                 <div class="nav-icon">🏠</div>
                 <div>Home</div>
             </div>
-            <div class="nav-item" onclick="switchScreenPhone4(1)">
+            <div class="nav-item" onclick="switchScreen(1)">
                 <div class="nav-icon">📈</div>
                 <div>Charts</div>
             </div>
-            <div class="nav-item" onclick="switchScreenPhone4(2)">
+            <div class="nav-item" onclick="switchScreen(2)">
                 <div class="nav-icon">💰</div>
                 <div>Portfolio</div>
             </div>
-            <div class="nav-item active" onclick="switchScreenPhone4(3)">
+            <div class="nav-item active" onclick="switchScreen(3)">
                 <div class="nav-icon">🔔</div>
                 <div>Alerts</div>
             </div>
-            <div class="nav-item" onclick="switchScreenPhone4(4)">
+            <div class="nav-item" onclick="switchScreen(4)">
                 <div class="nav-icon">👤</div>
                 <div>Profile</div>
             </div>
@@ -1227,174 +1257,59 @@
     </div>
 
     <!-- PHONE 5: PROFILE SCREEN -->
-    <div class="phone">
+    <div class="phone" id="phone-profile">
         <div class="status-bar">
             <div class="status-left">9:41</div>
             <div class="status-right">📶 📡 🔋</div>
         </div>
 
-        <div class="app-content" id="profile-screen" style="display: none;">
-            <div class="header">
-                <div style="font-size: 14px; color: white; margin-bottom: 12px;">👤 Profile</div>
+        <div class="app-content" id="profile-screen" style="background: #F8F8F8 !important; display: flex !important; flex-direction: column !important; visibility: visible !important; opacity: 1 !important;">
+            <div class="header" style="background: linear-gradient(135deg, #2E5BFF 0%, #1e40ff 100%); color: white; padding: 20px; border-radius: 0 0 20px 20px; z-index: 1;">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">👤 YOUR PROFILE</div>
+                <div style="font-size: 12px; opacity: 0.9;">Account Information</div>
             </div>
 
-            <div id="profile-container" style="padding: 15px;">
-                <div style="text-align: center; padding: 30px; color: #999;">Loading profile...</div>
-            </div>
-
-            <div id="profile-placeholder-content" style="display:none;">
-            <div class="header" style="display:none;">
-                <div style="text-align: center;">
-                    <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.3); border-radius: 50%; margin: 0 auto 12px;"></div>
-                    <div style="font-size: 18px; font-weight: bold;">Harsh Kumar</div>
-                    <div style="font-size: 13px; opacity: 0.9;">harsh@example.com</div>
-                    <div style="font-size: 11px; opacity: 0.8; margin-top: 4px;">Member Since: Mar 30, 2026 | ✓ Verified</div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">📧 Account Info</div>
-                
-                <div style="background: white; border-radius: 12px; padding: 12px; margin: 0 16px 8px;">
-                    <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">Email Address</div>
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">harsh@example.com</div>
-                    <div style="display: flex; gap: 4px;">
-                        <button class="qt-btn" style="flex: 1; font-size: 11px; padding: 6px;">✓ Verified</button>
-                        <button class="qt-btn" style="flex: 1; font-size: 11px; padding: 6px; background: var(--bg-secondary); color: var(--text-primary);">Change</button>
+            <div id="profile-container" style="padding: 15px; flex: 1; overflow-y: auto; background: #F8F8F8; z-index: 2;">
+                <div style="background:white; border-radius:12px; padding:15px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:5;">
+                    <div style="text-align:center; margin-bottom:15px;">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; margin: 0 auto 10px; display:flex; align-items:center; justify-content:center; color:white; font-size:28px;">👤</div>
+                        <div style="font-size:18px; font-weight:600; color:#333; margin-bottom:4px;">Loading Profile...</div>
+                        <div style="font-size:12px; color:#666;">Fetching your account information...</div>
                     </div>
                 </div>
-
-                <div style="background: white; border-radius: 12px; padding: 12px; margin: 0 16px 8px;">
-                    <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">Phone Number</div>
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">+91 98765 43210</div>
-                    <button class="qt-btn" style="width: 100%; font-size: 11px; padding: 6px;">Update</button>
+                <div style="text-align: center; padding: 30px; color: #333; background: white; border-radius: 12px; margin: 15px; z-index: 3;">
+                    <div style="font-size: 24px; margin-bottom: 10px;">⏳</div>
+                    <div style="font-size: 14px; font-weight: 600; color: #333;">Loading profile...</div>
+                    <div style="font-size: 12px; color: #666; margin-top: 5px;">Connecting to server...</div>
                 </div>
-
-                <div style="background: white; border-radius: 12px; padding: 12px; margin: 0 16px 8px;">
-                    <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">Bank Account</div>
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">HDFC Bank - Savings | ***1234</div>
-                    <div style="display: flex; gap: 4px;">
-                        <button class="qt-btn" style="flex: 1; font-size: 11px; padding: 6px;">✓ Verified</button>
-                        <button class="qt-btn" style="flex: 1; font-size: 11px; padding: 6px; background: var(--bg-secondary); color: var(--text-primary);">Change</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">🎨 Preferences</div>
-                
-                <div style="background: white; border-radius: 12px; padding: 12px; margin: 0 16px 8px;">
-                    <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">Theme</div>
-                    <div style="display: flex; gap: 4px;">
-                        <button class="qt-btn qt-btn-buy" style="flex: 1; font-size: 11px; padding: 6px;">Light</button>
-                        <button class="qt-btn" style="flex: 1; font-size: 11px; padding: 6px; background: var(--bg-secondary); color: var(--text-primary);">Dark</button>
-                        <button class="qt-btn" style="flex: 1; font-size: 11px; padding: 6px; background: var(--bg-secondary); color: var(--text-primary);">Auto</button>
-                    </div>
-                </div>
-
-                <div style="background: white; border-radius: 12px; padding: 12px; margin: 0 16px 8px;">
-                    <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">🔔 Notifications</div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px;">
-                        <span>Price Alerts</span>
-                        <input type="checkbox" checked style="width: 16px; cursor: pointer;">
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px;">
-                        <span>Trade Confirmations</span>
-                        <input type="checkbox" checked style="width: 16px; cursor: pointer;">
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px;">
-                        <span>News & Updates</span>
-                        <input type="checkbox" style="width: 16px; cursor: pointer;">
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                        <span>Promotional</span>
-                        <input type="checkbox" style="width: 16px; cursor: pointer;">
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">🔐 Security</div>
-                
-                <div style="background: white; border-radius: 12px; padding: 12px; margin: 0 16px 8px;">
-                    <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">Password</div>
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">Last changed: 2 months ago</div>
-                    <button class="qt-btn" style="width: 100%; font-size: 11px; padding: 6px;">Change Password</button>
-                </div>
-
-                <div style="background: white; border-radius: 12px; padding: 12px; margin: 0 16px 8px;">
-                    <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">🛡️ Two-Factor Auth</div>
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">Status: 🟢 Enabled</div>
-                    <div style="display: flex; gap: 4px;">
-                        <button class="qt-btn qt-btn-buy" style="flex: 1; font-size: 11px; padding: 6px;">Disable</button>
-                        <button class="qt-btn" style="flex: 1; font-size: 11px; padding: 6px; background: var(--bg-secondary); color: var(--text-primary);">Reconfig</button>
-                    </div>
-                </div>
-
-                <div style="background: white; border-radius: 12px; padding: 12px; margin: 0 16px 8px;">
-                    <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">👥 Active Sessions</div>
-                    <div style="font-size: 11px; margin-bottom: 4px;">
-                        <div style="color: var(--text-secondary);">📱 iPhone 12 - This Device</div>
-                    </div>
-                    <div style="font-size: 11px; margin-bottom: 6px;">
-                        <div style="color: var(--text-secondary);">💻 Chrome Browser - Yesterday</div>
-                    </div>
-                    <button class="qt-btn qt-btn-sell" style="width: 100%; font-size: 11px; padding: 6px;">Logout All</button>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="section-title">📚 Support & Legal</div>
-                
-                <div style="background: white; border-radius: 12px; padding: 8px; margin: 0 16px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-                    <span>❓ Help & Support</span>
-                    <span style="color: var(--text-secondary);">→</span>
-                </div>
-
-                <div style="background: white; border-radius: 12px; padding: 8px; margin: 0 16px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-                    <span>📄 Terms of Service</span>
-                    <span style="color: var(--text-secondary);">→</span>
-                </div>
-
-                <div style="background: white; border-radius: 12px; padding: 8px; margin: 0 16px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-                    <span>🔒 Privacy Policy</span>
-                    <span style="color: var(--text-secondary);">→</span>
-                </div>
-
-                <div style="background: white; border-radius: 12px; padding: 8px; margin: 0 16px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-                    <span>⚠️ Risk Disclosure</span>
-                    <span style="color: var(--text-secondary);">→</span>
-                </div>
-            </div>
-
-            <div class="section">
-                <button class="btn-full" style="background: var(--danger);">🚪 Logout</button>
-                <button class="btn-full" style="background: #999; margin-top: 8px;">❌ Delete Account</button>
             </div>
 
             <div style="height: 20px;"></div>
-            </div>
         </div>
 
         <div class="bottom-nav">
-            <div class="nav-item" onclick="switchScreenPhone5(0)">
+            <div class="nav-item" onclick="switchScreen(0)">
                 <div class="nav-icon">🏠</div>
                 <div>Home</div>
             </div>
-            <div class="nav-item" onclick="switchScreenPhone5(1)">
+            <div class="nav-item" onclick="switchScreen(1)">
                 <div class="nav-icon">📈</div>
                 <div>Charts</div>
             </div>
-            <div class="nav-item" onclick="switchScreenPhone5(2)">
+            <div class="nav-item" onclick="switchScreen(2)">
                 <div class="nav-icon">💰</div>
                 <div>Portfolio</div>
             </div>
-            <div class="nav-item" onclick="switchScreenPhone5(3)">
+            <div class="nav-item" onclick="switchScreen(3)">
                 <div class="nav-icon">🔔</div>
                 <div>Alerts</div>
             </div>
-            <div class="nav-item active" onclick="switchScreenPhone5(4)">
+            <div class="nav-item active" onclick="switchScreen(4)">
                 <div class="nav-icon">👤</div>
+                <div>Profile</div>
+            </div>
+        </div>
+    </div>
                 <div>Profile</div>
             </div>
         </div>
@@ -1517,7 +1432,7 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8080';
+        const API_BASE = 'https://divider-backend.onrender.com';
         let token = localStorage.getItem('token') || null;
         let wsConnected = false;
         let wsInstance = null;
@@ -1674,51 +1589,42 @@
             logDebug('--- SENDING REQUEST ---');
 
             try {
-                // Check backend connectivity first
-                logDebug('🔍 Pre-checking backend connectivity...');
-                let healthCheck = null;
-                try {
-                    const healthStart = Date.now();
-                    const healthResponse = await fetch(`${API_BASE}/health`, {
-                        method: 'GET',
-                        mode: 'cors',
-                        cache: 'no-cache',
-                        signal: AbortSignal.timeout(5000)
-                    });
-                    const healthTime = Date.now() - healthStart;
-                    logDebug(`✅ Health check OK (${healthTime}ms) - Backend is running`);
-                    healthCheck = true;
-                } catch (healthErr) {
-                    logDebug(`⚠️ Health check failed: ${healthErr.message}`);
-                    logDebug('⚠️ This might mean backend is slow or unavailable');
-                    healthCheck = false;
-                }
-                logDebug('');
-
-                // Main login request
+                // Main login request (skipping health check to avoid preflight issues)
                 const requestStart = Date.now();
                 logDebug('📨 Sending login request...');
 
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => {
-                    controller.abort();
-                    logDebug('⏰ Request timeout triggered (15 seconds)');
-                }, 15000);
-
-                const response = await fetch(`${API_BASE}/auth/login`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password }),
-                    signal: controller.signal,
-                    mode: 'cors',
-                    cache: 'no-cache',
-                    credentials: 'omit'
+                let timeoutId = null;
+                
+                // Use promise race for timeout as fallback to AbortSignal.timeout
+                const timeoutPromise = new Promise((_, reject) => {
+                    timeoutId = setTimeout(() => {
+                        controller.abort();
+                        logDebug('⏰ Request timeout triggered (15 seconds)');
+                    }, 15000);
                 });
 
-                clearTimeout(timeoutId);
+                let response;
+                try {
+                    response = await Promise.race([
+                        fetch(`${API_BASE}/auth/login`, {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ email, password }),
+                            signal: controller.signal,
+                            mode: 'cors',
+                            cache: 'no-cache',
+                            credentials: 'omit'
+                        }),
+                        timeoutPromise
+                    ]);
+                } finally {
+                    if (timeoutId) clearTimeout(timeoutId);
+                }
+
                 const requestTime = Date.now() - requestStart;
 
                 logDebug('');
@@ -1839,7 +1745,7 @@
                     logDebug('🔗 ERROR: Network/Fetch Issue');
                     logDebug('💡 Possible causes:');
                     logDebug('   1. No internet connection');
-                    logDebug('   2. DNS cannot resolve divider-backend.onrender.com');
+                    logDebug(`   2. DNS cannot resolve ${API_BASE}`);
                     logDebug('   3. HTTPS/SSL certificate issue');
                     logDebug('   4. Proxy/Firewall blocking');
                     logDebug('   5. Backend service is down');
@@ -1850,8 +1756,8 @@
                         showLoginError('You are offline. Check internet connection.');
                     } else {
                         logDebug('✅ Browser reports: ONLINE');
-                        logDebug('💡 Issue is likely backend connectivity');
-                        showLoginError('Cannot connect to backend. Check internet or try later.');
+                        logDebug(`💡 Issue is likely backend connectivity to ${API_BASE}`);
+                        showLoginError(`Cannot connect to backend at ${API_BASE}. Check if server is running.`);
                     }
                 } else {
                     logDebug(`⚠️ ERROR: ${error.name}`);
@@ -1864,9 +1770,11 @@
                 logDebug('1. Press F12 to open DevTools');
                 logDebug('2. Go to Network tab');
                 logDebug('3. Try login again');
-                logDebug('4. Look for request to divider-backend.onrender.com');
+                logDebug(`4. Look for request to ${API_BASE}/auth/login`);
                 logDebug('5. Check response status and error message');
-                logDebug('6. Share screenshot of Network tab for support');
+                logDebug('6. Ensure backend server is running at ' + API_BASE);
+                logDebug('7. Check CORS settings on backend');
+                logDebug('8. Clear browser cache and try again');
                 
                 console.error('Full login error:', error);
             } finally {
@@ -1970,13 +1878,21 @@
 
         // ========== PORTFOLIO APIs ==========
         async function loadWalletData() {
+            console.log('💼 loadWalletData() called');
+            
             if (!token) {
+                console.log('⚠️ No token available');
                 addDebugLog('⚠️ No token available', 'warning');
+                // Set default values
+                const headerBalance = document.getElementById('home-balance');
+                if (headerBalance) headerBalance.textContent = '₹0.00';
                 return null;
             }
 
             try {
                 addDebugLog('💼 Fetching wallet data...', 'info');
+                console.log('🌐 Fetching from:', `${API_BASE}/trading/wallet`);
+                
                 const response = await fetch(`${API_BASE}/trading/wallet`, {
                     method: 'GET',
                     headers: {
@@ -1985,17 +1901,32 @@
                     }
                 });
 
+                console.log('📊 Response status:', response.status);
+                
                 if (!response.ok) {
-                    addDebugLog(`❌ Wallet fetch failed: ${response.status}`, 'error');
+                    const errorText = await response.text();
+                    console.log('❌ Error response:', errorText);
+                    addDebugLog(`❌ Wallet fetch failed: ${response.status} - ${errorText}`, 'error');
+                    
+                    // Set default values on error
+                    const headerBalance = document.getElementById('home-balance');
+                    if (headerBalance) headerBalance.textContent = '₹0.00';
                     return null;
                 }
                 
                 const wallet = await response.json();
+                console.log('✅ Wallet data received:', wallet);
                 addDebugLog(`✅ Wallet loaded: ₹${wallet.total_balance?.toFixed(2)}, ${Object.keys(wallet.positions || {}).length} holdings`, 'success');
                 updatePortfolioUI(wallet);
                 return wallet;
             } catch (error) {
+                console.log('💥 Error loading wallet:', error);
                 addDebugLog(`💥 Error loading wallet: ${error.message}`, 'error');
+                
+                // Set default values on error
+                const headerBalance = document.getElementById('home-balance');
+                if (headerBalance) headerBalance.textContent = '₹0.00';
+                
                 return null;
             }
         }
@@ -2494,6 +2425,9 @@
             }
 
             addDebugLog(`🎨 Rendering chart with ${candles.length} candles...`, 'info');
+            
+            // Get the latest candle (last one in the array)
+            const latestCandle = candles[candles.length - 1];
             const isUp = latestCandle.close >= latestCandle.open;
 
             // Update Current Candle section with latest data
@@ -2667,12 +2601,51 @@
 
         // ========== PROFILE APIs ==========
         async function loadUserProfile() {
+            console.log('🔍 loadUserProfile() called');
+            
+            const profileContainer = document.getElementById('profile-container');
+            const profileScreen = document.getElementById('profile-screen');
+            const phoneProfile = document.getElementById('phone-profile');
+            
+            console.log('📍 profileContainer found:', !!profileContainer);
+            console.log('📍 profileScreen found:', !!profileScreen);
+            console.log('📍 phoneProfile found:', !!phoneProfile);
+            
+            if (profileScreen) {
+                const computed = window.getComputedStyle(profileScreen);
+                console.log('📍 profileScreen style:', profileScreen.getAttribute('style'));
+                console.log('📍 profileScreen computed display:', computed.display);
+                console.log('📍 profileScreen computed visibility:', computed.visibility);
+                console.log('📍 profileScreen computed opacity:', computed.opacity);
+                console.log('📍 profileScreen computed zIndex:', computed.zIndex);
+            }
+            
+            if (phoneProfile) {
+                const computed = window.getComputedStyle(phoneProfile);
+                console.log('📍 phoneProfile computed display:', computed.display);
+                console.log('📍 phoneProfile computed visibility:', computed.visibility);
+                console.log('📍 phoneProfile computed opacity:', computed.opacity);
+                console.log('📍 phoneProfile computed zIndex:', computed.zIndex);
+            }
+            
             if (!token) {
+                console.log('⚠️ No token available for profile load');
                 addDebugLog('⚠️ No token available for profile load', 'warning');
+                if (profileContainer) {
+                    profileContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#999; background:white; border-radius:8px; margin:15px;">🚫 Please login to view profile</div>';
+                }
                 return;
             }
 
+            if (profileContainer) {
+                profileContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#333; background:white; border-radius:8px; margin:15px; z-index:10;"><div style="font-size: 24px; margin-bottom: 10px;">⏳</div><div style="font-size: 14px; font-weight: 600; color: #333;">Loading profile...</div><div style="font-size: 12px; color: #666; margin-top: 5px;">Connecting to server...</div></div>';
+                console.log('✅ Loading message displayed');
+            } else {
+                console.log('❌ profileContainer NOT found!');
+            }
+
             addDebugLog('👤 Loading user profile...', 'info');
+            console.log('🌐 Fetching from:', `${API_BASE}/user/profile`);
 
             try {
                 const response = await fetch(`${API_BASE}/user/profile`, {
@@ -2683,48 +2656,83 @@
                     }
                 });
 
+                console.log('📊 Profile API Response Status:', response.status);
+                addDebugLog(`📊 Profile API Response Status: ${response.status}`, 'info');
+
                 if (!response.ok) {
-                    addDebugLog(`❌ Failed to load profile: ${response.status}`, 'error');
+                    const errorText = await response.text();
+                    console.log('❌ Error response:', errorText);
+                    addDebugLog(`❌ Failed to load profile: ${response.status} - ${errorText}`, 'error');
+                    if (profileContainer) {
+                        profileContainer.innerHTML = `<div style="text-align:center; padding:30px; color:red; background:white; border-radius:8px; margin:15px;">❌ Error loading profile: ${response.status}</div>`;
+                    }
                     return;
                 }
 
                 const profile = await response.json();
-                addDebugLog(`✅ Profile loaded: ${profile.username || 'User'}`, 'success');
+                console.log('✅ Profile loaded:', profile);
+                addDebugLog(`✅ Profile loaded: ${profile.username || profile.email}`, 'success');
+                addDebugLog(`📝 Profile email: ${profile.email}`, 'info');
                 updateProfileUI(profile);
             } catch (error) {
+                console.log('💥 Error loading profile:', error);
                 addDebugLog(`💥 Error loading profile: ${error.message}`, 'error');
+                if (profileContainer) {
+                    profileContainer.innerHTML = `<div style="text-align:center; padding:30px; color:red; background:white; border-radius:8px; margin:15px;">💥 Error: ${error.message}</div>`;
+                }
             }
         }
 
         function updateProfileUI(profile) {
+            console.log('🎨 updateProfileUI() called with:', profile);
+            
             let profileHTML = `
-                <div style="background:white; border-radius:12px; padding:15px; margin-bottom:15px;">
+                <div style="background:white; border-radius:12px; padding:15px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:5;">
                     <div style="text-align:center; margin-bottom:15px;">
-                        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; margin: 0 auto 10px;"></div>
-                        <div style="font-size:16px; font-weight:600; color:#333;">${profile.username || 'User'}</div>
-                        <div style="font-size:13px; color:#666; margin-top:4px;">${profile.email || 'N/A'}</div>
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; margin: 0 auto 10px; display:flex; align-items:center; justify-content:center; color:white; font-size:28px;">👤</div>
+                        <div style="font-size:18px; font-weight:600; color:#333; margin-bottom:4px;">${profile.username || profile.email || 'User'}</div>
+                        <div style="font-size:13px; color:#666;">${profile.email || 'N/A'}</div>
                     </div>
                 </div>
 
-                <div style="background:white; border-radius:8px; overflow:hidden;">
+                <div style="background:white; border-radius:8px; overflow:hidden; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
                     <div style="padding:12px; border-bottom:1px solid #eee;">
-                        <div style="font-size:11px; color:#999; margin-bottom:4px; font-weight:600;">EMAIL</div>
-                        <div style="font-weight:500; font-size:13px;">${profile.email || 'N/A'}</div>
+                        <div style="font-size:11px; color:#999; margin-bottom:4px; font-weight:600;">📧 EMAIL</div>
+                        <div style="font-weight:500; font-size:13px; color:#333;">${profile.email || 'N/A'}</div>
                     </div>
                     <div style="padding:12px; border-bottom:1px solid #eee;">
-                        <div style="font-size:11px; color:#999; margin-bottom:4px; font-weight:600;">PORTFOLIO VALUE</div>
-                        <div style="font-weight:600; color:#2E5BFF; font-size:15px;">₹${profile.total_portfolio_value?.toFixed(2) || '0.00'}</div>
+                        <div style="font-size:11px; color:#999; margin-bottom:4px; font-weight:600;">💰 PORTFOLIO VALUE</div>
+                        <div style="font-weight:600; color:#2E5BFF; font-size:15px;">₹${profile.total_portfolio_value?.toFixed(2) || profile.portfolio_value?.toFixed(2) || profile.balance?.toFixed(2) || '0.00'}</div>
                     </div>
                     <div style="padding:12px;">
-                        <div style="font-size:11px; color:#999; margin-bottom:4px; font-weight:600;">MEMBER SINCE</div>
-                        <div style="font-weight:500; font-size:13px;">${profile.created_at ? new Date(profile.created_at).toLocaleDateString() : 'N/A'}</div>
+                        <div style="font-size:11px; color:#999; margin-bottom:4px; font-weight:600;">📅 MEMBER SINCE</div>
+                        <div style="font-weight:500; font-size:13px; color:#333;">${profile.created_at ? new Date(profile.created_at).toLocaleDateString() : 'Just now'}</div>
                     </div>
                 </div>
+
+                <div style="background:#f0f4ff; border-radius:8px; padding:12px; margin-bottom:15px;">
+                    <div style="font-size:11px; color:#2E5BFF; font-weight:600; margin-bottom:8px;">ℹ️ ACCOUNT STATUS</div>
+                    <div style="font-size:13px; color:#333;">✅ Active Account</div>
+                    <div style="font-size:11px; color:#666; margin-top:4px;">Connected to Neon Database</div>
+                </div>
+
+                <button onclick="UserLogout()" style="width:100%; padding:12px; background:#FF5252; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:14px; margin-bottom:20px;">🚪 Logout</button>
             `;
 
             const profileContainer = document.getElementById('profile-container');
             if (profileContainer) {
                 profileContainer.innerHTML = profileHTML;
+                console.log('✅ Profile HTML updated');
+            } else {
+                console.log('❌ profileContainer not found!');
+            }
+        }
+
+        function UserLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('token');
+                token = null;
+                location.reload();
             }
         }
 
@@ -2745,7 +2753,10 @@
             logDebug('🔌 Attempting WebSocket connection...');
 
             try {
-                const wsURL = `ws://localhost:8080/ws?token=${token}`;
+                // Convert HTTPS to WSS (secure WebSocket)
+                const wsProtocol = API_BASE.startsWith('https') ? 'wss' : 'ws';
+                const wsHost = API_BASE.replace('https://', '').replace('http://', '');
+                const wsURL = `${wsProtocol}://${wsHost}/ws?token=${token}`;
                 logDebug(`📍 WebSocket URL: ${wsURL.substring(0, 60)}...`);
                 
                 wsInstance = new WebSocket(wsURL);
@@ -2796,20 +2807,35 @@
 
         function updatePricesUI(marketData) {
             // Update prices on home screen
-            if (!Array.isArray(marketData)) return;
+            if (!Array.isArray(marketData)) {
+                console.log('⚠️ Market data is not an array:', marketData);
+                return;
+            }
 
+            console.log('📊 Updating prices UI with', marketData.length, 'stocks');
+            
             let pricesHTML = '';
-            marketData.slice(0, 4).forEach(stock => {
+            const displayData = marketData.slice(0, 4);
+            
+            if (displayData.length === 0) {
+                console.log('⚠️ No market data to display');
+                return;
+            }
+            
+            displayData.forEach(stock => {
                 const changeColor = stock.percentageChange >= 0 ? '#4CAF50' : '#F44336';
                 const changeIcon = stock.percentageChange >= 0 ? '📈' : '📉';
+                const currentPrice = stock.currentPrice || stock.current_price || 0;
+                const percentageChange = stock.percentageChange || stock.percentage_change || 0;
+                
                 pricesHTML += `
-                    <div class="price-item ${stock.percentageChange >= 0 ? 'up' : 'down'}">
+                    <div class="price-item ${percentageChange >= 0 ? 'up' : 'down'}">
                         <div class="price-left">
                             <div class="price-symbol">${stock.symbol}</div>
-                            <div class="price-value">₹${stock.currentPrice?.toFixed(2) || '0.00'}</div>
+                            <div class="price-value">₹${currentPrice.toFixed(2)}</div>
                         </div>
                         <div class="price-right">
-                            <div class="price-change ${stock.percentageChange >= 0 ? 'up' : 'down'}">${changeIcon} ${(stock.percentageChange || 0).toFixed(2)}%</div>
+                            <div class="price-change ${percentageChange >= 0 ? 'up' : 'down'}">${changeIcon} ${percentageChange.toFixed(2)}%</div>
                         </div>
                     </div>
                 `;
@@ -2817,7 +2843,10 @@
 
             const pricesContainer = document.getElementById('prices-container');
             if (pricesContainer) {
+                console.log('✅ Updating prices container with', displayData.length, 'items');
                 pricesContainer.innerHTML = pricesHTML;
+            } else {
+                console.log('❌ Prices container not found');
             }
         }
 
@@ -2901,44 +2930,97 @@
         }
 
         function switchScreen(index) {
+            console.log('🔄 switchScreen called with index:', index);
+            
             // If no token and not index 0 (home), stay on login
             if (!token && index !== 0) {
+                console.log('⚠️ No token, cannot switch to screen:', index);
                 logDebug('⚠️ Please login first');
                 return;
             }
 
-            // If token exists but trying to access without loading, load the data
+            // Load data for the target screen
             if (token) {
                 if (index === 0) {
-                    // Home screen - connect WebSocket
+                    console.log('📱 Loading Home screen data');
                     setTimeout(() => connectWebSocket(), 500);
                     loadWalletData();
                     loadUserProfile();
                 }
                 if (index === 1) {
-                    // Charts - load selected symbol
+                    console.log('📈 Loading Charts screen data');
                     const symbol = document.getElementById('symbolSelect')?.value || 'RELIANCE-CE-2900';
                     loadCandleData(symbol);
                 }
-                if (index === 2) loadWalletData();                     // Portfolio
-                if (index === 3) loadAlertsData();                     // Alerts
-                if (index === 4) loadUserProfile();                    // Profile
+                if (index === 2) {
+                    console.log('💰 Loading Portfolio screen data');
+                    loadWalletData();
+                }
+                if (index === 3) {
+                    console.log('🔔 Loading Alerts screen data');
+                    loadAlertsData();
+                }
+                if (index === 4) {
+                    console.log('👤 Loading Profile screen data');
+                    loadUserProfile();
+                }
             }
 
-            // Hide login screen
-            const loginScreen = document.getElementById('login-screen');
-            if (loginScreen) loginScreen.style.display = 'none';
-
-            // Hide all app screens
-            const screens = ['home-screen', 'charts-screen', 'portfolio-screen', 'alerts-screen', 'profile-screen'];
-            screens.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.style.display = 'none';
+            // Hide all phones
+            const phoneIds = ['phone-login-home', 'phone-charts', 'phone-portfolio', 'phone-alerts', 'phone-profile'];
+            phoneIds.forEach(id => {
+                const phone = document.getElementById(id);
+                if (phone) {
+                    phone.style.display = 'none';
+                    phone.style.visibility = 'hidden';
+                    phone.style.opacity = '0';
+                    phone.style.zIndex = '0';
+                }
             });
 
-            // Show selected screen
-            const selected = document.getElementById(screens[index]);
-            if (selected) selected.style.display = 'block';
+            // Show the selected phone
+            const selectedPhoneId = phoneIds[index];
+            const selectedPhone = document.getElementById(selectedPhoneId);
+            if (selectedPhone) {
+                console.log('✅ Showing phone:', selectedPhoneId);
+                selectedPhone.style.display = 'flex';
+                selectedPhone.style.visibility = 'visible';
+                selectedPhone.style.opacity = '1';
+                selectedPhone.style.zIndex = '10';
+            }
+
+            // For login-home phone, show/hide specific screens
+            if (index === 0) {
+                console.log('🔐 Configuring login-home screen');
+                const loginScreen = document.getElementById('login-screen');
+                const homeScreen = document.getElementById('home-screen');
+                
+                if (token) {
+                    // Logged in - show home
+                    if (loginScreen) {
+                        loginScreen.style.display = 'none';
+                        loginScreen.style.visibility = 'hidden';
+                        loginScreen.style.opacity = '0';
+                    }
+                    if (homeScreen) {
+                        homeScreen.style.display = 'flex';
+                        homeScreen.style.visibility = 'visible';
+                        homeScreen.style.opacity = '1';
+                    }
+                } else {
+                    // Not logged in - show login
+                    if (loginScreen) {
+                        loginScreen.style.display = 'flex';
+                        loginScreen.style.visibility = 'visible';
+                        loginScreen.style.opacity = '1';
+                    }
+                    if (homeScreen) {
+                        homeScreen.style.display = 'none';
+                        homeScreen.style.visibility = 'hidden';
+                        homeScreen.style.opacity = '0';
+                    }
+                }
+            }
 
             // Update nav items styling
             const navItems = document.querySelectorAll('.nav-item');
@@ -2949,12 +3031,9 @@
                     item.classList.remove('active');
                 }
             });
+            
+            console.log('✅ Screen switch complete');
         }
-
-        function switchScreenPhone2(index) {}
-        function switchScreenPhone3(index) {}
-        function switchScreenPhone4(index) {}
-        function switchScreenPhone5(index) {}
 
         // ========== INITIALIZATION ==========
         document.addEventListener('DOMContentLoaded', () => {
@@ -2966,40 +3045,75 @@
                  logDebug(`✅ JWT Token found (${token.substring(0, 20)}...)`);
                 logDebug('ℹ️ Tip: Open browser DevTools (F12) > Application > LocalStorage to see full token');
                 
-                // Hide login screen
-                const loginScreen = document.getElementById('login-screen');
-                if (loginScreen) loginScreen.style.display = 'none';
+                // Show phone-login-home with home screen
+                const phone = document.getElementById('phone-login-home');
+                if (phone) {
+                    phone.style.display = 'flex';
+                    const loginScreen = document.getElementById('login-screen');
+                    if (loginScreen) loginScreen.style.display = 'none';
+                    const homeScreen = document.getElementById('home-screen');
+                    if (homeScreen) homeScreen.style.display = 'flex';
+                }
                 
-                // Show home screen
-                const homeScreen = document.getElementById('home-screen');
-                if (homeScreen) homeScreen.style.display = 'block';
+                // Hide other phones
+                const otherPhones = ['phone-charts', 'phone-portfolio', 'phone-alerts', 'phone-profile'];
+                otherPhones.forEach(id => {
+                    const p = document.getElementById(id);
+                    if (p) p.style.display = 'none';
+                });
                 
                 // Show bottom nav
                 const bottomNav = document.querySelector('.bottom-nav');
                 if (bottomNav) bottomNav.style.display = 'flex';
 
+                console.log('🔌 Connecting WebSocket in 500ms...');
                 // Connect WebSocket
-                setTimeout(() => connectWebSocket(), 500);
-                loadWalletData();
-                loadUserProfile();
+                setTimeout(() => {
+                    console.log('🔌 WebSocket connection attempt...');
+                    connectWebSocket();
+                }, 500);
+                
+                console.log('💼 Loading wallet data...');
+                try {
+                    loadWalletData();
+                } catch (err) {
+                    console.error('❌ Wallet loading error:', err);
+                }
+                
+                console.log('👤 Loading user profile...');
+                try {
+                    loadUserProfile();
+                } catch (err) {
+                    console.error('❌ Profile loading error:', err);
+                }
                 
                 // Auto-load home screen data
-                loadCandleData('RELIANCE-CE-2900');
+                console.log('📊 Loading candle data...');
+                try {
+                    loadCandleData('RELIANCE-CE-2900');
+                } catch (err) {
+                    console.error('❌ Candle loading error:', err);
+                }
             } else {
                 logDebug('⚠️ No JWT token found in localStorage');
                 logDebug('💡 Please login to access the app');
                 
-                // Show login screen
-                const loginScreen = document.getElementById('login-screen');
-                if (loginScreen) loginScreen.style.display = 'flex';
+                // Show phone-login-home with login screen
+                const phone = document.getElementById('phone-login-home');
+                if (phone) {
+                    phone.style.display = 'flex';
+                    const loginScreen = document.getElementById('login-screen');
+                    if (loginScreen) loginScreen.style.display = 'flex';
+                    const homeScreen = document.getElementById('home-screen');
+                    if (homeScreen) homeScreen.style.display = 'none';
+                }
                 
-                // Hide home screen
-                const homeScreen = document.getElementById('home-screen');
-                if (homeScreen) homeScreen.style.display = 'none';
-                
-                // Hide bottom nav
-                const bottomNav = document.querySelector('.bottom-nav');
-                if (bottomNav) bottomNav.style.display = 'none';
+                // Hide other phones
+                const otherPhones = ['phone-charts', 'phone-portfolio', 'phone-alerts', 'phone-profile'];
+                otherPhones.forEach(id => {
+                    const p = document.getElementById(id);
+                    if (p) p.style.display = 'none';
+                });
                 
                 updateConnectionStatus('disconnected');
                 logDebug('⏳ Waiting for login to establish WebSocket connection...');
@@ -3100,14 +3214,94 @@
                 console.log('In browser F12 console, type: debugTrading.help()');
             }
         };
-    </script>
 
-        function switchScreenPhone2(index) {}
-        function switchScreenPhone3(index) {}
-        function switchScreenPhone4(index) {}
-        function switchScreenPhone5(index) {}
-
-        console.log('✓ App screens loaded!');
+        // Add profile debug functions
+        window.debugProfile = {
+            testFetch: async () => {
+                console.log('🧪 Testing Profile API fetch...');
+                if (!token) {
+                    console.error('❌ No token available');
+                    return;
+                }
+                try {
+                    const response = await fetch(`${API_BASE}/user/profile`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    console.log('📊 API Response Status:', response.status, response.statusText);
+                    const data = await response.json();
+                    console.log('📋 Profile Data:', data);
+                    return data;
+                } catch (error) {
+                    console.error('💥 Fetch Error:', error);
+                }
+            },
+            checkElements: () => {
+                const phoneProfile = document.getElementById('phone-profile');
+                const profileScreen = document.getElementById('profile-screen');
+                const profileContainer = document.getElementById('profile-container');
+                
+                console.log('📍 phone-profile exists:', !!phoneProfile);
+                console.log('📍 profile-screen exists:', !!profileScreen);
+                console.log('📍 profile-container exists:', !!profileContainer);
+                
+                if (phoneProfile) {
+                    const computed = window.getComputedStyle(phoneProfile);
+                    console.log('  display:', computed.display);
+                    console.log('  visibility:', computed.visibility);
+                    console.log('  opacity:', computed.opacity);
+                    console.log('  zIndex:', computed.zIndex);
+                }
+                
+                if (profileScreen) {
+                    const computed = window.getComputedStyle(profileScreen);
+                    console.log('📍 profile-screen styles:');
+                    console.log('  display:', computed.display);
+                    console.log('  visibility:', computed.visibility);
+                    console.log('  opacity:', computed.opacity);
+                    console.log('  background:', computed.background);
+                }
+                
+                if (profileContainer) {
+                    const computed = window.getComputedStyle(profileContainer);
+                    console.log('📍 profile-container styles:');
+                    console.log('  display:', computed.display);
+                    console.log('  visibility:', computed.visibility);
+                    console.log('  background:', computed.background);
+                    console.log('  innerHTML length:', profileContainer.innerHTML.length);
+                }
+            },
+            loadProfile: () => {
+                console.log('👤 Manually loading profile...');
+                loadUserProfile();
+            },
+            switchToProfile: () => {
+                console.log('🔄 Switching to profile screen...');
+                switchScreen(4);
+            },
+            fullDiagnostic: async () => {
+                console.log('%c=== PROFILE DIAGNOSTIC ===', 'color: #2E5BFF; font-size: 16px; font-weight: bold;');
+                debugProfile.checkElements();
+                console.log('');
+                const data = await debugProfile.testFetch();
+                console.log('');
+                console.log('%c=== DIAGNOSTIC COMPLETE ===', 'color: #2E5BFF; font-size: 14px; font-weight: bold;');
+            },
+            help: () => {
+                console.log('%c=== Profile Debug Commands ===', 'color: #2E5BFF; font-size: 14px; font-weight: bold;');
+                console.log('debugProfile.checkElements() - Check if profile DOM elements exist and their styles');
+                console.log('debugProfile.testFetch() - Test the /user/profile API endpoint');
+                console.log('debugProfile.loadProfile() - Manually call loadUserProfile()');
+                console.log('debugProfile.switchToProfile() - Manually switch to profile screen');
+                console.log('debugProfile.fullDiagnostic() - Run complete diagnostic');
+                console.log('debugProfile.help() - Show this help');
+                console.log('%c=== Usage ===', 'color: #FF9800; font-size: 12px;');
+                console.log('In browser F12 console, type: debugProfile.help()');
+            }
+        };
     </script>
 </body>
 </html>
