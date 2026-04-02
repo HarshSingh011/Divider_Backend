@@ -89,6 +89,8 @@
             font-size: 12px;
             font-weight: 600;
             margin-top: 16px;
+            height: 50px;
+            flex-shrink: 0;  /* Don't shrink */
         }
 
         .status-left, .status-right {
@@ -104,6 +106,37 @@
             overflow-x: hidden;
             background: var(--bg-secondary);
             scroll-behavior: smooth;
+            min-height: 0; /* Important for flex children */
+            min-width: 0;  /* Important for flex children */
+        }
+
+        /* Explicit profile screen styling */
+        #profile-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #F8F8F8;
+            scroll-behavior: smooth;
+            min-height: 0;
+            min-width: 0;
+            visibility: visible;
+            opacity: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Profile container styling */
+        #profile-container {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #F8F8F8;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            min-width: 0;
         }
 
         .app-content::-webkit-scrollbar {
@@ -125,6 +158,8 @@
             display: flex;
             justify-content: space-around;
             padding: 12px 0 24px;
+            height: 80px;
+            flex-shrink: 0;  /* Don't shrink */
         }
 
         .nav-item {
@@ -684,9 +719,56 @@
             font-weight: 600;
             text-align: right;
         }
+
+        /* PERSISTENT DEBUG LOG */
+        #persistent-debug-log {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 400px;
+            max-height: 300px;
+            background: #1a1a1a;
+            border: 2px solid #FF5722;
+            border-radius: 8px;
+            color: #00FF00;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 10px;
+            overflow-y: auto;
+            z-index: 9999;
+            box-shadow: 0 0 15px rgba(255, 87, 34, 0.5);
+            line-height: 1.4;
+        }
+
+        #persistent-debug-log .log-entry {
+            margin-bottom: 4px;
+            padding: 4px;
+            border-bottom: 1px solid #333;
+        }
+
+        #persistent-debug-log .log-entry.error {
+            color: #FF3333;
+        }
+
+        #persistent-debug-log .log-entry.success {
+            color: #00FF00;
+        }
+
+        #persistent-debug-log .log-entry.warning {
+            color: #FFFF00;
+        }
+
+        #persistent-debug-log .log-entry.info {
+            color: #00CCFF;
+        }
     </style>
 </head>
 <body>
+    <!-- PERSISTENT DEBUG LOG -->
+    <div id="persistent-debug-log">
+        <div style="font-weight: bold; margin-bottom: 8px; color: #FF5722;">🔍 PROFILE DEBUG LOG 🔍</div>
+    </div>
+
     <!-- PHONE 1: LOGIN SCREEN -->
     <div class="phone" id="phone-login-home">
         <div class="status-bar">
@@ -1181,6 +1263,7 @@
                     </div>
                 </div>
             </div>
+            </div>
 
             <div class="section">
                 <div class="section-title">🔴 Triggered Today (3)</div>
@@ -1263,21 +1346,21 @@
             <div class="status-right">📶 📡 🔋</div>
         </div>
 
-        <div class="app-content" id="profile-screen" style="background: #F8F8F8 !important; display: flex !important; flex-direction: column !important; visibility: visible !important; opacity: 1 !important;">
-            <div class="header" style="background: linear-gradient(135deg, #2E5BFF 0%, #1e40ff 100%); color: white; padding: 20px; border-radius: 0 0 20px 20px; z-index: 1;">
+        <div class="app-content" id="profile-screen">
+            <div class="header" style="background: linear-gradient(135deg, #2E5BFF 0%, #1e40ff 100%); color: white; padding: 20px; border-radius: 0 0 20px 20px;">
                 <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">👤 YOUR PROFILE</div>
                 <div style="font-size: 12px; opacity: 0.9;">Account Information</div>
             </div>
 
-            <div id="profile-container" style="padding: 15px; flex: 1; overflow-y: auto; background: #F8F8F8; z-index: 2;">
-                <div style="background:white; border-radius:12px; padding:15px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:5;">
+            <div id="profile-container" style="padding: 15px; flex: 1; overflow-y: auto; background: #F8F8F8;">
+                <div style="background:white; border-radius:12px; padding:15px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
                     <div style="text-align:center; margin-bottom:15px;">
                         <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; margin: 0 auto 10px; display:flex; align-items:center; justify-content:center; color:white; font-size:28px;">👤</div>
                         <div style="font-size:18px; font-weight:600; color:#333; margin-bottom:4px;">Loading Profile...</div>
                         <div style="font-size:12px; color:#666;">Fetching your account information...</div>
                     </div>
                 </div>
-                <div style="text-align: center; padding: 30px; color: #333; background: white; border-radius: 12px; margin: 15px; z-index: 3;">
+                <div style="text-align: center; padding: 30px; color: #333; background: white; border-radius: 12px; margin: 15px;">
                     <div style="font-size: 24px; margin-bottom: 10px;">⏳</div>
                     <div style="font-size: 14px; font-weight: 600; color: #333;">Loading profile...</div>
                     <div style="font-size: 12px; color: #666; margin-top: 5px;">Connecting to server...</div>
@@ -1306,10 +1389,6 @@
             </div>
             <div class="nav-item active" onclick="switchScreen(4)">
                 <div class="nav-icon">👤</div>
-                <div>Profile</div>
-            </div>
-        </div>
-    </div>
                 <div>Profile</div>
             </div>
         </div>
@@ -1437,6 +1516,23 @@
         let wsConnected = false;
         let wsInstance = null;
         let wsMessageCount = 0;
+
+        // PERSISTENT DEBUG LOGGING - Works across all screens
+        function logPersistent(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            
+            const debugLog = document.getElementById('persistent-debug-log');
+            if (debugLog) {
+                debugLog.appendChild(logEntry);
+                debugLog.scrollTop = debugLog.scrollHeight; // Auto-scroll to bottom
+            }
+            
+            // Also log to console
+            console.log(`[${timestamp}] ${message}`, type);
+        }
 
         // Debug logging function
         function logDebug(message, data = null) {
@@ -2601,11 +2697,16 @@
 
         // ========== PROFILE APIs ==========
         async function loadUserProfile() {
+            logPersistent('👤 loadUserProfile() CALLED', 'info');
             console.log('🔍 loadUserProfile() called');
             
             const profileContainer = document.getElementById('profile-container');
             const profileScreen = document.getElementById('profile-screen');
             const phoneProfile = document.getElementById('phone-profile');
+            
+            logPersistent(`profileContainer exists: ${!!profileContainer}`, 'info');
+            logPersistent(`profileScreen exists: ${!!profileScreen}`, 'info');
+            logPersistent(`phoneProfile exists: ${!!phoneProfile}`, 'info');
             
             console.log('📍 profileContainer found:', !!profileContainer);
             console.log('📍 profileScreen found:', !!profileScreen);
@@ -2630,6 +2731,7 @@
             
             if (!token) {
                 console.log('⚠️ No token available for profile load');
+                logPersistent('⚠️ NO TOKEN - Cannot load profile', 'warning');
                 addDebugLog('⚠️ No token available for profile load', 'warning');
                 if (profileContainer) {
                     profileContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#999; background:white; border-radius:8px; margin:15px;">🚫 Please login to view profile</div>';
@@ -2637,17 +2739,23 @@
                 return;
             }
 
+            logPersistent('✅ Token found - Ready to fetch', 'success');
+
             if (profileContainer) {
                 profileContainer.innerHTML = '<div style="text-align:center; padding:30px; color:#333; background:white; border-radius:8px; margin:15px; z-index:10;"><div style="font-size: 24px; margin-bottom: 10px;">⏳</div><div style="font-size: 14px; font-weight: 600; color: #333;">Loading profile...</div><div style="font-size: 12px; color: #666; margin-top: 5px;">Connecting to server...</div></div>';
                 console.log('✅ Loading message displayed');
+                logPersistent('📝 Loading message set in container', 'info');
             } else {
+                logPersistent('❌ CRITICAL: profileContainer NOT FOUND!', 'error');
                 console.log('❌ profileContainer NOT found!');
             }
 
             addDebugLog('👤 Loading user profile...', 'info');
+            logPersistent(`🌐 Fetching from: ${API_BASE}/user/profile`, 'info');
             console.log('🌐 Fetching from:', `${API_BASE}/user/profile`);
 
             try {
+                logPersistent('📤 Sending API request...', 'info');
                 const response = await fetch(`${API_BASE}/user/profile`, {
                     method: 'GET',
                     headers: {
@@ -2657,11 +2765,13 @@
                 });
 
                 console.log('📊 Profile API Response Status:', response.status);
+                logPersistent(`📊 API Response: ${response.status} ${response.statusText}`, 'info');
                 addDebugLog(`📊 Profile API Response Status: ${response.status}`, 'info');
 
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.log('❌ Error response:', errorText);
+                    logPersistent(`❌ API ERROR: ${response.status} - ${errorText}`, 'error');
                     addDebugLog(`❌ Failed to load profile: ${response.status} - ${errorText}`, 'error');
                     if (profileContainer) {
                         profileContainer.innerHTML = `<div style="text-align:center; padding:30px; color:red; background:white; border-radius:8px; margin:15px;">❌ Error loading profile: ${response.status}</div>`;
@@ -2671,11 +2781,14 @@
 
                 const profile = await response.json();
                 console.log('✅ Profile loaded:', profile);
+                logPersistent(`✅ PROFILE DATA RECEIVED: ${profile.username}`, 'success');
                 addDebugLog(`✅ Profile loaded: ${profile.username || profile.email}`, 'success');
                 addDebugLog(`📝 Profile email: ${profile.email}`, 'info');
+                logPersistent('🎨 Calling updateProfileUI()...', 'info');
                 updateProfileUI(profile);
             } catch (error) {
                 console.log('💥 Error loading profile:', error);
+                logPersistent(`💥 FETCH ERROR: ${error.message}`, 'error');
                 addDebugLog(`💥 Error loading profile: ${error.message}`, 'error');
                 if (profileContainer) {
                     profileContainer.innerHTML = `<div style="text-align:center; padding:30px; color:red; background:white; border-radius:8px; margin:15px;">💥 Error: ${error.message}</div>`;
@@ -2685,6 +2798,7 @@
 
         function updateProfileUI(profile) {
             console.log('🎨 updateProfileUI() called with:', profile);
+            logPersistent('🎨 updateProfileUI() STARTED', 'info');
             
             let profileHTML = `
                 <div style="background:white; border-radius:12px; padding:15px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:5;">
@@ -2721,9 +2835,40 @@
 
             const profileContainer = document.getElementById('profile-container');
             if (profileContainer) {
+                logPersistent(`✅ profileContainer found, updating HTML...`, 'success');
                 profileContainer.innerHTML = profileHTML;
                 console.log('✅ Profile HTML updated');
+                logPersistent(`✅ PROFILE HTML UPDATED - User: ${profile.username}`, 'success');
+                
+                // DEBUG: Check actual rendering
+                setTimeout(() => {
+                    const phoneProfile = document.getElementById('phone-profile');
+                    const appContent = document.getElementById('profile-screen');
+                    const container = document.getElementById('profile-container');
+                    
+                    if (phoneProfile) {
+                        const phoneComputed = window.getComputedStyle(phoneProfile);
+                        const phoneRect = phoneProfile.getBoundingClientRect();
+                        logPersistent(`🎯 phone-profile FIX: display=${phoneComputed.display} h=${phoneRect.height}px`, 'success');
+                    }
+                    
+                    if (appContent) {
+                        const appComputed = window.getComputedStyle(appContent);
+                        const appRect = appContent.getBoundingClientRect();
+                        logPersistent(`🎯 profile-screen FIX: display=${appComputed.display} h=${appRect.height}px`, 'success');
+                        logPersistent(`🎯 profile-screen FIX: flex=${appComputed.flex} flex-basis=${appComputed.flexBasis}`, 'success');
+                    }
+                    
+                    if (container) {
+                        const containerComputed = window.getComputedStyle(container);
+                        const containerRect = container.getBoundingClientRect();
+                        logPersistent(`🎯 profile-container FIX: h=${containerRect.height}px children=${container.children.length}`, 'success');
+                    }
+                    
+                    logPersistent(`✅✅✅ PROFILE SCREEN SHOULD NOW BE VISIBLE! ✅✅✅`, 'success');
+                }, 50);
             } else {
+                logPersistent('❌ CRITICAL: profileContainer NOT found in updateProfileUI!', 'error');
                 console.log('❌ profileContainer not found!');
             }
         }
@@ -2930,11 +3075,13 @@
         }
 
         function switchScreen(index) {
+            logPersistent(`🔄 switchScreen() CALLED with index: ${index}`, 'info');
             console.log('🔄 switchScreen called with index:', index);
             
             // If no token and not index 0 (home), stay on login
             if (!token && index !== 0) {
                 console.log('⚠️ No token, cannot switch to screen:', index);
+                logPersistent('⚠️ NO TOKEN - Cannot switch screens', 'warning');
                 logDebug('⚠️ Please login first');
                 return;
             }
@@ -2943,31 +3090,37 @@
             if (token) {
                 if (index === 0) {
                     console.log('📱 Loading Home screen data');
+                    logPersistent('📱 Home screen - Loading data', 'info');
                     setTimeout(() => connectWebSocket(), 500);
                     loadWalletData();
                     loadUserProfile();
                 }
                 if (index === 1) {
                     console.log('📈 Loading Charts screen data');
+                    logPersistent('📈 Charts screen - Loading data', 'info');
                     const symbol = document.getElementById('symbolSelect')?.value || 'RELIANCE-CE-2900';
                     loadCandleData(symbol);
                 }
                 if (index === 2) {
                     console.log('💰 Loading Portfolio screen data');
+                    logPersistent('💰 Portfolio screen - Loading data', 'info');
                     loadWalletData();
                 }
                 if (index === 3) {
                     console.log('🔔 Loading Alerts screen data');
+                    logPersistent('🔔 Alerts screen - Loading data', 'info');
                     loadAlertsData();
                 }
                 if (index === 4) {
                     console.log('👤 Loading Profile screen data');
+                    logPersistent('👤👤👤 PROFILE SCREEN - TRIGGERED 👤👤👤', 'warning');
                     loadUserProfile();
                 }
             }
 
             // Hide all phones
             const phoneIds = ['phone-login-home', 'phone-charts', 'phone-portfolio', 'phone-alerts', 'phone-profile'];
+            logPersistent(`📴 Hiding all phones...`, 'info');
             phoneIds.forEach(id => {
                 const phone = document.getElementById(id);
                 if (phone) {
@@ -2975,18 +3128,24 @@
                     phone.style.visibility = 'hidden';
                     phone.style.opacity = '0';
                     phone.style.zIndex = '0';
+                    if (index === 4) logPersistent(`  Hid ${id}`, 'info');
                 }
             });
 
             // Show the selected phone
             const selectedPhoneId = phoneIds[index];
             const selectedPhone = document.getElementById(selectedPhoneId);
+            logPersistent(`📱 Trying to show: ${selectedPhoneId}`, 'info');
             if (selectedPhone) {
                 console.log('✅ Showing phone:', selectedPhoneId);
+                logPersistent(`✅ FOUND ${selectedPhoneId} - Applying display styles`, 'success');
                 selectedPhone.style.display = 'flex';
                 selectedPhone.style.visibility = 'visible';
                 selectedPhone.style.opacity = '1';
                 selectedPhone.style.zIndex = '10';
+                logPersistent(`✅ STYLES APPLIED - Should be visible now!`, 'success');
+            } else {
+                logPersistent(`❌ CRITICAL: ${selectedPhoneId} NOT FOUND!`, 'error');
             }
 
             // For login-home phone, show/hide specific screens
@@ -3290,12 +3449,77 @@
                 console.log('');
                 console.log('%c=== DIAGNOSTIC COMPLETE ===', 'color: #2E5BFF; font-size: 14px; font-weight: bold;');
             },
+            visualTest: () => {
+                console.log('🎨 Visual Test - Adding colored borders to profile elements...');
+                const phoneProfile = document.getElementById('phone-profile');
+                const profileScreen = document.getElementById('profile-screen');
+                const profileContainer = document.getElementById('profile-container');
+                
+                if (phoneProfile) {
+                    phoneProfile.style.border = '5px solid RED';
+                    console.log('✅ Added RED border to phone-profile');
+                    logPersistent('🎨 RED border added to phone-profile', 'info');
+                }
+                
+                if (profileScreen) {
+                    profileScreen.style.border = '3px solid GREEN';
+                    profileScreen.style.backgroundColor = 'rgba(0, 255, 0, 0.1)';
+                    console.log('✅ Added GREEN border to profile-screen');
+                    logPersistent('🎨 GREEN border added to profile-screen', 'info');
+                }
+                
+                if (profileContainer) {
+                    profileContainer.style.border = '2px solid BLUE';
+                    profileContainer.style.backgroundColor = 'rgba(0, 0, 255, 0.1)';
+                    console.log('✅ Added BLUE border to profile-container');
+                    logPersistent('🎨 BLUE border added to profile-container', 'info');
+                }
+                
+                console.log('🎨 Visual test complete. If you see colored boxes in profile screen, rendering works!');
+            },
+            checkDimensions: () => {
+                console.log('%c🔍 CHECKING ELEMENT DIMENSIONS AND POSITIONS', 'color: #FF5722; font-size: 14px; font-weight: bold;');
+                
+                const phoneProfile = document.getElementById('phone-profile');
+                const profileScreen = document.getElementById('profile-screen');
+                const profileContainer = document.getElementById('profile-container');
+                
+                if (phoneProfile) {
+                    const rect = phoneProfile.getBoundingClientRect();
+                    console.log('📍 phone-profile position:', {
+                        top: rect.top, left: rect.left, width: rect.width, height: rect.height,
+                        visible: rect.height > 0 && rect.width > 0
+                    });
+                    logPersistent(`phone-profile: w=${rect.width} h=${rect.height} visible=${rect.height > 0}`, 'info');
+                }
+                
+                if (profileScreen) {
+                    const rect = profileScreen.getBoundingClientRect();
+                    console.log('📍 profile-screen position:', {
+                        top: rect.top, left: rect.left, width: rect.width, height: rect.height,
+                        visible: rect.height > 0 && rect.width > 0
+                    });
+                    logPersistent(`profile-screen: w=${rect.width} h=${rect.height} visible=${rect.height > 0}`, 'info');
+                }
+                
+                if (profileContainer) {
+                    const rect = profileContainer.getBoundingClientRect();
+                    console.log('📍 profile-container position:', {
+                        top: rect.top, left: rect.left, width: rect.width, height: rect.height,
+                        visible: rect.height > 0 && rect.width > 0,
+                        children: profileContainer.children.length
+                    });
+                    logPersistent(`profile-container: w=${rect.width} h=${rect.height} children=${profileContainer.children.length}`, 'info');
+                }
+            },
             help: () => {
                 console.log('%c=== Profile Debug Commands ===', 'color: #2E5BFF; font-size: 14px; font-weight: bold;');
                 console.log('debugProfile.checkElements() - Check if profile DOM elements exist and their styles');
                 console.log('debugProfile.testFetch() - Test the /user/profile API endpoint');
                 console.log('debugProfile.loadProfile() - Manually call loadUserProfile()');
                 console.log('debugProfile.switchToProfile() - Manually switch to profile screen');
+                console.log('debugProfile.visualTest() - Add colored borders to see if elements are rendering');
+                console.log('debugProfile.checkDimensions() - Check element sizes and positions');
                 console.log('debugProfile.fullDiagnostic() - Run complete diagnostic');
                 console.log('debugProfile.help() - Show this help');
                 console.log('%c=== Usage ===', 'color: #FF9800; font-size: 12px;');
