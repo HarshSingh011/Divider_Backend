@@ -2129,14 +2129,115 @@
             // ========== Update Transactions Section ==========
             const transactionsContainer = document.getElementById('transactions-container');
             if (transactionsContainer) {
-                transactionsContainer.innerHTML = `
-                    <div style="text-align:center; padding:20px; color:#999;">
-                        <div style="font-size:12px;">📋 Transaction history coming soon</div>
-                    </div>
-                `;
+                await loadTransactions();
             }
 
             addDebugLog('✅ Portfolio UI updated successfully', 'success');
+        }
+
+        async function loadTransactions() {
+            if (!token) {
+                addDebugLog('⚠️ No token, cannot load transactions', 'warning');
+                return;
+            }
+
+            try {
+                addDebugLog('📋 Fetching transaction history...', 'info');
+                
+                const response = await fetch(`${API_BASE}/trading/transactions`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch transactions: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const transactions = data.transactions || [];
+                const transactionsContainer = document.getElementById('transactions-container');
+
+                if (!transactionsContainer) return;
+
+                if (transactions.length === 0) {
+                    transactionsContainer.innerHTML = `
+                        <div style="text-align:center; padding:20px; color:#999;">
+                            <div style="font-size:12px;">📋 No transactions yet</div>
+                        </div>
+                    `;
+                    addDebugLog('ℹ️ No transactions found', 'info');
+                    return;
+                }
+
+                // Sort transactions by date (newest first)
+                const sorted = transactions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                let transactionsHTML = '';
+                
+                sorted.forEach(txn => {
+                    const date = new Date(txn.created_at);
+                    const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    
+                    let emoji = '💳';
+                    let typeLabel = txn.type;
+                    let amountColor = 'var(--text-secondary)';
+                    let amount = txn.amount;
+
+                    if (txn.type === 'DEPOSIT') {
+                        emoji = '💰';
+                        typeLabel = '💳 DEPOSIT Cash';
+                        amountColor = 'var(--success)';
+                        amount = txn.amount;
+                    } else if (txn.type === 'BUY') {
+                        emoji = '🟢';
+                        typeLabel = `🟢 BUY ${Math.round(txn.quantity)} ${txn.symbol || 'STOCK'}`;
+                        amountColor = 'var(--danger)';
+                        amount = txn.amount + txn.fee;
+                    } else if (txn.type === 'SELL') {
+                        emoji = '🔴';
+                        typeLabel = `🔴 SELL ${Math.round(txn.quantity)} ${txn.symbol || 'STOCK'}`;
+                        amountColor = 'var(--success)';
+                        amount = txn.amount - txn.fee;
+                    } else if (txn.type === 'WITHDRAWAL') {
+                        emoji = '💸';
+                        typeLabel = '💸 WITHDRAWAL';
+                        amountColor = 'var(--danger)';
+                        amount = txn.amount;
+                    }
+
+                    const amountSign = (txn.type === 'DEPOSIT' || txn.type === 'SELL') ? '+' : '-';
+                    
+                    transactionsHTML += `
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="transaction-type">${typeLabel}</div>
+                                <div class="transaction-time">${timeStr} ${dateStr}${txn.fee ? ` | Fee: ₹${txn.fee.toFixed(2)}` : ''}</div>
+                            </div>
+                            <div class="transaction-amount" style="color: ${amountColor};">
+                                ${amountSign}₹${Math.abs(amount).toFixed(2)}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                transactionsContainer.innerHTML = transactionsHTML;
+                addDebugLog(`✅ Loaded ${transactions.length} transactions`, 'success');
+
+            } catch (error) {
+                addDebugLog(`💥 Error loading transactions: ${error.message}`, 'error');
+                const transactionsContainer = document.getElementById('transactions-container');
+                if (transactionsContainer) {
+                    transactionsContainer.innerHTML = `
+                        <div style="text-align:center; padding:20px; color:#d32f2f;">
+                            <div style="font-size:12px;">❌ Failed to load transactions</div>
+                        </div>
+                    `;
+                }
+            }
         }
 
         async function depositCash(amount) {
