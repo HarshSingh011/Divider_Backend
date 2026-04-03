@@ -62,11 +62,12 @@ type TransactionRepository interface {
 }
 
 type WalletSnapshot struct {
-	UserID        string              `json:"user_id"`
-	TotalBalance  float64             `json:"total_balance"`
-	AvailableCash float64             `json:"available_cash"`
-	Positions     map[string]Position `json:"positions"`
-	LastUpdated   time.Time           `json:"last_updated"`
+	UserID         string              `json:"user_id"`
+	TotalBalance   float64             `json:"total_balance"`
+	AvailableCash  float64             `json:"available_cash"`
+	InvestedAmount float64             `json:"invested_amount"`
+	Positions      map[string]Position `json:"positions"`
+	LastUpdated    time.Time           `json:"last_updated"`
 }
 
 type Position struct {

@@ -1,0 +1,538 @@
+openapi: 3.0.0
+info:
+  title: StockTrack API
+  description: Real-time trading engine backend API for StockTrack application.
+  version: 1.0.0
+servers:
+  - url: https://divider-backend.onrender.com
+    description: Production Server
+  - url: http://localhost:8080
+    description: Local Development Server
+
+tags:
+  - name: Authentication
+    description: User registration and login
+  - name: User Profile
+    description: User profile and session management
+  - name: Trading
+    description: Portfolio, trades, and wallet operations
+  - name: Market Data
+    description: Live market prices and historical candle data
+  - name: Alerts
+    description: Price alert management
+  - name: System
+    description: Health checks and system endpoints
+
+paths:
+  /health:
+    get:
+      tags:
+        - System
+      summary: API Health Check
+      description: Returns the health status of the API.
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              example:
+                status: "OK"
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid request or validation error
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+
+  /user/profile:
+    get:
+      tags:
+        - User Profile
+      summary: Get User Profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Unauthorized
+    put:
+      tags:
+        - User Profile
+      summary: Update User Profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+        '401':
+          description: Unauthorized
+
+  /user/sessions:
+    get:
+      tags:
+        - User Profile
+      summary: Get Active Sessions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of active sessions retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActiveSession'
+        '401':
+          description: Unauthorized
+
+  /user/logout:
+    post:
+      tags:
+        - User Profile
+      summary: Logout User
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logged out successfully
+          content:
+            application/json:
+              example:
+                success: true
+                message: "Logged out successfully"
+
+  /trading/wallet:
+    get:
+      tags:
+        - Trading
+      summary: Get Wallet Snapshot
+      description: Retrieves user's total balance, available cash, and current holdings.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Wallet snapshot retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletSnapshot'
+        '401':
+          description: Unauthorized
+
+  /trading/deposit:
+    post:
+      tags:
+        - Trading
+      summary: Deposit Cash
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                  example: 10000
+      responses:
+        '200':
+          description: Deposit successful
+          content:
+            application/json:
+              example:
+                status: "Deposit successful"
+        '401':
+          description: Unauthorized
+
+  /trading/trade:
+    post:
+      tags:
+        - Trading
+      summary: Execute a Trade (Buy/Sell)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TradeRequest'
+      responses:
+        '200':
+          description: Trade executed successfully
+          content:
+            application/json:
+              example:
+                status: "Trade executed successfully"
+                total: 1025.0
+                symbol: "RELIANCE-CE-2900"
+                quantity: 10
+                price: 102.5
+                type: "BUY"
+        '400':
+          description: Invalid trade request (e.g., insufficient funds)
+        '401':
+          description: Unauthorized
+
+  /trading/alerts:
+    get:
+      tags:
+        - Alerts
+      summary: Get User Alerts
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of user alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Alert'
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - Alerts
+      summary: Create an Alert
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                symbol:
+                  type: string
+                price:
+                  type: number
+                condition:
+                  type: string
+                  enum: [ABOVE, BELOW]
+      responses:
+        '201':
+          description: Alert created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alert'
+        '401':
+          description: Unauthorized
+
+  /trading/candles:
+    get:
+      tags:
+        - Market Data
+      summary: Get OHLC Candles
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "RELIANCE-CE-2900"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: Historical candle data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Candle'
+
+  /market/data:
+    get:
+      tags:
+        - Market Data
+      summary: Get Market Data Summary
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current market data across tracked symbols
+          content:
+            application/json:
+              example:
+                data:
+                  stocks:
+                    - symbol: "RELIANCE-CE-2900"
+                      current_price: 102.50
+                      change: 2.50
+                      change_percent: 2.5
+                      high: 105.00
+                      low: 100.00
+                      volume: 1200
+
+  /ws:
+    get:
+      tags:
+        - Market Data
+      summary: WebSocket Connection (Market Stream)
+      description: Connect to real-time market data streaming. Requires JWT token either in query param `?token=` or Authorization Header.
+      parameters:
+        - name: token
+          in: query
+          required: true
+          description: JWT Authentication token
+          schema:
+            type: string
+      responses:
+        '101':
+          description: Switching Protocols to WebSocket
+        '401':
+          description: Unauthorized
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AuthRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: trader@stocktrack.com
+        username:
+          type: string
+          example: trader123
+        password:
+          type: string
+          format: password
+          example: SecurePass123!
+
+    AuthResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        token:
+          type: string
+          description: JWT Token to be used in Authorization header
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        bank_account:
+          type: string
+        bank_account_status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        member_since:
+          type: string
+          format: date-time
+        is_verified:
+          type: boolean
+        theme:
+          type: string
+        notification_alerts:
+          type: boolean
+        notification_trades:
+          type: boolean
+        notification_news:
+          type: boolean
+        two_factor_enabled:
+          type: boolean
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        theme:
+          type: string
+          example: "Dark"
+        notification_alerts:
+          type: boolean
+        notification_trades:
+          type: boolean
+        notification_news:
+          type: boolean
+
+    ActiveSession:
+      type: object
+      properties:
+        device_name:
+          type: string
+        last_active:
+          type: string
+          format: date-time
+        ip_address:
+          type: string
+
+    TradeRequest:
+      type: object
+      required:
+        - symbol
+        - quantity
+        - price
+        - type
+      properties:
+        symbol:
+          type: string
+          example: RELIANCE-CE-2900
+        quantity:
+          type: number
+          example: 100
+        price:
+          type: number
+          example: 102.50
+        type:
+          type: string
+          enum: [BUY, SELL]
+          example: BUY
+
+    WalletSnapshot:
+      type: object
+      properties:
+        user_id:
+          type: string
+        total_balance:
+          type: number
+        available_cash:
+          type: number
+        positions:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              symbol:
+                type: string
+              quantity:
+                type: number
+              average_cost:
+                type: number
+              current_price:
+                type: number
+              unrealized_pnl:
+                type: number
+              percentage:
+                type: number
+        last_updated:
+          type: string
+          format: date-time
+
+    Alert:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        symbol:
+          type: string
+        threshold_price:
+          type: number
+        condition:
+          type: string
+        is_active:
+          type: boolean
+        triggered_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Candle:
+      type: object
+      properties:
+        id:
+          type: string
+        symbol:
+          type: string
+        open:
+          type: number
+        high:
+          type: number
+        low:
+          type: number
+        close:
+          type: number
+        volume:
+          type: integer
+        timeframe_key:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

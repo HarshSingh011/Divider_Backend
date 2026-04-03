@@ -190,12 +190,20 @@ func (ws *WalletServiceImpl) GetWalletSnapshot(userID string) (*WalletSnapshot, 
 		}
 	}
 
+	// Calculate invested amount (holdings value at current prices)
+	investedAmount := totalBalance - availableCash
+
+if investedAmount < 0 {
+		investedAmount = 0
+	}
+
 	snapshot := &WalletSnapshot{
-		UserID:        userID,
-		TotalBalance:  totalBalance,
-		AvailableCash: availableCash,
-		Positions:     positions,
-		LastUpdated:   time.Now(),
+		UserID:         userID,
+		TotalBalance:   totalBalance,
+		AvailableCash:  availableCash,
+		InvestedAmount: investedAmount,
+		Positions:      positions,
+		LastUpdated:    time.Now(),
 	}
 
 	return snapshot, nil

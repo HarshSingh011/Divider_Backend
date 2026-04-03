@@ -72,7 +72,7 @@ func NewContainer() *Container {
 	wsHub := ws.NewHub()
 
 	authHandler := http.NewAuthHandler(authService)
-	tradingHandler := http.NewTradingHandler(walletService, alertService, ohlcAggregator)
+	tradingHandler := http.NewTradingHandler(walletService, alertService, ohlcAggregator, transactionRepo)
 	profileHandler := http.NewProfileHandler(authService)
 
 	authMiddleware := http.NewAuthMiddleware(authService)
