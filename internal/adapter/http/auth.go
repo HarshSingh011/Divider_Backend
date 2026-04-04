@@ -105,7 +105,15 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	result, err := h.authService.Register(req)
 	if err != nil {
-		sendJSONError(w, http.StatusBadRequest, err.Error())
+		// Map specific errors to appropriate status codes
+		errorMsg := err.Error()
+		statusCode := http.StatusBadRequest
+
+		if errorMsg == "user with this email already exists" {
+			statusCode = http.StatusConflict // 409 Conflict
+		}
+
+		sendJSONError(w, statusCode, errorMsg)
 		return
 	}
 
@@ -133,7 +141,15 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	result, err := h.authService.Login(req)
 	if err != nil {
-		sendJSONError(w, http.StatusUnauthorized, err.Error())
+		// Map specific errors to appropriate status codes
+		errorMsg := err.Error()
+		statusCode := http.StatusUnauthorized
+
+		if errorMsg == "email and password are required" {
+			statusCode = http.StatusBadRequest // 400 Bad Request
+		}
+
+		sendJSONError(w, statusCode, errorMsg)
 		return
 	}
 
