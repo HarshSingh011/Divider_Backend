@@ -6,18 +6,6 @@ import (
 	"time"
 )
 
-// IST timezone constant
-var istLocation *time.Location
-
-func init() {
-	var err error
-	istLocation, err = time.LoadLocation("Asia/Kolkata")
-	if err != nil {
-		// Fallback to UTC+5:30 if location loading fails
-		istLocation = time.FixedZone("IST", 5*3600+30*60)
-	}
-}
-
 type WalletServiceImpl struct {
 	transactionRepo TransactionRepository
 	marketEngine    *MarketEngine
@@ -59,7 +47,7 @@ func (ws *WalletServiceImpl) ExecuteTrade(userID, symbol string, quantity, price
 		Fee:       fee,
 		Amount:    amount,
 		Status:    "COMPLETED",
-		CreatedAt: time.Now().In(istLocation),
+		CreatedAt: time.Now().In(ISTLocation),
 	}
 
 	if err := ws.transactionRepo.SaveTransaction(transaction); err != nil {
@@ -91,7 +79,7 @@ func (ws *WalletServiceImpl) DepositCash(userID string, amount float64) error {
 		Fee:       0,
 		Status:    "COMPLETED",
 		Remarks:   "Cash deposit to wallet",
-		CreatedAt: time.Now().In(istLocation),
+		CreatedAt: time.Now().In(ISTLocation),
 	}
 
 	if err := ws.transactionRepo.SaveTransaction(transaction); err != nil {
@@ -215,7 +203,7 @@ if investedAmount < 0 {
 		AvailableCash:  availableCash,
 		InvestedAmount: investedAmount,
 		Positions:      positions,
-		LastUpdated:    time.Now().In(istLocation),
+		LastUpdated:    time.Now().In(ISTLocation),
 	}
 
 	return snapshot, nil

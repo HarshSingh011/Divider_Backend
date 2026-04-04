@@ -6,17 +6,6 @@ import (
 	"time"
 )
 
-// IST timezone initialization
-var istLocation *time.Location
-
-func init() {
-	var err error
-	istLocation, err = time.LoadLocation("Asia/Kolkata")
-	if err != nil {
-		istLocation = time.FixedZone("IST", 5*3600+30*60)
-	}
-}
-
 type AlertServiceImpl struct {
 	alertRepo AlertRepository
 	mu        sync.RWMutex
@@ -40,8 +29,8 @@ func (as *AlertServiceImpl) CreateAlert(userID, symbol string, price float64, co
 		ThresholdPrice: price,
 		Condition:      condition,
 		IsActive:       true,
-		CreatedAt:      time.Now().In(istLocation),
-		UpdatedAt:      time.Now().In(istLocation),
+		CreatedAt:      time.Now().In(ISTLocation),
+		UpdatedAt:      time.Now().In(ISTLocation),
 	}
 
 	if err := as.alertRepo.SaveAlert(alert); err != nil {
@@ -62,7 +51,7 @@ func (as *AlertServiceImpl) CheckAndTriggerAlerts(currentPrices map[string]float
 		return fmt.Errorf("failed to fetch active alerts: %w", err)
 	}
 
-	now := time.Now().In(istLocation)
+	now := time.Now().In(ISTLocation)
 
 	for _, alert := range activeAlerts {
 		currentPrice, exists := currentPrices[alert.Symbol]
