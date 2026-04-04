@@ -8,6 +8,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// IST timezone initialization
+var istLocation *time.Location
+
+func init() {
+	var err error
+	istLocation, err = time.LoadLocation("Asia/Kolkata")
+	if err != nil {
+		istLocation = time.FixedZone("IST", 5*3600+30*60)
+	}
+}
+
 type AuthServiceImpl struct {
 	userRepo      UserRepository
 	tokenProvider TokenProvider
@@ -39,7 +50,7 @@ func (as *AuthServiceImpl) Register(req AuthRequest) (*AuthResponse, error) {
 		Email:     req.Email,
 		Username:  req.Username,
 		Password:  string(hashedPassword),
-		CreatedAt: time.Now(),
+		CreatedAt: time.Now().In(istLocation),
 	}
 
 	if err := as.userRepo.Save(user); err != nil {

@@ -840,6 +840,147 @@ curl -X GET https://divider-backend.onrender.com/trading/wallet \
                         </div>
                     </div>
                 </div>
+
+                <!-- Get Transactions -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-url">/trading/transactions</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Get transaction history for the user including deposits, buys, sells, and withdrawals.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Example</div>
+                            <div class="code-block">
+curl -X GET https://divider-backend.onrender.com/trading/transactions \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+{
+  "transactions": [
+    {
+      "id": "txn_1712249700000",
+      "user_id": "user_123",
+      "type": "DEPOSIT",
+      "symbol": "CASH",
+      "quantity": 1,
+      "price": 100000,
+      "fee": 0,
+      "amount": 100000,
+      "status": "COMPLETED",
+      "remarks": "Cash deposit to wallet",
+      "created_at": "2026-04-04T10:00:00+05:30"
+    },
+    {
+      "id": "txn_1712249800000",
+      "user_id": "user_123",
+      "type": "BUY",
+      "symbol": "RELIANCE-CE-2900",
+      "quantity": 100,
+      "price": 102.50,
+      "fee": 512.50,
+      "amount": 10250,
+      "status": "COMPLETED",
+      "remarks": "",
+      "created_at": "2026-04-04T14:35:00+05:30"
+    },
+    {
+      "id": "txn_1712249900000",
+      "user_id": "user_123",
+      "type": "SELL",
+      "symbol": "HDFC-PE-1400",
+      "quantity": 50,
+      "price": 95.20,
+      "fee": 238,
+      "amount": 4760,
+      "status": "COMPLETED",
+      "remarks": "",
+      "created_at": "2026-04-04T15:10:00+05:30"
+    }
+  ],
+  "count": 3
+}
+                            </div>
+                        </div>
+
+                        <div class="field-table">
+                            <div class="field-table-header">
+                                <div class="field-table-row">
+                                    <div class="field-table-cell header">Field</div>
+                                    <div class="field-table-cell header">Type</div>
+                                    <div class="field-table-cell header">Description</div>
+                                </div>
+                            </div>
+                            <div class="field-table-row">
+                                <div class="field-table-cell">id</div>
+                                <div class="field-table-cell">string</div>
+                                <div class="field-table-cell">Unique transaction ID</div>
+                            </div>
+                            <div class="field-table-row">
+                                <div class="field-table-cell">user_id</div>
+                                <div class="field-table-cell">string</div>
+                                <div class="field-table-cell">User who made the transaction</div>
+                            </div>
+                            <div class="field-table-row">
+                                <div class="field-table-cell">type</div>
+                                <div class="field-table-cell">enum</div>
+                                <div class="field-table-cell">DEPOSIT, BUY, SELL, WITHDRAWAL</div>
+                            </div>
+                            <div class="field-table-row">
+                                <div class="field-table-cell">symbol</div>
+                                <div class="field-table-cell">string</div>
+                                <div class="field-table-cell">Stock symbol (empty for DEPOSIT/WITHDRAWAL)</div>
+                            </div>
+                            <div class="field-table-row">
+                                <div class="field-table-cell">quantity</div>
+                                <div class="field-table-cell">number</div>
+                                <div class="field-table-cell">No. of shares (0 for deposits)</div>
+                            </div>
+                            <div class="field-table-row">
+                                <div class="field-table-cell">price</div>
+                                <div class="field-table-cell">number</div>
+                                <div class="field-table-cell">Price per unit or amount for deposits</div>
+                            </div>
+                            <div class="field-table-row">
+                                <div class="field-table-cell">fee</div>
+                                <div class="field-table-cell">number</div>
+                                <div class="field-table-cell">Trading fee (0.5% of amount)</div>
+                            </div>
+                            <div class="field-table-row">
+                                <div class="field-table-cell">amount</div>
+                                <div class="field-table-cell">number</div>
+                                <div class="field-table-cell">Transaction amount before fees</div>
+                            </div>
+                            <div class="field-table-row">
+                                <div class="field-table-cell">status</div>
+                                <div class="field-table-cell">enum</div>
+                                <div class="field-table-cell">COMPLETED, PENDING, FAILED</div>
+                            </div>
+                            <div class="field-table-row">
+                                <div class="field-table-cell">created_at</div>
+                                <div class="field-table-cell">timestamp</div>
+                                <div class="field-table-cell">Transaction timestamp in IST (UTC+5:30)</div>
+                            </div>
+                        </div>
+
+                        <div class="note success-note">
+                            ✅ <strong>Display on Portfolio Screen:</strong> Show recent transactions with type, date/time, and amount. Sort by newest first.
+                        </div>
+
+                        <div class="note info-note">
+                            ℹ️ <strong>Timezone:</strong> All timestamps are in IST (Asia/Kolkata, UTC+5:30).
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- SECTION 4: ALERTS SCREEN -->

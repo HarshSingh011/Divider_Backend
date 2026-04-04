@@ -8,6 +8,17 @@ import (
 	"stocktrack-backend/internal/domain"
 )
 
+// IST timezone initialization
+var istLocation *time.Location
+
+func init() {
+	var err error
+	istLocation, err = time.LoadLocation("Asia/Kolkata")
+	if err != nil {
+		istLocation = time.FixedZone("IST", 5*3600+30*60)
+	}
+}
+
 type PostgresUserRepository struct {
 	db *sql.DB
 }
@@ -34,8 +45,8 @@ func (r *PostgresUserRepository) Save(user *domain.User) error {
 		user.Email,
 		user.Username,
 		user.Password,
-		time.Now(),
-		time.Now(),
+		time.Now().In(istLocation),
+		time.Now().In(istLocation),
 	)
 
 	return err

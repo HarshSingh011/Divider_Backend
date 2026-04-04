@@ -1519,10 +1519,19 @@
 
         // PERSISTENT DEBUG LOGGING - Works across all screens
         function logPersistent(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
+            const istTime = new Date().toLocaleString('en-IN', { 
+                timeZone: 'Asia/Kolkata',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
             const logEntry = document.createElement('div');
             logEntry.className = `log-entry ${type}`;
-            logEntry.textContent = `[${timestamp}] ${message}`;
+            logEntry.textContent = `[${istTime}] ${message}`;
             
             const debugLog = document.getElementById('persistent-debug-log');
             if (debugLog) {
@@ -1531,13 +1540,19 @@
             }
             
             // Also log to console
-            console.log(`[${timestamp}] ${message}`, type);
+            console.log(`[${istTime}] ${message}`, type);
         }
 
         // Debug logging function
         function logDebug(message, data = null) {
-            const timestamp = new Date().toLocaleTimeString();
-            const logMsg = `[${timestamp}] ${message}`;
+            const istTime = new Date().toLocaleString('en-IN', { 
+                timeZone: 'Asia/Kolkata',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            const logMsg = `[${istTime}] ${message}`;
             console.log(logMsg, data || '');
             updateDebugPanel(logMsg);
             addDebugLog(message, 'info');
@@ -1667,7 +1682,17 @@
             logDebug('═══════════════════════════════════════════');
             logDebug('🔐 LOGIN ATTEMPT STARTED');
             logDebug('═══════════════════════════════════════════');
-            logDebug(`⏰ Time: ${new Date().toISOString()}`);
+            const istDateTime = new Date().toLocaleString('en-IN', { 
+                timeZone: 'Asia/Kolkata',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            logDebug(`⏰ Time (IST): ${istDateTime}`);
             logDebug(`🌐 Browser: ${navigator.userAgent.substring(0, 50)}...`);
             logDebug(`🔌 Online Status: ${navigator.onLine ? '✅ Online' : '❌ Offline'}`);
             logDebug(`📧 Email: ${email}`);
@@ -2179,8 +2204,17 @@
                 
                 sorted.forEach(txn => {
                     const date = new Date(txn.created_at);
-                    const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-                    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    const timeStr = date.toLocaleString('en-IN', { 
+                        timeZone: 'Asia/Kolkata',
+                        hour: '2-digit', 
+                        minute: '2-digit', 
+                        hour12: true 
+                    });
+                    const dateStr = date.toLocaleString('en-IN', { 
+                        timeZone: 'Asia/Kolkata',
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
                     
                     let emoji = '💳';
                     let typeLabel = txn.type;

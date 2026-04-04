@@ -13,10 +13,28 @@ type AuthHandler struct {
 	authService domain.AuthService
 }
 
+// Error response struct
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
+// Success response struct
+type SuccessResponse struct {
+	Message string      `json:"message,omitempty"`
+	Data    interface{} `json:"data,omitempty"`
+}
+
 func NewAuthHandler(authService domain.AuthService) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
 	}
+}
+
+// Helper function to send JSON error response
+func sendJSONError(w http.ResponseWriter, statusCode int, errorMessage string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(ErrorResponse{Error: errorMessage})
 }
 
 func isValidEmail(email string) bool {
@@ -60,34 +78,34 @@ func isValidUsername(username string) bool {
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		sendJSONError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		return
 	}
 
 	var req domain.AuthRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		sendJSONError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	if !isValidEmail(req.Email) {
-		http.Error(w, "Invalid email format. Example: user@example.com", http.StatusBadRequest)
+		sendJSONError(w, http.StatusBadRequest, "Invalid email format. Example: user@example.com")
 		return
 	}
 
 	if !isValidUsername(req.Username) {
-		http.Error(w, "Username must be 3-20 characters and contain only letters, numbers, hyphens, and underscores", http.StatusBadRequest)
+		sendJSONError(w, http.StatusBadRequest, "Username must be 3-20 characters and contain only letters, numbers, hyphens, and underscores")
 		return
 	}
 
 	if !isValidPassword(req.Password) {
-		http.Error(w, "Password must be at least 8 characters and contain uppercase, lowercase, number, and special character (@$!%*?&)", http.StatusBadRequest)
+		sendJSONError(w, http.StatusBadRequest, "Password must be at least 8 characters and contain uppercase, lowercase, number, and special character (@$!%*?&)")
 		return
 	}
 
 	result, err := h.authService.Register(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		sendJSONError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -98,24 +116,24 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		sendJSONError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		return
 	}
 
 	var req domain.AuthRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		sendJSONError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	if !isValidEmail(req.Email) {
-		http.Error(w, "Invalid email format", http.StatusBadRequest)
+		sendJSONError(w, http.StatusBadRequest, "Invalid email format")
 		return
 	}
 
 	result, err := h.authService.Login(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		sendJSONError(w, http.StatusUnauthorized, err.Error())
 		return
 	}
 
