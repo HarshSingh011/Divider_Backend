@@ -3,10 +3,13 @@ package domain
 import "time"
 
 type MarketTick struct {
-	Symbol           string    `json:"symbol"`
-	CurrentPrice     float64   `json:"currentPrice"`
-	PercentageChange float64   `json:"percentageChange"`
-	Timestamp        time.Time `json:"timestamp"`
+	Symbol             string    `json:"symbol"`
+	CurrentPrice       float64   `json:"currentPrice"`
+	PercentageChange   float64   `json:"percentageChange"`
+	TotalQuantity      float64   `json:"totalQuantity"`        // Total shares available in market
+	AvailableQuantity  float64   `json:"availableQuantity"`    // Shares available to buy (not held)
+	HeldQuantity       float64   `json:"heldQuantity"`         // Shares currently held by all users
+	Timestamp          time.Time `json:"timestamp"`
 }
 
 type User struct {

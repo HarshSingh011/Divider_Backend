@@ -65,6 +65,7 @@ func NewContainer() *Container {
 	marketEngine := domain.NewMarketEngine()
 	marketEngine.SetOHLCAggregator(ohlcAggregator)
 	marketEngine.SetAlertService(alertService)
+	marketEngine.SetTransactionRepository(transactionRepo)
 
 	// Set market engine on wallet service for price lookups
 	walletService.SetMarketEngine(marketEngine)
