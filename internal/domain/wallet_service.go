@@ -6,8 +6,15 @@ import (
 	"time"
 )
 
+// Constants for trading limits
+const (
+	MAX_QUANTITY_PER_TRADE = 10000  // Maximum 10,000 shares per transaction
+	MAX_SELL_QUANTITY      = 10000  // Maximum 10,000 shares for SELL
+)
+
 type WalletServiceImpl struct {
 	transactionRepo TransactionRepository
+	stockRepo       StockRepository
 	marketEngine    *MarketEngine
 	mu              sync.RWMutex
 }
@@ -18,8 +25,96 @@ func NewWalletService(transactionRepo TransactionRepository) *WalletServiceImpl 
 	}
 }
 
+func (ws *WalletServiceImpl) SetStockRepository(stockRepo StockRepository) {
+	ws.stockRepo = stockRepo
+}
+
 func (ws *WalletServiceImpl) SetMarketEngine(engine *MarketEngine) {
 	ws.marketEngine = engine
+}
+
+// Helper function to calculate current holdings for a symbol
+func (ws *WalletServiceImpl) getCurrentHoldings(userID, symbol string) float64 {
+	transactions, err := ws.transactionRepo.FindTransactionsByUser(userID)
+	if err != nil {
+		return 0
+	}
+
+	quantity := 0.0
+	for _, txn := range transactions {
+		if txn.Symbol == symbol {
+			if txn.Type == "BUY" {
+				quantity += txn.Quantity
+			} else if txn.Type == "SELL" {
+				quantity -= txn.Quantity
+			}
+		}
+	}
+	return quantity
+}
+
+// Helper function to calculate current available cash
+func (ws *WalletServiceImpl) getCurrentCash(userID string) float64 {
+	transactions, err := ws.transactionRepo.FindTransactionsByUser(userID)
+	if err != nil {
+		return 100000.0 // Default initial cash
+	}
+
+	availableCash := 100000.0
+	for _, txn := range transactions {
+		switch txn.Type {
+		case "DEPOSIT":
+			availableCash += txn.Amount
+		case "BUY":
+			availableCash -= (txn.Amount + txn.Fee)
+		case "SELL":
+			availableCash += (txn.Amount - txn.Fee)
+		case "WITHDRAWAL":
+			availableCash -= txn.Amount
+		case "BROKERAGE_FEE":
+			availableCash -= txn.Fee
+		}
+	}
+	return availableCash
+}
+
+// Helper function to calculate available stock quantity (not held by any user)
+func (ws *WalletServiceImpl) getAvailableStockQuantity(symbol string) (float64, error) {
+	// If no stock repo, assume unlimited stock (backward compatibility)
+	if ws.stockRepo == nil {
+		return 999999999, nil
+	}
+
+	stock, err := ws.stockRepo.GetStock(symbol)
+	if err != nil {
+		// Stock not found, assume unlimited
+		return 999999999, nil
+	}
+
+	// Get all transactions for this symbol to calculate total held
+	transactions, err := ws.transactionRepo.FindTransactionsByUser("")
+	if err != nil {
+		return stock.TotalAvailableQty, nil
+	}
+
+	totalHeld := 0.0
+	for _, txn := range transactions {
+		if txn.Symbol == symbol {
+			if txn.Type == "BUY" {
+				totalHeld += txn.Quantity
+			} else if txn.Type == "SELL" {
+				totalHeld -= txn.Quantity
+			}
+		}
+	}
+
+	// Available = Total - Currently held by users
+	available := stock.TotalAvailableQty - totalHeld
+	if available < 0 {
+		available = 0
+	}
+
+	return available, nil
 }
 
 func (ws *WalletServiceImpl) ExecuteTrade(userID, symbol string, quantity, price float64, tradeType string) error {
@@ -29,6 +124,37 @@ func (ws *WalletServiceImpl) ExecuteTrade(userID, symbol string, quantity, price
 
 	if quantity <= 0 || price <= 0 {
 		return fmt.Errorf("quantity and price must be positive")
+	}
+
+	// Validate maximum quantity limit
+	if quantity > float64(MAX_QUANTITY_PER_TRADE) {
+		return fmt.Errorf("maximum quantity exceeded: you can only buy/sell up to %.0f shares per transaction, but trying to %s %.0f", float64(MAX_QUANTITY_PER_TRADE), tradeType, quantity)
+	}
+
+	// Validate SELL: Check if user has sufficient shares
+	if tradeType == "SELL" {
+		holdings := ws.getCurrentHoldings(userID, symbol)
+		if holdings < quantity {
+			return fmt.Errorf("insufficient holdings: you have %.2f shares of %s but trying to sell %.2f", holdings, symbol, quantity)
+		}
+		if holdings == 0 {
+			return fmt.Errorf("you do not own any shares of %s", symbol)
+		}
+	}
+
+	// Validate BUY: Check if user has sufficient cash
+	if tradeType == "BUY" {
+		requiredCash := (quantity * price) + (quantity * price * 0.005) // amount +fee
+		availableCash := ws.getCurrentCash(userID)
+		if availableCash < requiredCash {
+			return fmt.Errorf("insufficient cash: you have ₹%.2f but need ₹%.2f", availableCash, requiredCash)
+		}
+
+		// Check if stock quantity is available
+		availableStock, err := ws.getAvailableStockQuantity(symbol)
+		if err == nil && availableStock < quantity {
+			return fmt.Errorf("insufficient stock: only %.2f shares of %s available in market, but trying to buy %.2f", availableStock, symbol, quantity)
+		}
 	}
 
 	ws.mu.Lock()
@@ -87,6 +213,41 @@ func (ws *WalletServiceImpl) DepositCash(userID string, amount float64) error {
 	}
 
 	fmt.Printf("[WALLET] Deposit: %.2f to %s\n", amount, userID)
+	return nil
+}
+
+func (ws *WalletServiceImpl) WithdrawCash(userID string, amount float64) error {
+	if amount <= 0 {
+		return fmt.Errorf("withdrawal amount must be positive")
+	}
+
+	availableCash := ws.getCurrentCash(userID)
+	if availableCash < amount {
+		return fmt.Errorf("insufficient funds: you have ₹%.2f but trying to withdraw ₹%.2f", availableCash, amount)
+	}
+
+	ws.mu.Lock()
+	defer ws.mu.Unlock()
+
+	transaction := &Transaction{
+		ID:        fmt.Sprintf("txn_%d", time.Now().UnixNano()),
+		UserID:    userID,
+		Type:      "WITHDRAWAL",
+		Symbol:    "CASH",
+		Quantity:  1,
+		Price:     amount,
+		Amount:    amount,
+		Fee:       0,
+		Status:    "COMPLETED",
+		Remarks:   "Cash withdrawal from wallet",
+		CreatedAt: time.Now().In(ISTLocation),
+	}
+
+	if err := ws.transactionRepo.SaveTransaction(transaction); err != nil {
+		return fmt.Errorf("failed to save withdrawal transaction: %w", err)
+	}
+
+	fmt.Printf("[WALLET] Withdrawal: %.2f from %s\n", amount, userID)
 	return nil
 }
 

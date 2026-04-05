@@ -64,6 +64,7 @@ func setupRoutes(c *Container) {
 	http.HandleFunc("/trading/trade", corsHandler(c.AuthMiddleware.Protect(c.TradingHandler.ExecuteTrade)))
 	http.HandleFunc("/trading/wallet", corsHandler(c.AuthMiddleware.Protect(c.TradingHandler.GetWalletSnapshot)))
 	http.HandleFunc("/trading/deposit", corsHandler(c.AuthMiddleware.Protect(c.TradingHandler.DepositCash)))
+	http.HandleFunc("/trading/withdraw", corsHandler(c.AuthMiddleware.Protect(c.TradingHandler.WithdrawCash)))
 	http.HandleFunc("/trading/transactions", corsHandler(c.AuthMiddleware.Protect(c.TradingHandler.GetTransactions)))
 	http.HandleFunc("/trading/candles", corsHandler(c.TradingHandler.GetCandles))
 	http.HandleFunc("/market/data", corsHandler(c.AuthMiddleware.Protect(c.TradingHandler.GetMarketData)))

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"stocktrack-backend/internal/domain"
 )
@@ -29,15 +30,31 @@ func NewTradingHandler(
 	}
 }
 
+func (h *TradingHandler) sendJSONError(w http.ResponseWriter, statusCode int, errorCode string, message string, details map[string]interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	response := map[string]interface{}{
+		"success": false,
+		"error": map[string]interface{}{
+			"code":    errorCode,
+			"message": message,
+		},
+	}
+	if details != nil {
+		response["error"].(map[string]interface{})["details"] = details
+	}
+	json.NewEncoder(w).Encode(response)
+}
+
 func (h *TradingHandler) ExecuteTrade(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		h.sendJSONError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only POST method is allowed", nil)
 		return
 	}
 
 	userID := r.Header.Get("X-User-ID")
 	if userID == "" {
-		http.Error(w, "User not authenticated", http.StatusUnauthorized)
+		h.sendJSONError(w, http.StatusUnauthorized, "UNAUTHORIZED", "User not authenticated. X-User-ID header is required", nil)
 		return
 	}
 
@@ -49,58 +66,93 @@ func (h *TradingHandler) ExecuteTrade(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		h.sendJSONError(w, http.StatusBadRequest, "INVALID_REQUEST_BODY", "Invalid JSON request body", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 
 	if err := h.walletService.ExecuteTrade(userID, req.Symbol, req.Quantity, req.Price, req.Type); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		// Determine error type based on error message
+		errorCode := "TRADE_FAILED"
+		details := map[string]interface{}{
+			"symbol":   req.Symbol,
+			"quantity": req.Quantity,
+			"price":    req.Price,
+			"type":     req.Type,
+		}
+
+		if strings.Contains(err.Error(), "insufficient holdings") {
+			errorCode = "INSUFFICIENT_HOLDINGS"
+		} else if strings.Contains(err.Error(), "insufficient cash") {
+			errorCode = "INSUFFICIENT_CASH"
+		} else if strings.Contains(err.Error(), "insufficient stock") {
+			errorCode = "INSUFFICIENT_STOCK"
+		} else if strings.Contains(err.Error(), "invalid trade type") {
+			errorCode = "INVALID_TRADE_TYPE"
+		} else if strings.Contains(err.Error(), "quantity and price must be positive") {
+			errorCode = "INVALID_QUANTITY_OR_PRICE"
+		} else if strings.Contains(err.Error(), "maximum quantity exceeded") {
+			errorCode = "MAXIMUM_QUANTITY_EXCEEDED"
+		}
+
+		h.sendJSONError(w, http.StatusBadRequest, errorCode, err.Error(), details)
 		return
 	}
 
 	total := req.Quantity * req.Price
+	fee := total * 0.005
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"status":   "Trade executed successfully",
-		"total":    total,
-		"symbol":   req.Symbol,
-		"quantity": req.Quantity,
-		"price":    req.Price,
-		"type":     req.Type,
+		"success": true,
+		"data": map[string]interface{}{
+			"status":   "Trade executed successfully",
+			"total":    total,
+			"fee":      fee,
+			"symbol":   req.Symbol,
+			"quantity": req.Quantity,
+			"price":    req.Price,
+			"type":     req.Type,
+		},
 	})
 }
 
 func (h *TradingHandler) GetWalletSnapshot(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		h.sendJSONError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only GET method is allowed", nil)
 		return
 	}
 
 	userID := r.Header.Get("X-User-ID")
 	if userID == "" {
-		http.Error(w, "User not authenticated", http.StatusUnauthorized)
+		h.sendJSONError(w, http.StatusUnauthorized, "UNAUTHORIZED", "User not authenticated. X-User-ID header is required", nil)
 		return
 	}
 
 	snapshot, err := h.walletService.GetWalletSnapshot(userID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		h.sendJSONError(w, http.StatusInternalServerError, "WALLET_SNAPSHOT_ERROR", "Failed to get wallet snapshot", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(snapshot)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"data":    snapshot,
+	})
 }
 
 func (h *TradingHandler) DepositCash(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		h.sendJSONError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only POST method is allowed", nil)
 		return
 	}
 
 	userID := r.Header.Get("X-User-ID")
 	if userID == "" {
-		http.Error(w, "User not authenticated", http.StatusUnauthorized)
+		h.sendJSONError(w, http.StatusUnauthorized, "UNAUTHORIZED", "User not authenticated. X-User-ID header is required", nil)
 		return
 	}
 
@@ -109,18 +161,82 @@ func (h *TradingHandler) DepositCash(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		h.sendJSONError(w, http.StatusBadRequest, "INVALID_REQUEST_BODY", "Invalid JSON request body", map[string]interface{}{
+			"error": err.Error(),
+		})
 		return
 	}
 
 	if err := h.walletService.DepositCash(userID, req.Amount); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		errorCode := "DEPOSIT_FAILED"
+		details := map[string]interface{}{
+			"amount": req.Amount,
+		}
+
+		if strings.Contains(err.Error(), "deposit amount must be positive") {
+			errorCode = "INVALID_AMOUNT"
+		}
+
+		h.sendJSONError(w, http.StatusBadRequest, errorCode, err.Error(), details)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
-		"status": "Deposit successful",
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"data": map[string]interface{}{
+			"status": "Deposit successful",
+			"amount": req.Amount,
+		},
+	})
+}
+
+func (h *TradingHandler) WithdrawCash(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		h.sendJSONError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only POST method is allowed", nil)
+		return
+	}
+
+	userID := r.Header.Get("X-User-ID")
+	if userID == "" {
+		h.sendJSONError(w, http.StatusUnauthorized, "UNAUTHORIZED", "User not authenticated. X-User-ID header is required", nil)
+		return
+	}
+
+	var req struct {
+		Amount float64 `json:"amount"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.sendJSONError(w, http.StatusBadRequest, "INVALID_REQUEST_BODY", "Invalid JSON request body", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if err := h.walletService.WithdrawCash(userID, req.Amount); err != nil {
+		errorCode := "WITHDRAWAL_FAILED"
+		details := map[string]interface{}{
+			"amount": req.Amount,
+		}
+
+		if strings.Contains(err.Error(), "withdrawal amount must be positive") {
+			errorCode = "INVALID_AMOUNT"
+		} else if strings.Contains(err.Error(), "insufficient funds") {
+			errorCode = "INSUFFICIENT_FUNDS"
+		}
+
+		h.sendJSONError(w, http.StatusBadRequest, errorCode, err.Error(), details)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"data": map[string]interface{}{
+			"status": "Withdrawal successful",
+			"amount": req.Amount,
+		},
 	})
 }
 

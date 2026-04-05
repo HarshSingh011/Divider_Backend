@@ -40,6 +40,25 @@ type AlertRepository interface {
 	DeleteAlert(alertID string) error
 }
 
+// Stock represents a security listed on the market
+type Stock struct {
+	ID                 string    `json:"id"`
+	Symbol             string    `json:"symbol"`
+	CompanyName        string    `json:"company_name"`
+	TotalAvailableQty  float64   `json:"total_available_qty"`   // Total shares available in market
+	CurrentPrice       float64   `json:"current_price"`
+	MarketCap          float64   `json:"market_cap"`
+	CreatedAt          time.Time `json:"created_at"`
+	UpdatedAt          time.Time `json:"updated_at"`
+}
+
+type StockRepository interface {
+	SaveStock(stock *Stock) error
+	GetStock(symbol string) (*Stock, error)
+	UpdateStock(stock *Stock) error
+	GetAllStocks() ([]Stock, error)
+}
+
 type Transaction struct {
 	ID        string    `json:"id"`
 	UserID    string    `json:"user_id"`
@@ -83,6 +102,7 @@ type WalletService interface {
 	ExecuteTrade(userID, symbol string, quantity, price float64, tradeType string) error
 	GetWalletSnapshot(userID string) (*WalletSnapshot, error)
 	DepositCash(userID string, amount float64) error
+	WithdrawCash(userID string, amount float64) error
 }
 
 type AlertService interface {
