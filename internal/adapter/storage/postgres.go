@@ -363,14 +363,29 @@ func (r *PostgresTransactionRepository) SaveTransaction(transaction *domain.Tran
 }
 
 func (r *PostgresTransactionRepository) FindTransactionsByUser(userID string) ([]domain.Transaction, error) {
-	query := `
-		SELECT user_id, symbol, type, quantity, price, amount, fee, timestamp
-		FROM transactions
-		WHERE user_id = $1
-		ORDER BY timestamp DESC
-	`
+	var query string
+	var rows *sql.Rows
+	var err error
 
-	rows, err := r.db.Query(query, userID)
+	// If userID is empty, return ALL transactions (used by market engine for availability calculation)
+	if userID == "" {
+		query = `
+			SELECT user_id, symbol, type, quantity, price, amount, fee, timestamp
+			FROM transactions
+			ORDER BY timestamp DESC
+		`
+		rows, err = r.db.Query(query)
+	} else {
+		// Otherwise, return transactions for specific user
+		query = `
+			SELECT user_id, symbol, type, quantity, price, amount, fee, timestamp
+			FROM transactions
+			WHERE user_id = $1
+			ORDER BY timestamp DESC
+		`
+		rows, err = r.db.Query(query, userID)
+	}
+
 	if err != nil {
 		return nil, err
 	}

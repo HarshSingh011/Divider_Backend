@@ -102,7 +102,10 @@ func (m *MarketEngine) updatePrices() {
 	if m.transactionRepo != nil {
 		// Get all transactions (pass empty userID to get all)
 		allTransactions, err := m.transactionRepo.FindTransactionsByUser("")
-		if err == nil {
+		if err != nil {
+			// Log error but continue with 0 held quantities
+			_ = err
+		} else {
 			for _, txn := range allTransactions {
 				if txn.Type == "BUY" {
 					heldQtyMap[txn.Symbol] += txn.Quantity
