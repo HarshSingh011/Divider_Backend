@@ -42,14 +42,14 @@ type AlertRepository interface {
 
 // Stock represents a security listed on the market
 type Stock struct {
-	ID                 string    `json:"id"`
-	Symbol             string    `json:"symbol"`
-	CompanyName        string    `json:"company_name"`
-	TotalAvailableQty  float64   `json:"total_available_qty"`   // Total shares available in market
-	CurrentPrice       float64   `json:"current_price"`
-	MarketCap          float64   `json:"market_cap"`
-	CreatedAt          time.Time `json:"created_at"`
-	UpdatedAt          time.Time `json:"updated_at"`
+	ID                string    `json:"id"`
+	Symbol            string    `json:"symbol"`
+	CompanyName       string    `json:"company_name"`
+	TotalAvailableQty float64   `json:"total_available_qty"` // Total shares available in market
+	CurrentPrice      float64   `json:"current_price"`
+	MarketCap         float64   `json:"market_cap"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
 }
 
 type StockRepository interface {

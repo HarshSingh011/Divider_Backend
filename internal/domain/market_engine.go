@@ -6,15 +6,15 @@ import (
 )
 
 type MarketEngine struct {
-	prices              []MarketTick
-	broadcast           chan []MarketTick
-	ticker              *time.Ticker
-	stopChan            chan struct{}
-	ohlcAggregator      *OHLCAggregator
-	alertService        AlertService
-	stockRepo           StockRepository
-	transactionRepo     TransactionRepository
-	initialStockQty     map[string]float64  // Total stock quantity for each symbol
+	prices          []MarketTick
+	broadcast       chan []MarketTick
+	ticker          *time.Ticker
+	stopChan        chan struct{}
+	ohlcAggregator  *OHLCAggregator
+	alertService    AlertService
+	stockRepo       StockRepository
+	transactionRepo TransactionRepository
+	initialStockQty map[string]float64 // Total stock quantity for each symbol
 }
 
 func NewMarketEngine() *MarketEngine {
@@ -24,8 +24,8 @@ func NewMarketEngine() *MarketEngine {
 		"HDFC-PE-1400":     50000,
 		"INFY-CE-1500":     75000,
 		"TCS-PE-3500":      60000,
-		"TCS-CE-4500":      80000,    // NEW: TCS-CE-4500
-		"ITC-PE-2800":      90000,    // NEW: ITC-PE-2800
+		"TCS-CE-4500":      80000, // NEW: TCS-CE-4500
+		"ITC-PE-2800":      90000, // NEW: ITC-PE-2800
 	}
 
 	return &MarketEngine{
@@ -34,13 +34,13 @@ func NewMarketEngine() *MarketEngine {
 			{Symbol: "HDFC-PE-1400", CurrentPrice: 12.20, PercentageChange: 0, TotalQuantity: 50000, AvailableQuantity: 50000, HeldQuantity: 0},
 			{Symbol: "INFY-CE-1500", CurrentPrice: 62.75, PercentageChange: 0, TotalQuantity: 75000, AvailableQuantity: 75000, HeldQuantity: 0},
 			{Symbol: "TCS-PE-3500", CurrentPrice: 85.30, PercentageChange: 0, TotalQuantity: 60000, AvailableQuantity: 60000, HeldQuantity: 0},
-			{Symbol: "TCS-CE-4500", CurrentPrice: 55.20, PercentageChange: 0, TotalQuantity: 80000, AvailableQuantity: 80000, HeldQuantity: 0},   // NEW
-			{Symbol: "ITC-PE-2800", CurrentPrice: 38.75, PercentageChange: 0, TotalQuantity: 90000, AvailableQuantity: 90000, HeldQuantity: 0},  // NEW
+			{Symbol: "TCS-CE-4500", CurrentPrice: 55.20, PercentageChange: 0, TotalQuantity: 80000, AvailableQuantity: 80000, HeldQuantity: 0}, // NEW
+			{Symbol: "ITC-PE-2800", CurrentPrice: 38.75, PercentageChange: 0, TotalQuantity: 90000, AvailableQuantity: 90000, HeldQuantity: 0}, // NEW
 		},
-		broadcast:         make(chan []MarketTick, 10),
-		ticker:            time.NewTicker(500 * time.Millisecond),
-		stopChan:          make(chan struct{}),
-		initialStockQty:   stockQtyMap,
+		broadcast:       make(chan []MarketTick, 10),
+		ticker:          time.NewTicker(500 * time.Millisecond),
+		stopChan:        make(chan struct{}),
+		initialStockQty: stockQtyMap,
 	}
 }
 

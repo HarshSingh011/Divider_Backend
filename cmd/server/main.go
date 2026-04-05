@@ -86,5 +86,7 @@ func setupRoutes(c *Container) {
 	http.HandleFunc("/user/sessions", corsHandler(c.AuthMiddleware.Protect(c.ProfileHandler.GetSessions)))
 	http.HandleFunc("/user/logout", corsHandler(c.AuthMiddleware.Protect(c.ProfileHandler.Logout)))
 
+	http.HandleFunc("/dashboard/home", corsHandler(c.AuthMiddleware.Protect(c.DashboardHandler.GetHomeScreen)))
+
 	http.HandleFunc("/ws", c.AuthMiddleware.ProtectWebSocket(c.WebSocketHub.Handler))
 }

@@ -8,8 +8,8 @@ import (
 
 // Constants for trading limits
 const (
-	MAX_QUANTITY_PER_TRADE = 10000  // Maximum 10,000 shares per transaction
-	MAX_SELL_QUANTITY      = 10000  // Maximum 10,000 shares for SELL
+	MAX_QUANTITY_PER_TRADE = 10000 // Maximum 10,000 shares per transaction
+	MAX_SELL_QUANTITY      = 10000 // Maximum 10,000 shares for SELL
 )
 
 type WalletServiceImpl struct {

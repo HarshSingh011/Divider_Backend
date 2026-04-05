@@ -29,6 +29,7 @@ type Container struct {
 	AuthHandler           *http.AuthHandler
 	TradingHandler        *http.TradingHandler
 	ProfileHandler        *http.ProfileHandler
+	DashboardHandler      *http.DashboardHandler
 	AuthMiddleware        *http.AuthMiddleware
 }
 
@@ -75,6 +76,7 @@ func NewContainer() *Container {
 	authHandler := http.NewAuthHandler(authService)
 	tradingHandler := http.NewTradingHandler(walletService, alertService, ohlcAggregator, transactionRepo)
 	profileHandler := http.NewProfileHandler(authService)
+	dashboardHandler := http.NewDashboardHandler(walletService)
 
 	authMiddleware := http.NewAuthMiddleware(authService)
 
@@ -95,6 +97,7 @@ func NewContainer() *Container {
 		AuthHandler:           authHandler,
 		TradingHandler:        tradingHandler,
 		ProfileHandler:        profileHandler,
+		DashboardHandler:      dashboardHandler,
 		AuthMiddleware:        authMiddleware,
 	}
 }

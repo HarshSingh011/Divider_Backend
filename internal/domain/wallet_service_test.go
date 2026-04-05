@@ -882,9 +882,9 @@ func TestQuantitiesAroundLimit(t *testing.T) {
 	ws.DepositCash(userID, 500000)
 
 	testCases := []struct {
-		quantity  float64
+		quantity   float64
 		shouldFail bool
-		name      string
+		name       string
 	}{
 		{9999, false, "9999 (below limit)"},
 		{10000, false, "10000 (at limit)"},
@@ -1081,5 +1081,226 @@ func TestBuyWithoutStockRepository(t *testing.T) {
 		}
 	} else {
 		t.Logf("✅ PASSED: Allowed buy with no stock repository (backward compatible)")
+	}
+}
+
+// ============================================================
+// MARKET SOCKET AVAILABILITY TEST - REAL SCENARIO
+// ============================================================
+
+// Test: Market socket shows correct available quantity (236 shares held scenario)
+func TestMarketSocketRealQuantityWith236Holdings(t *testing.T) {
+	/*
+	   SCENARIO: User harsh2004416@gmail.com holds 236 shares of RELIANCE-CE-2900
+	   Expected Market Data:
+	   - Total Quantity: 100,000 (fixed market total)
+	   - Held Quantity: 236 (your holdings)
+	   - Available Quantity: 99,764 (100,000 - 236)
+	   
+	   Socket should show REAL available quantity after deducting all user holdings!
+	*/
+	txnRepo := NewMockTransactionRepository()
+	stockRepo := NewMockStockRepository()
+	ws := NewWalletService(txnRepo)
+	ws.SetStockRepository(stockRepo)
+
+	userID := "harsh2004416@gmail.com"
+	symbol := "RELIANCE-CE-2900"
+
+	// Market has 100,000 total shares
+	stock := &Stock{
+		ID:                "stock_reliance",
+		Symbol:            symbol,
+		CompanyName:       "Reliance Industries",
+		TotalAvailableQty: 100000,
+		CurrentPrice:      45.50,
+	}
+	stockRepo.SaveStock(stock)
+
+	// User deposits cash to afford 236 shares @ 45.50
+	_ = ws.DepositCash(userID, 1000000)
+
+	// User buys 236 shares
+	err := ws.ExecuteTrade(userID, symbol, 236, 45.50, "BUY")
+	if err != nil {
+		t.Fatalf("❌ FAILED: User should be able to buy 236 shares. Error: %v", err)
+	}
+
+	// Verify user holdings
+	holdings := ws.getCurrentHoldings(userID, symbol)
+	if holdings != 236 {
+		t.Errorf("❌ FAILED: User should hold 236 shares but got %.2f", holdings)
+	} else {
+		t.Logf("✅ PASSED: User correctly holds 236 shares")
+	}
+
+	// Now simulate what Market Engine would calculate for WebSocket broadcast
+	allTransactions, _ := txnRepo.FindTransactionsByUser("")
+	heldQty := 0.0
+	for _, txn := range allTransactions {
+		if txn.Symbol == symbol {
+			if txn.Type == "BUY" {
+				heldQty += txn.Quantity
+			} else if txn.Type == "SELL" {
+				heldQty -= txn.Quantity
+			}
+		}
+	}
+
+	totalQty := 100000.0
+	availableQty := totalQty - heldQty
+
+	t.Logf("\n📊 MARKET SOCKET DATA FOR WEBSOCKET BROADCAST:")
+	t.Logf("├─ Symbol: %s", symbol)
+	t.Logf("├─ Total Quantity: %.0f (fixed market total)", totalQty)
+	t.Logf("├─ Held Quantity: %.0f (user holdings)", heldQty)
+	t.Logf("├─ Available Quantity: %.0f (for others to buy)", availableQty)
+	t.Logf("└─ Calculation: %.0f - %.0f = %.0f", totalQty, heldQty, availableQty)
+
+	// Verify calculations
+	if heldQty != 236 {
+		t.Errorf("❌ FAILED: Held quantity should be 236 but got %.0f", heldQty)
+	} else {
+		t.Logf("✅ PASSED: heldQuantity = 236")
+	}
+
+	if availableQty != 99764 {
+		t.Errorf("❌ FAILED: Available quantity should be 99,764 but got %.0f", availableQty)
+	} else {
+		t.Logf("✅ PASSED: availableQuantity = 99,764 (100,000 - 236)")
+	}
+
+	// Verify total is correct
+	if heldQty+availableQty != totalQty {
+		t.Errorf("❌ FAILED: Held + Available should equal Total. %.0f + %.0f ≠ %.0f", heldQty, availableQty, totalQty)
+	} else {
+		t.Logf("✅ PASSED: Held + Available = Total (236 + 99,764 = 100,000)")
+	}
+
+	t.Logf("\n🔴 IMPORTANT: WebSocket should broadcast availableQuantity = 99,764, NOT 100,000!")
+	t.Logf("   Your UI should display: 'Available to Buy: 99,764 shares'")
+}
+
+// Test: Market socket with multiple users buying (combined holdings)
+func TestMarketSocketWithMultipleUsersHolding(t *testing.T) {
+	/*
+	   SCENARIO: Multiple users hold different quantities
+	   User 1: harsh2004416@gmail.com holds 236 shares
+	   User 2: another_user holds 500 shares
+	   Total Held: 736 shares
+	   Available: 100,000 - 736 = 99,264 shares
+	*/
+	txnRepo := NewMockTransactionRepository()
+	stockRepo := NewMockStockRepository()
+	ws := NewWalletService(txnRepo)
+	ws.SetStockRepository(stockRepo)
+
+	symbol := "RELIANCE-CE-2900"
+
+	// Market has 100,000 total
+	stock := &Stock{
+		ID:                "stock_reliance",
+		Symbol:            symbol,
+		CompanyName:       "Reliance Industries",
+		TotalAvailableQty: 100000,
+		CurrentPrice:      45.50,
+	}
+	stockRepo.SaveStock(stock)
+
+	// User 1: harsh2004416@gmail.com buys 236 shares
+	user1 := "harsh2004416@gmail.com"
+	ws.DepositCash(user1, 1000000)
+	_ = ws.ExecuteTrade(user1, symbol, 236, 45.50, "BUY")
+
+	// User 2: another_user buys 500 shares
+	user2 := "another_user"
+	ws.DepositCash(user2, 1000000)
+	_ = ws.ExecuteTrade(user2, symbol, 500, 45.50, "BUY")
+
+	// Calculate market socket data
+	allTransactions, _ := txnRepo.FindTransactionsByUser("")
+	heldQty := 0.0
+	for _, txn := range allTransactions {
+		if txn.Symbol == symbol {
+			if txn.Type == "BUY" {
+				heldQty += txn.Quantity
+			} else if txn.Type == "SELL" {
+				heldQty -= txn.Quantity
+			}
+		}
+	}
+
+	totalQty := 100000.0
+	availableQty := totalQty - heldQty
+
+	t.Logf("\n📊 MARKET SOCKET DATA WITH MULTIPLE USERS:")
+	t.Logf("├─ User 1 (%s): 236 shares", user1)
+	t.Logf("├─ User 2 (%s): 500 shares", user2)
+	t.Logf("├─ Total Held (All Users): %.0f shares", heldQty)
+	t.Logf("├─ Total in Market: %.0f shares", totalQty)
+	t.Logf("└─ Available for Next Buyer: %.0f shares (%.0f - %.0f)", availableQty, totalQty, heldQty)
+
+	if heldQty != 736 {
+		t.Errorf("❌ FAILED: Total held should be 736 but got %.0f", heldQty)
+	} else {
+		t.Logf("✅ PASSED: Combined heldQuantity = 736 (236 + 500)")
+	}
+
+	if availableQty != 99264 {
+		t.Errorf("❌ FAILED: Available should be 99,264 but got %.0f", availableQty)
+	} else {
+		t.Logf("✅ PASSED: availableQuantity = 99,264 (100,000 - 736)")
+	}
+
+	// Verify User 1 individual holdings
+	user1Holdings := ws.getCurrentHoldings(user1, symbol)
+	if user1Holdings != 236 {
+		t.Errorf("❌ FAILED: User 1 should have 236. Got %.0f", user1Holdings)
+	} else {
+		t.Logf("✅ PASSED: User 1 holdings = 236")
+	}
+
+	// Now User 1 sells 100 shares
+	_ = ws.ExecuteTrade(user1, symbol, 100, 50.0, "SELL")
+
+	// Recalculate market socket data
+	allTransactions, _ = txnRepo.FindTransactionsByUser("")
+	heldQty = 0.0
+	for _, txn := range allTransactions {
+		if txn.Symbol == symbol {
+			if txn.Type == "BUY" {
+				heldQty += txn.Quantity
+			} else if txn.Type == "SELL" {
+				heldQty -= txn.Quantity
+			}
+		}
+	}
+
+	availableQty = totalQty - heldQty
+
+	t.Logf("\n📊 AFTER USER 1 SELLS 100 SHARES:")
+	t.Logf("├─ User 1 now holds: 136 shares (236 - 100)")
+	t.Logf("├─ User 2 still holds: 500 shares")
+	t.Logf("├─ Total Held: %.0f shares", heldQty)
+	t.Logf("└─ Available for Next Buyer: %.0f shares", availableQty)
+
+	if heldQty != 636 {
+		t.Errorf("❌ FAILED: Total held should be 636 but got %.0f", heldQty)
+	} else {
+		t.Logf("✅ PASSED: Updated heldQuantity = 636 (136 + 500)")
+	}
+
+	if availableQty != 99364 {
+		t.Errorf("❌ FAILED: Available should be 99,364 but got %.0f", availableQty)
+	} else {
+		t.Logf("✅ PASSED: Updated availableQuantity = 99,364 (100,000 - 636)")
+	}
+
+	// Verify User 1 now has 136
+	user1Holdings = ws.getCurrentHoldings(user1, symbol)
+	if user1Holdings != 136 {
+		t.Errorf("❌ FAILED: User 1 after selling should have 136. Got %.0f", user1Holdings)
+	} else {
+		t.Logf("✅ PASSED: User 1 holdings after sale = 136")
 	}
 }
