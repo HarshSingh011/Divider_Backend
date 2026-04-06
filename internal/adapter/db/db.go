@@ -125,6 +125,13 @@ func (d *Database) Migrate() error {
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 		)`,
+		`ALTER TABLE alerts ADD COLUMN IF NOT EXISTS symbol TEXT`,
+		`ALTER TABLE alerts ADD COLUMN IF NOT EXISTS price DOUBLE PRECISION`,
+		`ALTER TABLE alerts ADD COLUMN IF NOT EXISTS condition TEXT`,
+		`ALTER TABLE alerts ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE`,
+		`ALTER TABLE alerts ADD COLUMN IF NOT EXISTS triggered_at TIMESTAMPTZ`,
+		`ALTER TABLE alerts ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`,
+		`ALTER TABLE alerts ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`,
 		`CREATE INDEX IF NOT EXISTS idx_alerts_user_id ON alerts (user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_alerts_active_symbol ON alerts (is_active, symbol)`,
 
