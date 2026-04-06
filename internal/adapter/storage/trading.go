@@ -40,13 +40,25 @@ func (r *InMemoryCandleRepository) GetCandles(symbol string, limit int) ([]domai
 		return []domain.Candle{}, nil
 	}
 
+	// Ensure limit is positive
+	if limit <= 0 {
+		limit = 1
+	}
+
+	// Get the last `limit` candles
 	start := len(candles) - limit
 	if start < 0 {
 		start = 0
 	}
 
-	result := make([]domain.Candle, len(candles[start:]))
-	copy(result, candles[start:])
+	// Extract exactly `limit` candles (or fewer if not available)
+	endIdx := len(candles)
+	if endIdx-start > limit {
+		endIdx = start + limit
+	}
+
+	result := make([]domain.Candle, endIdx-start)
+	copy(result, candles[start:endIdx])
 	return result, nil
 }
 
