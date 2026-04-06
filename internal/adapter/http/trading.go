@@ -316,10 +316,21 @@ func (h *TradingHandler) GetCandles(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Cap maximum limit to prevent abuse
+	maxLimit := 500
+	if limit > maxLimit {
+		limit = maxLimit
+	}
+
 	candles, err := h.ohlcService.GetCandles(symbol, limit)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	// Ensure we only return the requested limit
+	if len(candles) > limit {
+		candles = candles[:limit]
 	}
 
 	w.Header().Set("Content-Type", "application/json")

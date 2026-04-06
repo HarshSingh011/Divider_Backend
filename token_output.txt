@@ -1,0 +1,7 @@
+Status: 200
+Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhhcnNoMjAwNDQxNkBnbWFpbC5jb20iLCJleHAiOjE3NzU1NjMzNDIsInVzZXJfaWQiOiJ1c2VyXzE3NzUwNTgyMjE3NzE1Mzk0NDciLCJ1c2VybmFtZSI6Imxvd1RlY2gifQ.Lnzngu8iqzxrBnfIugQTUsoer9ZwMwCIU9kCST4cTdw
+Response: {
+  "id": "user_1775058221771539447",
+  "email": "harsh2004416@gmail.com",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImhhcnNoMjAwNDQxNkBnbWFpbC5jb20iLCJleHAiOjE3NzU1NjMzNDIsInVzZXJfaWQiOiJ1c2VyXzE3NzUwNTgyMjE3NzE1Mzk0NDciLCJ1c2VybmFtZSI6Imxvd1RlY2gifQ.Lnzngu8iqzxrBnfIugQTUsoer9ZwMwCIU9kCST4cTdw"
+}

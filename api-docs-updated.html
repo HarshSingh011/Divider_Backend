@@ -775,6 +775,114 @@ curl -X POST https://divider-backend.onrender.com/trading/deposit \
 }
                             </div>
                         </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Error Responses</div>
+                            <div class="code-block error">
+400 Bad Request - Invalid amount
+{
+  "error": "amount is required",
+  "error_code": "INVALID_AMOUNT"
+}
+                            </div>
+                            <div class="code-block error">
+400 Bad Request - Negative amount
+{
+  "error": "amount must be positive",
+  "error_code": "INVALID_AMOUNT"
+}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Withdraw Cash -->
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-post">POST</span>
+                        <span class="endpoint-url">/trading/withdraw</span>
+                        <span class="endpoint-auth">🔒 REQUIRES AUTH</span>
+                    </div>
+                    <div class="endpoint-body">
+                        <div class="endpoint-description">
+                            Withdraw cash from wallet. Validates sufficient available cash and creates a withdrawal transaction in the immutable ledger.
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Body</div>
+                            <div class="field-list">
+                                <div class="field-item">
+                                    <span class="field-name">amount</span>
+                                    <span class="field-type">number</span>
+                                    <span class="field-required">*</span>
+                                    <div class="field-description">Amount to withdraw (in rupees)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Request Example</div>
+                            <div class="code-block">
+curl -X POST https://divider-backend.onrender.com/trading/withdraw \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "amount": 25000
+  }'
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Response (200 OK)</div>
+                            <div class="code-block response">
+{
+  "withdrawal_id": "with_abc789",
+  "amount": 25000,
+  "previous_balance": 50000,
+  "new_balance": 25000,
+  "timestamp": "2026-04-01T10:30:00Z"
+}
+                            </div>
+                        </div>
+
+                        <div class="code-section">
+                            <div class="code-section-title">Error Responses</div>
+                            <div class="code-block error">
+400 Bad Request - Missing amount
+{
+  "error": "amount is required",
+  "error_code": "INVALID_AMOUNT"
+}
+                            </div>
+                            <div class="code-block error">
+400 Bad Request - Negative amount
+{
+  "error": "amount must be positive",
+  "error_code": "INVALID_AMOUNT"
+}
+                            </div>
+                            <div class="code-block error">
+400 Bad Request - Insufficient funds
+{
+  "error": "insufficient available cash for withdrawal",
+  "error_code": "INSUFFICIENT_CASH",
+  "available_cash": 15000,
+  "requested_amount": 25000
+}
+                            </div>
+                        </div>
+
+                        <div class="note">
+                            📌 <strong>Withdrawal Rules:</strong><br>
+                            • Amount must be positive number<br>
+                            • Cannot withdraw more than available cash<br>
+                            • No fees charged on withdrawals<br>
+                            • Withdrawal is recorded in transaction ledger
+                        </div>
+
+                        <div class="note success-note">
+                            ✅ <strong>Available Cash Calculation:</strong> Total deposits + gains from selling - withdrawals - amount invested in stocks - trading fees
+                        </div>
                     </div>
                 </div>
             </div>

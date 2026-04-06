@@ -145,6 +145,11 @@ func (r *PostgresCandleRepository) SaveCandle(candle *domain.Candle) error {
 }
 
 func (r *PostgresCandleRepository) GetCandles(symbol string, limit int) ([]domain.Candle, error) {
+	// Ensure limit is positive
+	if limit <= 0 {
+		limit = 1
+	}
+
 	query := `
 		SELECT symbol, open, high, low, close, volume, timestamp
 		FROM candles
@@ -174,6 +179,11 @@ func (r *PostgresCandleRepository) GetCandles(symbol string, limit int) ([]domai
 			return nil, err
 		}
 		candles = append(candles, candle)
+	}
+
+	// Reverse to get oldest first in the result
+	for i, j := 0, len(candles)-1; i < j; i, j = i+1, j-1 {
+		candles[i], candles[j] = candles[j], candles[i]
 	}
 
 	return candles, rows.Err()

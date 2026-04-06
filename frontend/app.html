@@ -9,6 +9,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         :root {
@@ -32,6 +33,7 @@
             justify-content: center;
             align-items: flex-start;
             flex-wrap: wrap;
+            pointer-events: auto;
         }
 
         .phone {
@@ -47,6 +49,8 @@
             position: relative;
             transition: opacity 0.2s, visibility 0.2s;
             z-index: 1;
+            pointer-events: auto;
+            touch-action: auto;
         }
 
         #phone-login-home {
@@ -171,6 +175,10 @@
             color: var(--text-secondary);
             font-size: 11px;
             transition: all 0.3s;
+            user-select: none;
+            -webkit-user-select: none;
+            pointer-events: auto;
+            padding: 8px;
         }
 
         .nav-item.active {
@@ -249,6 +257,8 @@
             font-size: 14px;
             transition: all 0.3s ease;
             font-family: inherit;
+            pointer-events: auto;
+            touch-action: manipulation;
         }
 
         .login-input:focus {
@@ -269,6 +279,8 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 8px;
+            pointer-events: auto;
+            touch-action: manipulation;
         }
 
         .login-button:hover:not(:disabled) {
@@ -332,6 +344,8 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            pointer-events: auto;
+            touch-action: manipulation;
         }
 
         .login-demo-btn:hover {
@@ -465,6 +479,8 @@
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s;
+            pointer-events: auto;
+            touch-action: manipulation;
         }
 
         .qt-btn-buy {
@@ -554,10 +570,12 @@
             background: rgba(0,0,0,0.7);
             z-index: 200;
             align-items: flex-end;
+            pointer-events: none;
         }
 
         .modal.active {
             display: flex;
+            pointer-events: auto;
         }
 
         .modal-content {
@@ -583,6 +601,9 @@
             border: none;
             font-size: 28px;
             cursor: pointer;
+            pointer-events: auto;
+            padding: 4px 8px;
+            touch-action: manipulation;
         }
 
         .input-group {
@@ -603,6 +624,8 @@
             border-radius: 8px;
             font-size: 14px;
             font-family: inherit;
+            pointer-events: auto;
+            touch-action: manipulation;
         }
 
         .input-field:focus {
@@ -622,6 +645,8 @@
             font-size: 16px;
             cursor: pointer;
             margin-top: 8px;
+            pointer-events: auto;
+            touch-action: manipulation;
         }
 
         .btn-full:active {
@@ -735,9 +760,10 @@
             font-size: 11px;
             padding: 10px;
             overflow-y: auto;
-            z-index: 9999;
+            z-index: 99;
             box-shadow: 0 0 15px rgba(255, 87, 34, 0.5);
             line-height: 1.4;
+            pointer-events: none;
         }
 
         #persistent-debug-log .log-entry {
@@ -804,13 +830,16 @@
                     <button class="login-button" id="loginBtn" onclick="handleLogin()">
                         Sign In
                     </button>
+                    <button class="login-demo-btn" id="signupBtn" style="margin-top: 10px;" onclick="handleSignup()">
+                        Sign Up
+                    </button>
                 </div>
 
                 <div class="login-divider">
                     <span>Demo Account</span>
                 </div>
 
-                <button class="login-demo-btn" onclick="useDemoCredentials()">
+                <button class="login-demo-btn" id="demoBtn" onclick="useDemoCredentials()">
                     Use Demo Credentials
                 </button>
 
@@ -848,7 +877,7 @@
             <div style="background:#fff3cd; padding:10px; margin:8px; border-radius:6px; border-left:4px solid #FF9800;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                     <div style="font-size:12px; font-weight:600;">🔧 Trade Debug Console</div>
-                    <button onclick="toggleDebugConsole()" style="background:none; border:none; cursor:pointer; font-size:12px; padding:2px 8px; border-radius:3px; background:#FF9800; color:white;">
+                    <button id="debugToggleBtn" onclick="toggleDebugConsole()" style="background:none; border:none; cursor:pointer; font-size:12px; padding:2px 8px; border-radius:3px; background:#FF9800; color:white;">
                         <span id="debugToggleText">Show</span>
                     </button>
                 </div>
@@ -858,8 +887,8 @@
             <div class="quick-trade">
                 <div class="qt-title">⚡ Quick Action</div>
                 <div class="qt-buttons">
-                    <button class="qt-btn qt-btn-buy" onclick="showModal('tradeModal', 'BUY')">🟢 BUY</button>
-                    <button class="qt-btn qt-btn-sell" onclick="showModal('tradeModal', 'SELL')">🔴 SELL</button>
+                    <button class="qt-btn qt-btn-buy" id="quickTradeBuyBtn" onclick="showModal('tradeModal', 'BUY')">🟢 BUY</button>
+                    <button class="qt-btn qt-btn-sell" id="quickTradeSellBtn" onclick="showModal('tradeModal', 'SELL')">🔴 SELL</button>
                 </div>
             </div>
 
@@ -919,6 +948,7 @@
             <div class="header" style="padding-bottom: 12px;">
                 <div style="font-size: 14px; color: white; margin-bottom: 8px;">📈 Charts</div>
                 <select id="symbolSelect" onchange="onSymbolChange()" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-size: 14px;">
+                <select id="symbolSelect" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-size: 14px;">
                     <option value="RELIANCE-CE-2900">RELIANCE-CE-2900</option>
                     <option value="HDFC-PE-1400">HDFC-PE-1400</option>
                     <option value="INFY-CE-1500">INFY-CE-1500</option>
@@ -1203,7 +1233,7 @@
             <div class="header">
                 <div class="header-title">🔔 Price Alerts</div>
                 <div style="display: flex; gap: 8px; margin-top: 12px;">
-                    <button onclick="showModal('alertModal')" style="flex: 1; padding: 10px; background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 14px;">+ Create Alert</button>
+                    <button id="createAlertBtn" onclick="showModal('alertModal')" style="flex: 1; padding: 10px; background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 14px;">+ Create Alert</button>
                 </div>
             </div>
 
@@ -1399,7 +1429,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 Trade
-                <button class="modal-close" onclick="closeModal('tradeModal')">×</button>
+                <button class="modal-close" id="tradeModalClose" onclick="closeModal('tradeModal')">×</button>
             </div>
 
             <div class="input-group">
@@ -1456,8 +1486,8 @@
                 </div>
             </div>
 
-            <button class="btn-full" onclick="executeTradeModal()">✓ EXECUTE TRADE</button>
-            <button class="btn-full" style="background: var(--border); color: var(--text-primary); margin-top: 12px; margin-bottom: 40px;" onclick="closeModal('tradeModal')">Cancel</button>
+            <button class="btn-full" id="tradeExecuteBtn" onclick="executeTradeModal()">✓ EXECUTE TRADE</button>
+            <button class="btn-full" id="tradeCancelBtn" style="background: var(--border); color: var(--text-primary); margin-top: 12px; margin-bottom: 40px;" onclick="closeModal('tradeModal')">Cancel</button>
         </div>
     </div>
 
@@ -1465,7 +1495,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 New Alert
-                <button class="modal-close" onclick="closeModal('alertModal')">×</button>
+                <button class="modal-close" id="alertModalClose" onclick="closeModal('alertModal')">×</button>
             </div>
 
             <div class="input-group">
@@ -1505,8 +1535,8 @@
                 </label>
             </div>
 
-            <button class="btn-full">✓ CREATE ALERT</button>
-            <button class="btn-full" style="background: var(--border); color: var(--text-primary); margin-top: 12px; margin-bottom: 40px;" onclick="closeModal('alertModal')">Cancel</button>
+            <button class="btn-full" id="alertExecuteBtn">✓ CREATE ALERT</button>
+            <button class="btn-full" id="alertCancelBtn" style="background: var(--border); color: var(--text-primary); margin-top: 12px; margin-bottom: 40px;" onclick="closeModal('alertModal')">Cancel</button>
         </div>
     </div>
 
@@ -1646,262 +1676,117 @@
         }
 
         async function handleLogin() {
+            console.log('🔐 handleLogin called');
             hideLoginError();
             
             const emailInput = document.getElementById('loginEmail');
             const passwordInput = document.getElementById('loginPassword');
             const loginBtn = document.getElementById('loginBtn');
             
-            if (!emailInput || !passwordInput) {
-                showLoginError('Login form not found');
-                return;
-            }
+            const email = emailInput?.value?.trim() || '';
+            const password = passwordInput?.value?.trim() || '';
 
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
-
-            // Validation
             if (!email) {
-                showLoginError('Please enter your email address');
-                emailInput.focus();
+                showLoginError('Please enter email');
                 return;
             }
-
             if (!password) {
-                showLoginError('Please enter your password');
-                passwordInput.focus();
+                showLoginError('Please enter password');
                 return;
             }
 
-            // Disable button during login
             loginBtn.disabled = true;
-            const originalText = loginBtn.textContent;
-            loginBtn.innerHTML = '<span class="login-loading"></span>Signing In...';
-
-            // ========== DETAILED LOGGING ==========
-            logDebug('═══════════════════════════════════════════');
-            logDebug('🔐 LOGIN ATTEMPT STARTED');
-            logDebug('═══════════════════════════════════════════');
-            const istDateTime = new Date().toLocaleString('en-IN', { 
-                timeZone: 'Asia/Kolkata',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true
-            });
-            logDebug(`⏰ Time (IST): ${istDateTime}`);
-            logDebug(`🌐 Browser: ${navigator.userAgent.substring(0, 50)}...`);
-            logDebug(`🔌 Online Status: ${navigator.onLine ? '✅ Online' : '❌ Offline'}`);
-            logDebug(`📧 Email: ${email}`);
-            logDebug(`🔑 Password: ${'*'.repeat(password.length)}`);
-            logDebug('');
-            logDebug('--- REQUEST DETAILS ---');
-            logDebug(`🔗 API Base URL: ${API_BASE}`);
-            logDebug(`📍 Full Endpoint: ${API_BASE}/auth/login`);
-            logDebug(`📤 Request Method: POST`);
-            logDebug(`📦 Request Body: {"email":"${email}","password":"***"}`);
-            logDebug(`📋 Headers: Content-Type: application/json, Accept: application/json`);
-            logDebug(`⚙️ CORS: Enabled (mode: cors)`);
-            logDebug(`⏱️ Timeout: 15 seconds`);
-            logDebug('');
-            logDebug('--- SENDING REQUEST ---');
+            loginBtn.textContent = 'Signing In...';
 
             try {
-                // Main login request (skipping health check to avoid preflight issues)
-                const requestStart = Date.now();
-                logDebug('📨 Sending login request...');
-
-                const controller = new AbortController();
-                let timeoutId = null;
-                
-                // Use promise race for timeout as fallback to AbortSignal.timeout
-                const timeoutPromise = new Promise((_, reject) => {
-                    timeoutId = setTimeout(() => {
-                        controller.abort();
-                        logDebug('⏰ Request timeout triggered (15 seconds)');
-                    }, 15000);
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
                 });
 
-                let response;
-                try {
-                    response = await Promise.race([
-                        fetch(`${API_BASE}/auth/login`, {
-                            method: 'POST',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({ email, password }),
-                            signal: controller.signal,
-                            mode: 'cors',
-                            cache: 'no-cache',
-                            credentials: 'omit'
-                        }),
-                        timeoutPromise
-                    ]);
-                } finally {
-                    if (timeoutId) clearTimeout(timeoutId);
-                }
-
-                const requestTime = Date.now() - requestStart;
-
-                logDebug('');
-                logDebug('--- RESPONSE RECEIVED ---');
-                logDebug(`⏱️ Response time: ${requestTime}ms`);
-                logDebug(`📊 Status Code: ${response.status} ${response.statusText}`);
-                logDebug(`📋 Headers:`);
-                logDebug(`   - Content-Type: ${response.headers.get('content-type')}`);
-                logDebug(`   - CORS-Allow-Origin: ${response.headers.get('access-control-allow-origin')}`);
-                logDebug(`   - Server: ${response.headers.get('server') || 'Not specified'}`);
-                logDebug('');
-
                 if (!response.ok) {
-                    logDebug('❌ Response not OK - parsing error details...');
-                    let errorText = 'Unknown error';
-                    let errorData = null;
-                    
-                    try {
-                        const responseCopy = response.clone();
-                        errorData = await responseCopy.json();
-                        errorText = errorData.message || errorData.error || JSON.stringify(errorData);
-                        logDebug(`📄 Error Response (JSON): ${errorText}`);
-                    } catch (parseErr) {
-                        try {
-                            const responseCopy2 = response.clone();
-                            errorText = await responseCopy2.text();
-                            logDebug(`📄 Error Response (Text): ${errorText}`);
-                        } catch (textErr) {
-                            errorText = 'Unable to parse error response';
-                            logDebug(`📄 Error Response: Unable to parse`);
-                        }
-                    }
-                    
-                    logDebug('');
-                    logDebug('--- ERROR ANALYSIS ---');
-                    
-                    if (response.status === 401 || response.status === 400) {
-                        logDebug(`🔒 Auth Error (${response.status}): Invalid credentials or user not found`);
-                        showLoginError('Invalid email or password, or account not registered');
-                    } else if (response.status === 500) {
-                        logDebug('💥 Server Error (500): Backend is throwing errors');
-                        logDebug('💡 Suggestion: Check backend logs on Render dashboard');
-                        showLoginError('Server error. Please try again later.');
-                    } else if (response.status === 503) {
-                        logDebug('🚀 Service Unavailable (503): Backend might be starting');
-                        logDebug('💡 Suggestion: Wait 30 seconds and try again');
-                        showLoginError('Backend is starting up. Please wait and try again.');
-                    } else {
-                        logDebug(`❌ Unexpected Status (${response.status}): ${errorText}`);
-                        showLoginError(`Login failed: ${errorText}`);
-                    }
+                    const err = await response.text();
+                    showLoginError(`Login failed: ${response.status}`);
+                    console.error('Login error:', err);
                     return;
                 }
 
-                logDebug('✅ Response OK - parsing login response...');
                 const result = await response.json();
-                logDebug('');
-                logDebug('--- LOGIN RESPONSE DATA ---');
-                logDebug(`📝 Response keys: ${Object.keys(result).join(', ')}`);
-                
                 if (!result.token) {
-                    logDebug('❌ CRITICAL: No token in response!');
-                    logDebug(`📄 Full response: ${JSON.stringify(result)}`);
-                    showLoginError('No token received from server');
+                    showLoginError('No token received');
                     return;
                 }
 
                 token = result.token;
-                logDebug(`🔑 Token received (length: ${token.length} chars)`);
-                logDebug(`👤 User ID: ${result.id}`);
-                logDebug(`📧 Email: ${result.email}`);
-
-                // Save token to localStorage
                 localStorage.setItem('token', token);
-                logDebug('');
-                logDebug('--- SUCCESS ---');
-                logDebug('✅ Token saved to localStorage');
-                logDebug('✅ Login successful!');
-                logDebug('🚀 Switching to home screen...');
+                console.log('✅ Login successful');
                 
-                // Show success message
-                loginBtn.textContent = '✅ Login Successful!';
-                loginBtn.style.background = '#4CAF50';
-                
-                // Switch to home screen after a brief delay
-                setTimeout(() => {
-                    switchScreen(0);
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = originalText;
-                    loginBtn.style.background = '';
-                }, 500);
-
-                // Clear the form
-                emailInput.value = '';
-                passwordInput.value = '';
-
-            } catch (error) {
-                logDebug('');
-                logDebug('--- EXCEPTION CAUGHT ---');
-                logDebug(`❌ Error Type: ${error.name}`);
-                logDebug(`❌ Error Message: ${error.message}`);
-                logDebug(`❌ Error Stack: ${error.stack}`);
-                logDebug('');
-                logDebug('--- DIAGNOSTICS ---');
-
-                if (error.name === 'AbortError') {
-                    logDebug('⏰ ERROR: Request Timeout');
-                    logDebug('💡 Causes:');
-                    logDebug('   1. Backend is not responding (15s+ to respond)');
-                    logDebug('   2. Network is very slow');
-                    logDebug('   3. Firewall/proxy blocking request');
-                    logDebug('💡 Solutions:');
-                    logDebug('   1. Wait 30 seconds and try again');
-                    logDebug('   2. Check Render dashboard if backend is running');
-                    logDebug('   3. Try on mobile/different network');
-                    showLoginError('Request timeout. Backend may be slow. Try again in 30 seconds.');
-                } else if (error instanceof TypeError) {
-                    logDebug('🔗 ERROR: Network/Fetch Issue');
-                    logDebug('💡 Possible causes:');
-                    logDebug('   1. No internet connection');
-                    logDebug(`   2. DNS cannot resolve ${API_BASE}`);
-                    logDebug('   3. HTTPS/SSL certificate issue');
-                    logDebug('   4. Proxy/Firewall blocking');
-                    logDebug('   5. Backend service is down');
-                    logDebug(`📋 TypeError details: ${error.message}`);
-                    
-                    if (!navigator.onLine) {
-                        logDebug('❌ Browser reports: OFFLINE');
-                        showLoginError('You are offline. Check internet connection.');
-                    } else {
-                        logDebug('✅ Browser reports: ONLINE');
-                        logDebug(`💡 Issue is likely backend connectivity to ${API_BASE}`);
-                        showLoginError(`Cannot connect to backend at ${API_BASE}. Check if server is running.`);
-                    }
-                } else {
-                    logDebug(`⚠️ ERROR: ${error.name}`);
-                    logDebug(`💡 Message: ${error.message}`);
-                    showLoginError(`Error: ${error.message}`);
-                }
-                
-                logDebug('');
-                logDebug('--- TROUBLESHOOTING GUIDE ---');
-                logDebug('1. Press F12 to open DevTools');
-                logDebug('2. Go to Network tab');
-                logDebug('3. Try login again');
-                logDebug(`4. Look for request to ${API_BASE}/auth/login`);
-                logDebug('5. Check response status and error message');
-                logDebug('6. Ensure backend server is running at ' + API_BASE);
-                logDebug('7. Check CORS settings on backend');
-                logDebug('8. Clear browser cache and try again');
-                
-                console.error('Full login error:', error);
+                switchScreen(0);
+            } catch (err) {
+                console.error('Login error:', err);
+                showLoginError('Network error: ' + err.message);
             } finally {
-                if (loginBtn.disabled) {
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = originalText;
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
+            }
+        }
+
+        async function handleSignup() {
+            hideLoginError();
+
+            const emailInput = document.getElementById('loginEmail');
+            const passwordInput = document.getElementById('loginPassword');
+            const signupBtn = document.getElementById('signupBtn');
+
+            const email = emailInput?.value?.trim() || '';
+            const password = passwordInput?.value?.trim() || '';
+
+            if (!email) {
+                showLoginError('Please enter email');
+                return;
+            }
+            if (!password) {
+                showLoginError('Please enter password');
+                return;
+            }
+
+            const usernameBase = email.split('@')[0] || 'user';
+            const username = `${usernameBase}_${Date.now().toString().slice(-6)}`;
+
+            if (signupBtn) {
+                signupBtn.disabled = true;
+                signupBtn.textContent = 'Signing Up...';
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, username, password })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    showLoginError(`Sign up failed: ${errorText || response.status}`);
+                    return;
+                }
+
+                const result = await response.json();
+                if (!result.token) {
+                    showLoginError('Signup succeeded but no token returned');
+                    return;
+                }
+
+                token = result.token;
+                localStorage.setItem('token', token);
+                switchScreen(0);
+            } catch (error) {
+                showLoginError(`Network error: ${error.message}`);
+            } finally {
+                if (signupBtn) {
+                    signupBtn.disabled = false;
+                    signupBtn.textContent = 'Sign Up';
                 }
             }
         }
@@ -2052,7 +1937,7 @@
             }
         }
 
-        function updatePortfolioUI(wallet) {
+        async function updatePortfolioUI(wallet) {
             if (!wallet) {
                 addDebugLog('❌ No wallet data provided', 'error');
                 return;
@@ -2619,17 +2504,28 @@
         }
 
         // ========== CHARTS APIs ==========
+        let chartLimitValue = 11; // Default: 10 last candles + 1 current candle
+
+        function setChartLimit(newLimit) {
+            chartLimitValue = Math.max(1, newLimit);
+            addDebugLog(`📊 Chart limit set to: ${chartLimitValue}`, 'info');
+            const symbol = document.getElementById('symbolSelect').value;
+            if (symbol) {
+                loadCandleData(symbol, chartLimitValue);
+            }
+        }
+
         function onSymbolChange() {
             const symbol = document.getElementById('symbolSelect').value;
             addDebugLog(`📊 Symbol changed to: ${symbol}`, 'info');
-            loadCandleData(symbol);
+            loadCandleData(symbol, chartLimitValue);
         }
 
-        async function loadCandleData(symbol) {
-            addDebugLog(`📊 Loading candle data for ${symbol}...`, 'info');
+        async function loadCandleData(symbol, limit = 11) {
+            addDebugLog(`📊 Loading candle data for ${symbol} (limit=${limit})...`, 'info');
             
             try {
-                const response = await fetch(`${API_BASE}/trading/candles?symbol=${symbol}&limit=50`, {
+                const response = await fetch(`${API_BASE}/trading/candles?symbol=${symbol}&limit=${limit}`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -2966,6 +2862,7 @@
                 </div>
 
                 <button onclick="UserLogout()" style="width:100%; padding:12px; background:#FF5252; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:14px; margin-bottom:20px;">🚪 Logout</button>
+                <button id="logoutBtn" style="width:100%; padding:12px; background:#FF5252; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:14px; margin-bottom:20px;">🚪 Logout</button>
             `;
 
             const profileContainer = document.getElementById('profile-container');
@@ -3331,89 +3228,99 @@
 
         // ========== INITIALIZATION ==========
         document.addEventListener('DOMContentLoaded', () => {
-            logDebug('🚀 App initializing...');
-            logDebug(`📌 Deployed API: ${API_BASE}`);
-            
-            // Check token status
-            if (token) {
-                 logDebug(`✅ JWT Token found (${token.substring(0, 20)}...)`);
-                logDebug('ℹ️ Tip: Open browser DevTools (F12) > Application > LocalStorage to see full token');
-                
-                // Show phone-login-home with home screen
-                const phone = document.getElementById('phone-login-home');
-                if (phone) {
-                    phone.style.display = 'flex';
-                    const loginScreen = document.getElementById('login-screen');
-                    if (loginScreen) loginScreen.style.display = 'none';
-                    const homeScreen = document.getElementById('home-screen');
-                    if (homeScreen) homeScreen.style.display = 'flex';
-                }
-                
-                // Hide other phones
-                const otherPhones = ['phone-charts', 'phone-portfolio', 'phone-alerts', 'phone-profile'];
-                otherPhones.forEach(id => {
-                    const p = document.getElementById(id);
-                    if (p) p.style.display = 'none';
-                });
-                
-                // Show bottom nav
-                const bottomNav = document.querySelector('.bottom-nav');
-                if (bottomNav) bottomNav.style.display = 'flex';
+            console.log('🚀 App initializing...');
 
-                console.log('🔌 Connecting WebSocket in 500ms...');
-                // Connect WebSocket
-                setTimeout(() => {
-                    console.log('🔌 WebSocket connection attempt...');
-                    connectWebSocket();
-                }, 500);
-                
-                console.log('💼 Loading wallet data...');
-                try {
-                    loadWalletData();
-                } catch (err) {
-                    console.error('❌ Wallet loading error:', err);
-                }
-                
-                console.log('👤 Loading user profile...');
-                try {
-                    loadUserProfile();
-                } catch (err) {
-                    console.error('❌ Profile loading error:', err);
-                }
-                
-                // Auto-load home screen data
-                console.log('📊 Loading candle data...');
-                try {
-                    loadCandleData('RELIANCE-CE-2900');
-                } catch (err) {
-                    console.error('❌ Candle loading error:', err);
-                }
-            } else {
-                logDebug('⚠️ No JWT token found in localStorage');
-                logDebug('💡 Please login to access the app');
-                
-                // Show phone-login-home with login screen
-                const phone = document.getElementById('phone-login-home');
-                if (phone) {
-                    phone.style.display = 'flex';
-                    const loginScreen = document.getElementById('login-screen');
-                    if (loginScreen) loginScreen.style.display = 'flex';
-                    const homeScreen = document.getElementById('home-screen');
-                    if (homeScreen) homeScreen.style.display = 'none';
-                }
-                
-                // Hide other phones
-                const otherPhones = ['phone-charts', 'phone-portfolio', 'phone-alerts', 'phone-profile'];
-                otherPhones.forEach(id => {
+            const phone = document.getElementById('phone-login-home');
+            const loginScreen = document.getElementById('login-screen');
+            const homeScreen = document.getElementById('home-screen');
+
+            if (phone) {
+                phone.style.display = 'flex';
+            }
+
+            if (token) {
+                if (loginScreen) loginScreen.style.display = 'none';
+                if (homeScreen) homeScreen.style.display = 'flex';
+                ['phone-charts', 'phone-portfolio', 'phone-alerts', 'phone-profile'].forEach((id) => {
                     const p = document.getElementById(id);
                     if (p) p.style.display = 'none';
                 });
-                
-                updateConnectionStatus('disconnected');
-                logDebug('⏳ Waiting for login to establish WebSocket connection...');
+                setTimeout(() => {
+                    connectWebSocket();
+                    loadWalletData();
+                    loadUserProfile();
+                }, 100);
+            } else {
+                if (loginScreen) loginScreen.style.display = 'flex';
+                if (homeScreen) homeScreen.style.display = 'none';
             }
-            
-            logDebug('✨ App ready - check console (F12) for full logs');
+
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) loginBtn.addEventListener('click', handleLogin);
+
+            const signupBtn = document.getElementById('signupBtn');
+            if (signupBtn) signupBtn.addEventListener('click', handleSignup);
+
+            const demoBtn = document.getElementById('demoBtn');
+            if (demoBtn) demoBtn.addEventListener('click', useDemoCredentials);
+
+            const loginPassword = document.getElementById('loginPassword');
+            if (loginPassword) {
+                loginPassword.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') handleLogin();
+                });
+            }
+
+            const debugToggleBtn = document.getElementById('debugToggleBtn');
+            if (debugToggleBtn) debugToggleBtn.addEventListener('click', toggleDebugConsole);
+
+            const createAlertBtn = document.getElementById('createAlertBtn');
+            if (createAlertBtn) createAlertBtn.addEventListener('click', () => showModal('alertModal'));
+
+            const tradeModalClose = document.getElementById('tradeModalClose');
+            if (tradeModalClose) tradeModalClose.addEventListener('click', () => closeModal('tradeModal'));
+
+            const alertModalClose = document.getElementById('alertModalClose');
+            if (alertModalClose) alertModalClose.addEventListener('click', () => closeModal('alertModal'));
+
+            const tradeExecuteBtn = document.getElementById('tradeExecuteBtn');
+            if (tradeExecuteBtn) tradeExecuteBtn.addEventListener('click', executeTradeModal);
+
+            const tradeCancelBtn = document.getElementById('tradeCancelBtn');
+            if (tradeCancelBtn) tradeCancelBtn.addEventListener('click', () => closeModal('tradeModal'));
+
+            const alertExecuteBtn = document.getElementById('alertExecuteBtn');
+            if (alertExecuteBtn) {
+                alertExecuteBtn.addEventListener('click', () => {
+                    const symbolSelect = document.querySelector('#alertModal select');
+                    const priceInput = document.querySelector('#alertModal input[type="number"]');
+                    const conditionSelect = document.querySelectorAll('#alertModal select')[1];
+
+                    if (symbolSelect && priceInput && conditionSelect) {
+                        const symbol = symbolSelect.value;
+                        const price = parseFloat(priceInput.value);
+                        const condition = conditionSelect.value.includes('ABOVE') ? 'ABOVE' : 'BELOW';
+
+                        if (price > 0 && symbol && !symbol.includes('Select')) {
+                            createAlert(symbol, price, condition);
+                        } else {
+                            alert('Please fill out all alert fields correctly.');
+                        }
+                    }
+                    closeModal('alertModal');
+                });
+            }
+
+            const alertCancelBtn = document.getElementById('alertCancelBtn');
+            if (alertCancelBtn) alertCancelBtn.addEventListener('click', () => closeModal('alertModal'));
+
+            document.body.addEventListener('click', (e) => {
+                if (e.target && e.target.id === 'logoutBtn') {
+                    UserLogout();
+                }
+            });
+
+            console.log('✅ App ready - handlers attached');
         });
 
         // Expose these functions globally for testing in browser console

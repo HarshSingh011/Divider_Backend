@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Click Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        input { padding: 8px; font-size: 14px; margin: 10px 0; display: block; }
+        #result { margin-top: 20px; padding: 10px; background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <h1>Interaction Test</h1>
+    
+    <input type="text" id="emailInput" placeholder="Enter email">
+    <input type="password" id="passwordInput" placeholder="Enter password">
+    
+    <button id="testBtn">Test Button Click</button>
+    <button onclick="testOnclick()">Test Onclick</button>
+    
+    <div id="result">
+        <p>Click the buttons and check results below:</p>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function log(msg) {
+            const output = document.getElementById('output');
+            output.innerHTML += '<p>' + msg + '</p>';
+            console.log(msg);
+        }
+
+        // Test 1: addEventListener
+        const btn1 = document.getElementById('testBtn');
+        btn1.addEventListener('click', () => {
+            log('✅ addEventListener WORKS! Click registered.');
+        });
+
+        // Test 2: onclick attribute
+        function testOnclick() {
+            log('✅ onclick attribute WORKS! Click registered.');
+        }
+
+        // Test 3: Input focus
+        const emailInput = document.getElementById('emailInput');
+        emailInput.addEventListener('focus', () => {
+            log('✅ Input focus WORKS!');
+        });
+        
+        emailInput.addEventListener('keypress', (e) => {
+            log(`📝 Typed character: ${e.key}`);
+        });
+
+        log('Page loaded - try clicking buttons and typing in input');
+    </script>
+</body>
+</html>
