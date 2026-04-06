@@ -72,7 +72,7 @@ func (as *AuthServiceImpl) Login(req AuthRequest) (*AuthResponse, error) {
 	// Find user by email
 	user, err := as.userRepo.FindByEmail(req.Email)
 	if err != nil {
-		return nil, errors.New("database error while finding user")
+		return nil, errors.New("failed to find user")
 	}
 
 	// Check if user exists

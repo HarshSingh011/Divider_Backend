@@ -26,6 +26,7 @@ type AuthConfig struct {
 
 type DatabaseConfig struct {
 	Driver   string
+	URL      string
 	Host     string
 	Port     string
 	User     string
@@ -35,6 +36,12 @@ type DatabaseConfig struct {
 }
 
 func NewDefaultConfig() *Config {
+	databaseURL := getEnv("DATABASE_URL", "")
+	driverDefault := "memory"
+	if databaseURL != "" {
+		driverDefault = "postgres"
+	}
+
 	return &Config{
 		Server: ServerConfig{
 			Port:           ":8080",
@@ -48,7 +55,8 @@ func NewDefaultConfig() *Config {
 			TokenExpiry:  24 * time.Hour,
 		},
 		Database: DatabaseConfig{
-			Driver:   getEnv("DB_DRIVER", "memory"),
+			Driver:   getEnv("DB_DRIVER", driverDefault),
+			URL:      databaseURL,
 			Host:     getEnv("DB_HOST", "localhost"),
 			Port:     getEnv("DB_PORT", "5432"),
 			User:     getEnv("DB_USER", "postgres"),

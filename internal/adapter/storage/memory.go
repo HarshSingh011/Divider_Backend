@@ -44,7 +44,7 @@ func (r *InMemoryUserRepository) FindByEmail(email string) (*domain.User, error)
 		}
 	}
 
-	return nil, errors.New("user not found")
+	return nil, nil
 }
 
 func (r *InMemoryUserRepository) FindByID(id string) (*domain.User, error) {
@@ -57,7 +57,7 @@ func (r *InMemoryUserRepository) FindByID(id string) (*domain.User, error) {
 
 	user, ok := r.users[id]
 	if !ok {
-		return nil, errors.New("user not found")
+		return nil, nil
 	}
 
 	return user, nil

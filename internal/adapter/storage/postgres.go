@@ -22,10 +22,13 @@ func (r *PostgresUserRepository) Save(user *domain.User) error {
 	}
 
 	query := `
-		INSERT INTO users (id, email, username, password_hash, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO users (id, email, username, password_hash, password, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		ON CONFLICT (id) DO UPDATE SET
+			email = EXCLUDED.email,
+			username = EXCLUDED.username,
 			password_hash = EXCLUDED.password_hash,
+			password = EXCLUDED.password,
 			updated_at = EXCLUDED.updated_at
 	`
 
@@ -33,6 +36,7 @@ func (r *PostgresUserRepository) Save(user *domain.User) error {
 		user.ID,
 		user.Email,
 		user.Username,
+		user.Password,
 		user.Password,
 		time.Now().In(domain.ISTLocation),
 		time.Now().In(domain.ISTLocation),
@@ -42,7 +46,7 @@ func (r *PostgresUserRepository) Save(user *domain.User) error {
 }
 
 func (r *PostgresUserRepository) FindByEmail(email string) (*domain.User, error) {
-	query := `SELECT id, email, username, password_hash FROM users WHERE email = $1`
+	query := `SELECT id, email, username, COALESCE(password_hash, password) FROM users WHERE email = $1`
 
 	var user domain.User
 	err := r.db.QueryRow(query, email).Scan(
@@ -63,7 +67,7 @@ func (r *PostgresUserRepository) FindByEmail(email string) (*domain.User, error)
 }
 
 func (r *PostgresUserRepository) FindByUsername(username string) (*domain.User, error) {
-	query := `SELECT id, email, username, password_hash FROM users WHERE username = $1`
+	query := `SELECT id, email, username, COALESCE(password_hash, password) FROM users WHERE username = $1`
 
 	var user domain.User
 	err := r.db.QueryRow(query, username).Scan(
@@ -82,8 +86,9 @@ func (r *PostgresUserRepository) FindByUsername(username string) (*domain.User, 
 
 	return &user, nil
 }
+
 func (r *PostgresUserRepository) FindByID(id string) (*domain.User, error) {
-	query := `SELECT id, email, username, password FROM users WHERE id = $1`
+	query := `SELECT id, email, username, COALESCE(password_hash, password) FROM users WHERE id = $1`
 
 	var user domain.User
 	err := r.db.QueryRow(query, id).Scan(
@@ -237,12 +242,14 @@ func (r *PostgresAlertRepository) SaveAlert(alert *domain.Alert) error {
 	}
 
 	query := `
-		INSERT INTO alerts (id, user_id, symbol, price, condition, is_active)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO alerts (id, user_id, symbol, price, condition, is_active, triggered_at, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		ON CONFLICT (id) DO UPDATE SET
 			price = EXCLUDED.price,
 			condition = EXCLUDED.condition,
-			is_active = EXCLUDED.is_active
+			is_active = EXCLUDED.is_active,
+			triggered_at = EXCLUDED.triggered_at,
+			updated_at = EXCLUDED.updated_at
 	`
 
 	_, err := r.db.Exec(query,
@@ -252,13 +259,16 @@ func (r *PostgresAlertRepository) SaveAlert(alert *domain.Alert) error {
 		alert.ThresholdPrice,
 		alert.Condition,
 		alert.IsActive,
+		alert.TriggeredAt,
+		alert.CreatedAt,
+		alert.UpdatedAt,
 	)
 
 	return err
 }
 
 func (r *PostgresAlertRepository) FindAlertsByUser(userID string) ([]domain.Alert, error) {
-	query := `SELECT id, user_id, symbol, price, condition, is_active FROM alerts WHERE user_id = $1`
+	query := `SELECT id, user_id, symbol, price, condition, is_active, triggered_at, created_at, updated_at FROM alerts WHERE user_id = $1 ORDER BY created_at DESC`
 
 	rows, err := r.db.Query(query, userID)
 	if err != nil {
@@ -269,6 +279,7 @@ func (r *PostgresAlertRepository) FindAlertsByUser(userID string) ([]domain.Aler
 	var alerts []domain.Alert
 	for rows.Next() {
 		var alert domain.Alert
+		var triggeredAt sql.NullTime
 		if err := rows.Scan(
 			&alert.ID,
 			&alert.UserID,
@@ -276,8 +287,15 @@ func (r *PostgresAlertRepository) FindAlertsByUser(userID string) ([]domain.Aler
 			&alert.ThresholdPrice,
 			&alert.Condition,
 			&alert.IsActive,
+			&triggeredAt,
+			&alert.CreatedAt,
+			&alert.UpdatedAt,
 		); err != nil {
 			return nil, err
+		}
+		if triggeredAt.Valid {
+			triggerTime := triggeredAt.Time
+			alert.TriggeredAt = &triggerTime
 		}
 		alerts = append(alerts, alert)
 	}
@@ -286,7 +304,7 @@ func (r *PostgresAlertRepository) FindAlertsByUser(userID string) ([]domain.Aler
 }
 
 func (r *PostgresAlertRepository) FindActiveAlerts() ([]domain.Alert, error) {
-	query := `SELECT id, user_id, symbol, price, condition, is_active FROM alerts WHERE is_active = true`
+	query := `SELECT id, user_id, symbol, price, condition, is_active, triggered_at, created_at, updated_at FROM alerts WHERE is_active = true`
 
 	rows, err := r.db.Query(query)
 	if err != nil {
@@ -297,6 +315,7 @@ func (r *PostgresAlertRepository) FindActiveAlerts() ([]domain.Alert, error) {
 	var alerts []domain.Alert
 	for rows.Next() {
 		var alert domain.Alert
+		var triggeredAt sql.NullTime
 		if err := rows.Scan(
 			&alert.ID,
 			&alert.UserID,
@@ -304,8 +323,15 @@ func (r *PostgresAlertRepository) FindActiveAlerts() ([]domain.Alert, error) {
 			&alert.ThresholdPrice,
 			&alert.Condition,
 			&alert.IsActive,
+			&triggeredAt,
+			&alert.CreatedAt,
+			&alert.UpdatedAt,
 		); err != nil {
 			return nil, err
+		}
+		if triggeredAt.Valid {
+			triggerTime := triggeredAt.Time
+			alert.TriggeredAt = &triggerTime
 		}
 		alerts = append(alerts, alert)
 	}
@@ -314,9 +340,9 @@ func (r *PostgresAlertRepository) FindActiveAlerts() ([]domain.Alert, error) {
 }
 
 func (r *PostgresAlertRepository) UpdateAlert(alert *domain.Alert) error {
-	query := `UPDATE alerts SET price = $1, condition = $2, is_active = $3 WHERE id = $4`
+	query := `UPDATE alerts SET price = $1, condition = $2, is_active = $3, triggered_at = $4, updated_at = $5 WHERE id = $6`
 
-	result, err := r.db.Exec(query, alert.ThresholdPrice, alert.Condition, alert.IsActive, alert.ID)
+	result, err := r.db.Exec(query, alert.ThresholdPrice, alert.Condition, alert.IsActive, alert.TriggeredAt, alert.UpdatedAt, alert.ID)
 	if err != nil {
 		return err
 	}
